@@ -1,0 +1,66 @@
+[
+  {
+    "title": "US Core CPI m/m (Consumer Price Index)",
+    "impact": "HIGH",
+    "timeWib": "19:30 WIB",
+    "currency": "USD",
+    "dayOfWeek": 3,
+    "hourWib": 19.5
+  },
+  {
+    "title": "US FOMC Federal Funds Rate & Statement",
+    "impact": "HIGH",
+    "timeWib": "21:00 WIB",
+    "currency": "USD",
+    "dayOfWeek": 3,
+    "hourWib": 21.0
+  },
+  {
+    "title": "EU ECB Monetary Policy Statement",
+    "impact": "HIGH",
+    "timeWib": "18:45 WIB",
+    "currency": "EUR",
+    "dayOfWeek": 4,
+    "hourWib": 18.75
+  },
+  {
+    "title": "US Initial Jobless Claims",
+    "impact": "MEDIUM",
+    "timeWib": "19:30 WIB",
+    "currency": "USD",
+    "dayOfWeek": 4,
+    "hourWib": 19.5
+  },
+  {
+    "title": "US Non-Farm Employment Change (NFP)",
+    "impact": "HIGH",
+    "timeWib": "19:30 WIB",
+    "currency": "USD",
+    "dayOfWeek": 5,
+    "hourWib": 19.5
+  },
+  {
+    "title": "US Unemployment Rate",
+    "impact": "HIGH",
+    "timeWib": "19:30 WIB",
+    "currency": "USD",
+    "dayOfWeek": 5,
+    "hourWib": 19.5
+  },
+  {
+    "title": "UK GDP m/m",
+    "impact": "MEDIUM",
+    "timeWib": "13:00 WIB",
+    "currency": "GBP",
+    "dayOfWeek": 2,
+    "hourWib": 13.0
+  },
+  {
+    "title": "AU RBA Rate Statement",
+    "impact": "HIGH",
+    "timeWib": "11:30 WIB",
+    "currency": "AUD",
+    "dayOfWeek": 2,
+    "hourWib": 11.5
+  }
+]
