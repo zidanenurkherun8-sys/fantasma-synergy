@@ -18,6 +18,8 @@ interface MarketScannerProps {
   onSelectPair: (pairId: string) => void;
 }
 
+import TiltCard from './TiltCard';
+
 export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: MarketScannerProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'GAINERS' | 'VOLUME'>('ALL');
@@ -43,15 +45,15 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
     .slice(0, 3);
 
   return (
-    <div className="quantum-card rounded-xl p-4 border border-[#30363D] flex flex-col h-full bg-[#161B22] select-none">
+    <TiltCard className="p-4 flex flex-col h-full bg-[#07090F] select-none">
       {/* Scanner Title */}
-      <div className="flex items-center gap-2 mb-4 border-b border-[#30363D] pb-3">
+      <div className="flex items-center gap-2 mb-4 border-b border-[#1E2333] pb-3">
         <Flame className="h-5 w-5 text-[#58A6FF]" />
         <h2 className="font-bold text-base text-[#E6EDF3] tracking-wide font-sans">Market Scanner</h2>
       </div>
 
       {/* Recommended Setups (Micro Signals) */}
-      <div className="mb-4 bg-[#0D1117] border border-[#30363D] rounded-lg p-2.5">
+      <div className="mb-4 bg-[#030407] border border-[#1E2333] rounded-lg p-2.5">
         <span className="text-[10px] uppercase font-bold text-[#8B949E] tracking-wider flex items-center gap-1.5 mb-2 font-sans">
           <TrendingUp className="h-3 w-3 text-[#58A6FF]" /> Volatilitas Tinggi (Sinyal)
         </span>
@@ -60,7 +62,7 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
             <div 
               key={`setup-${index}`} 
               onClick={() => onSelectPair(setup.id)}
-              className="flex items-center justify-between text-xs cursor-pointer hover:bg-[#1C2333] p-1 rounded transition select-none font-mono"
+              className="flex items-center justify-between text-xs cursor-pointer hover:bg-[#0C0E18] p-1 rounded transition select-none font-mono"
             >
               <span className="text-[#8B949E] font-medium font-sans">#{index + 1} {setup.symbol}/IDR</span>
               <span className={`font-semibold ${setup.change24h >= 0 ? 'text-[#3FB950]' : 'text-[#F85149]'}`}>
@@ -79,7 +81,7 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
           placeholder="Cari koin (misal BTC, ETH)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-[#0D1117] border border-[#30363D] text-[#E6EDF3] rounded-lg pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-[#58A6FF] transition-colors font-sans"
+          className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-lg pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-[#58A6FF] transition-colors font-sans"
         />
       </div>
 
@@ -91,7 +93,7 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
           className={`flex-1 py-1 rounded transition-all cursor-pointer ${
             filterType === 'ALL' 
               ? 'bg-[#58A6FF] text-[#0D1117] font-bold' 
-              : 'bg-[#0D1117] text-[#8B949E] border border-[#30363D] hover:text-[#E6EDF3]'
+              : 'bg-[#030407] text-[#8B949E] border border-[#1E2333] hover:text-[#E6EDF3]'
           }`}
         >
           Semua
@@ -102,7 +104,7 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
           className={`flex-1 py-1 rounded transition-all cursor-pointer ${
             filterType === 'GAINERS' 
               ? 'bg-[#3FB950] text-[#0D1117] font-bold' 
-              : 'bg-[#0D1117] text-[#8B949E] border border-[#30363D] hover:text-[#E6EDF3]'
+              : 'bg-[#030407] text-[#8B949E] border border-[#1E2333] hover:text-[#E6EDF3]'
           }`}
         >
           Gainer
@@ -113,7 +115,7 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
           className={`flex-1 py-1 rounded transition-all cursor-pointer ${
             filterType === 'VOLUME' 
               ? 'bg-[#58A6FF] text-[#0D1117] font-bold' 
-              : 'bg-[#0D1117] text-[#8B949E] border border-[#30363D] hover:text-[#E6EDF3]'
+              : 'bg-[#030407] text-[#8B949E] border border-[#1E2333] hover:text-[#E6EDF3]'
           }`}
         >
           Likuid
@@ -131,8 +133,8 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
               onClick={() => onSelectPair(pair.id)}
               className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all border ${
                 isSelected 
-                  ? 'bg-[#1C2333] border-[#58A6FF] shadow-sm' 
-                  : 'bg-[#0D1117]/40 border-[#30363D]/60 hover:bg-[#1C2333]/30 hover:border-[#30363D]'
+                  ? 'bg-[#0C0E18] border-[#58A6FF] shadow-sm' 
+                  : 'bg-[#030407]/40 border-[#1E2333]/60 hover:bg-[#0C0E18]/30 hover:border-[#1E2333]'
               }`}
             >
               <div className="flex flex-col gap-0.5 font-sans">
@@ -159,6 +161,6 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
           <div className="text-[#8B949E] text-center py-12 text-xs italic font-sans">Coin tidak ditemukan</div>
         )}
       </div>
-    </div>
+    </TiltCard>
   );
 }

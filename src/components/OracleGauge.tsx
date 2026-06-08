@@ -12,7 +12,7 @@ export default function OracleGauge({ signal, loading }: OracleGaugeProps) {
 
   if (loading) {
     return (
-      <div className="quantum-card rounded-xl p-6 border border-[#30363D] bg-[#161B22] flex flex-col items-center justify-center h-48 select-none">
+      <div className="quantum-card rounded-xl p-6 border border-[#1E2333] bg-[#07090F] flex flex-col items-center justify-center h-48 select-none">
         <div className="relative h-16 w-16 flex items-center justify-center">
           <div className="absolute inset-0 rounded-full border-t-2 border-[#58A6FF] animate-spin" />
           <div className="absolute inset-2 rounded-full border-b-2 border-indigo-400 animate-spin" style={{ animationDirection: 'reverse' }} />
@@ -24,7 +24,7 @@ export default function OracleGauge({ signal, loading }: OracleGaugeProps) {
 
   if (!signal) {
     return (
-      <div className="quantum-card rounded-xl p-6 border border-[#30363D] bg-[#161B22] flex flex-col items-center justify-center text-center h-48 select-none text-slate-500 font-sans">
+      <div className="quantum-card rounded-xl p-6 border border-[#1E2333] bg-[#07090F] flex flex-col items-center justify-center text-center h-48 select-none text-slate-500 font-sans">
         <ShieldAlert className="h-8 w-8 mb-2 opacity-40 text-slate-500" />
         <span className="text-xs uppercase font-extrabold tracking-wider">No Active Oracle Signals</span>
         <span className="text-[10px] text-[#8B949E] mt-1 font-mono">Cash is a Position — Warren Buffett</span>
@@ -72,7 +72,7 @@ export default function OracleGauge({ signal, loading }: OracleGaugeProps) {
     : [];
 
   return (
-    <div className={`quantum-card rounded-xl p-5 border border-[#30363D] bg-[#161B22] flex flex-col items-center justify-center text-center relative select-none ${glowClass}`}>
+    <div className={`quantum-card rounded-xl p-5 border border-[#1E2333] bg-[#07090F] flex flex-col items-center justify-center text-center relative select-none ${glowClass}`}>
       <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans mb-3 tracking-wider">Oracle Confidence</span>
 
       {/* Main interactive Gauge Area */}
@@ -142,8 +142,8 @@ export default function OracleGauge({ signal, loading }: OracleGaugeProps) {
 
         {/* Interactive Tooltip Card */}
         {showTooltip && models.length > 0 && (
-          <div className="absolute top-28 z-50 w-52 bg-[#0D1117] border border-[#30363D] p-3 rounded-lg shadow-2xl text-left pointer-events-none animate-fadeIn">
-            <div className="flex items-center gap-1 mb-2 border-b border-[#30363D] pb-1">
+          <div className="absolute top-28 z-50 w-52 bg-[#030407] border border-[#1E2333] p-3 rounded-lg shadow-2xl text-left pointer-events-none animate-fadeIn">
+            <div className="flex items-center gap-1 mb-2 border-b border-[#1E2333] pb-1">
               <Info className="h-3.5 w-3.5 text-[#58A6FF]" />
               <span className="text-[10px] font-bold text-[#E6EDF3] font-sans uppercase">Model Consensus Votes</span>
             </div>
@@ -157,7 +157,7 @@ export default function OracleGauge({ signal, loading }: OracleGaugeProps) {
                   </div>
                 );
               })}
-              <div className="mt-1.5 pt-1 border-t border-[#30363D] flex justify-between font-sans text-[8px] text-[#8B949E] uppercase font-bold">
+              <div className="mt-1.5 pt-1 border-t border-[#1E2333] flex justify-between font-sans text-[8px] text-[#8B949E] uppercase font-bold">
                 <span>Agreement Score:</span>
                 <span className="text-[#E6EDF3] font-mono font-extrabold text-[9px]">
                   {Math.round(signal.modelConsensus.agreement * 100)}%

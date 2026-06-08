@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { CandleData } from '@/lib/indodax';
 import { RiskLabEngine, RiskLabSetup, EconomicEvent } from '@/lib/risk-lab-engine';
+import TiltCard from './TiltCard';
 
 export interface MarketPair {
   id: string;
@@ -261,8 +262,8 @@ export default function RiskLabConsole({
     <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden h-[calc(100vh-130px)]">
       
       {/* ================= PANEL KIRI: DIKTATOR ASSET ================= */}
-      <div className="w-full lg:w-1/5 quantum-card rounded-xl border border-[#30363D] bg-[#161B22] flex flex-col h-full shrink-0">
-        <div className="p-3 border-b border-[#30363D] bg-[#0D1117]/35">
+      <TiltCard className="w-full lg:w-1/5 flex flex-col h-full shrink-0 bg-[#07090F]">
+        <div className="p-3 border-b border-[#1E2333] bg-[#030407]/35">
           <span className="text-xs font-bold text-[#E6EDF3] uppercase tracking-wider block mb-2 font-sans">Asset Directory</span>
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-500" />
@@ -271,13 +272,13 @@ export default function RiskLabConsole({
               placeholder="Cari pair koin..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-[#0D1117] border border-[#30363D] rounded-lg text-xs text-[#E6EDF3] placeholder-slate-600 focus:outline-none focus:border-[#58A6FF]"
+              className="w-full pl-8 pr-3 py-1.5 bg-[#030407] border border-[#1E2333] rounded-lg text-xs text-[#E6EDF3] placeholder-slate-600 focus:outline-none focus:border-[#58A6FF]"
             />
           </div>
         </div>
 
         {/* Filters tab */}
-        <div className="grid grid-cols-4 border-b border-[#30363D] bg-[#0D1117]/15 text-[9px] font-bold">
+        <div className="grid grid-cols-4 border-b border-[#1E2333] bg-[#030407]/15 text-[9px] font-bold">
           <button 
             onClick={() => setLeftFilter('ALL')}
             className={`py-2 text-center border-b-2 transition-all ${leftFilter === 'ALL' ? 'border-[#58A6FF] text-[#58A6FF] bg-slate-900/40' : 'border-transparent text-slate-500'}`}
@@ -332,11 +333,11 @@ export default function RiskLabConsole({
             );
           })}
         </div>
-      </div>
+      </TiltCard>
 
       {/* ================= PANEL TENGAH: CONFIGURATION DECK ================= */}
-      <div className="flex-1 quantum-card rounded-xl border border-[#30363D] bg-[#161B22] p-4 flex flex-col gap-5 h-full overflow-y-auto">
-        <div className="flex items-center justify-between border-b border-[#30363D] pb-3">
+      <TiltCard className="flex-1 p-4 flex flex-col gap-5 h-full overflow-y-auto bg-[#07090F]">
+        <div className="flex items-center justify-between border-b border-[#1E2333] pb-3">
           <div className="flex items-center gap-2">
             <Sliders className="h-4.5 w-4.5 text-[#58A6FF]" />
             <span className="text-sm font-bold text-[#E6EDF3] uppercase tracking-wide">Risk Lab Config Deck</span>
@@ -348,7 +349,7 @@ export default function RiskLabConsole({
             <select
               value={activePreset}
               onChange={(e) => setActivePreset(e.target.value)}
-              className="bg-[#0D1117] border border-[#30363D] px-2 py-1 rounded text-[10px] font-mono text-slate-300 focus:outline-none focus:border-[#58A6FF]"
+              className="bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-[10px] font-mono text-slate-300 focus:outline-none focus:border-[#58A6FF]"
             >
               {savedPresets.map(preset => (
                 <option key={preset} value={preset}>{preset}</option>
@@ -356,7 +357,7 @@ export default function RiskLabConsole({
             </select>
             <button 
               onClick={() => setShowPresetSaveInput(true)}
-              className="p-1 bg-[#21262D] border border-[#30363D] rounded hover:bg-[#30363D] text-slate-400"
+              className="p-1 bg-[#21262D] border border-[#1E2333] rounded hover:bg-[#30363D] text-slate-400"
               title="Simpan preset"
             >
               <Save className="h-3 w-3" />
@@ -366,7 +367,7 @@ export default function RiskLabConsole({
 
         {/* Preset save popup input */}
         {showPresetSaveInput && (
-          <div className="bg-[#0D1117] border border-[#30363D] p-3 rounded-lg flex flex-col gap-2">
+          <div className="bg-[#030407] border border-[#1E2333] p-3 rounded-lg flex flex-col gap-2">
             <span className="text-[10px] font-bold text-slate-300">Simpan Preset Baru</span>
             <div className="flex gap-2">
               <input
@@ -374,7 +375,7 @@ export default function RiskLabConsole({
                 value={newPresetName}
                 onChange={(e) => setNewPresetName(e.target.value)}
                 placeholder="Nama preset..."
-                className="flex-1 bg-slate-950 border border-[#30363D] rounded px-2 py-1 text-xs text-slate-200"
+                className="flex-1 bg-slate-950 border border-[#1E2333] rounded px-2 py-1 text-xs text-slate-200"
               />
               <button onClick={handleSavePreset} className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs">Simpan</button>
               <button onClick={() => setShowPresetSaveInput(false)} className="px-3 py-1 bg-[#21262D] text-slate-400 rounded text-xs">Batal</button>
@@ -398,7 +399,7 @@ export default function RiskLabConsole({
                 className={`py-2 px-1 rounded-xl border flex flex-col items-center justify-center transition-all ${
                   style === item.id 
                     ? 'bg-[#58A6FF]/10 border-[#58A6FF] text-[#58A6FF] font-bold shadow-[0_0_8px_rgba(88,166,255,0.15)]' 
-                    : 'bg-[#0D1117] border-[#30363D] text-slate-400 hover:border-slate-700'
+                    : 'bg-[#030407] border-[#1E2333] text-slate-400 hover:border-slate-700'
                 }`}
               >
                 <span className="text-[10px] block">{item.label}</span>
@@ -425,7 +426,7 @@ export default function RiskLabConsole({
                   className={`py-1.5 px-2 rounded-lg border text-left transition-all ${
                     targetTime === item.id 
                       ? 'bg-purple-500/10 border-purple-500 text-purple-400 font-bold' 
-                      : 'bg-[#0D1117] border-[#30363D] text-slate-400 hover:border-slate-700'
+                      : 'bg-[#030407] border-[#1E2333] text-slate-400 hover:border-slate-700'
                   }`}
                 >
                   <span className="text-[10px] block">{item.label}</span>
@@ -450,7 +451,7 @@ export default function RiskLabConsole({
                   className={`py-1.5 px-2 rounded-lg border text-left transition-all ${
                     method === item.id 
                       ? 'bg-indigo-500/10 border-indigo-500 text-indigo-400 font-bold' 
-                      : 'bg-[#0D1117] border-[#30363D] text-slate-400 hover:border-slate-700'
+                      : 'bg-[#030407] border-[#1E2333] text-slate-400 hover:border-slate-700'
                   }`}
                 >
                   <span className="text-[10px] block">{item.label}</span>
@@ -462,7 +463,7 @@ export default function RiskLabConsole({
         </div>
 
         {/* Risk/Reward Slider */}
-        <div className="bg-[#0D1117]/35 border border-[#30363D]/60 rounded-xl p-3 flex flex-col gap-2">
+        <div className="bg-[#030407]/35 border border-[#1E2333]/60 rounded-xl p-3 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">4. Target Risk/Reward Ratio</span>
             <span className="text-xs font-mono font-bold text-[#58A6FF]">1 : {rrRatio.toFixed(1)}</span>
@@ -474,7 +475,7 @@ export default function RiskLabConsole({
             step="0.1"
             value={rrRatio}
             onChange={(e) => setRrRatio(parseFloat(e.target.value))}
-            className="w-full accent-[#58A6FF] bg-[#0D1117] h-1.5 rounded-lg cursor-pointer"
+            className="w-full accent-[#58A6FF] bg-[#030407] h-1.5 rounded-lg cursor-pointer"
           />
           <div className="flex gap-2">
             {[2.0, 3.0, 4.0].map(val => (
@@ -482,7 +483,7 @@ export default function RiskLabConsole({
                 key={val} 
                 onClick={() => setRrRatio(val)}
                 className={`px-2 py-0.5 rounded text-[9px] font-mono border ${
-                  rrRatio === val ? 'bg-[#58A6FF]/20 text-[#58A6FF] border-[#58A6FF]/40' : 'bg-slate-900 border-[#30363D] text-slate-500 hover:text-slate-300'
+                  rrRatio === val ? 'bg-[#58A6FF]/20 text-[#58A6FF] border-[#58A6FF]/40' : 'bg-slate-900 border-[#1E2333] text-slate-500 hover:text-slate-300'
                 }`}
               >
                 1:{val.toFixed(1)}
@@ -492,7 +493,7 @@ export default function RiskLabConsole({
         </div>
 
         {/* Risk per Trade & Sizing */}
-        <div className="bg-[#0D1117]/35 border border-[#30363D]/60 rounded-xl p-3 flex flex-col gap-3">
+        <div className="bg-[#030407]/35 border border-[#1E2333]/60 rounded-xl p-3 flex flex-col gap-3">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">5. Position Sizer & Capital Sizing</span>
           
           <div className="grid grid-cols-2 gap-3">
@@ -508,7 +509,7 @@ export default function RiskLabConsole({
                 step="0.1"
                 value={riskPercent}
                 onChange={(e) => setRiskPercent(parseFloat(e.target.value))}
-                className="w-full accent-purple-600 bg-[#0D1117] h-1 rounded-lg cursor-pointer"
+                className="w-full accent-purple-600 bg-[#030407] h-1 rounded-lg cursor-pointer"
               />
             </div>
             <div className="flex flex-col justify-between text-right">
@@ -517,7 +518,7 @@ export default function RiskLabConsole({
             </div>
           </div>
 
-          <div className="border-t border-[#30363D]/50 pt-2 grid grid-cols-2 text-xs">
+          <div className="border-t border-[#1E2333]/50 pt-2 grid grid-cols-2 text-xs">
             <div className="flex flex-col gap-0.5">
               <span className="text-[9px] text-slate-500">Suggested Capital Margin:</span>
               <span className="font-mono font-bold text-slate-200">Rp {setup.positionMargin.toLocaleString('id-ID')}</span>
@@ -532,7 +533,7 @@ export default function RiskLabConsole({
         {/* Safety toggles & Drawdown */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
           {/* Daily Drawdown limit */}
-          <div className="bg-[#0D1117]/15 border border-[#30363D]/40 rounded-xl p-3 flex flex-col gap-1.5 justify-center">
+          <div className="bg-[#030407]/15 border border-[#1E2333]/40 rounded-xl p-3 flex flex-col gap-1.5 justify-center">
             <div className="flex justify-between items-center text-[10px]">
               <span className="text-slate-400 font-bold uppercase tracking-wider">Max Drawdown Limit:</span>
               <span className="font-mono text-rose-400 font-bold">{maxDrawdown}%</span>
@@ -544,7 +545,7 @@ export default function RiskLabConsole({
               step="0.5"
               value={maxDrawdown}
               onChange={(e) => setMaxDrawdown(parseFloat(e.target.value))}
-              className="w-full accent-rose-500 bg-[#0D1117] h-1 rounded-lg cursor-pointer"
+              className="w-full accent-rose-500 bg-[#030407] h-1 rounded-lg cursor-pointer"
             />
             {dailyDrawdownBreached && (
               <span className="text-[8px] font-bold text-rose-400 uppercase tracking-wide block animate-pulse">
@@ -560,7 +561,7 @@ export default function RiskLabConsole({
                 type="checkbox" 
                 checked={mtfFilter} 
                 onChange={(e) => setMtfFilter(e.target.checked)}
-                className="rounded border-[#30363D] bg-slate-900 text-[#58A6FF] focus:ring-0 focus:ring-offset-0" 
+                className="rounded border-[#1E2333] bg-slate-900 text-[#58A6FF] focus:ring-0 focus:ring-offset-0" 
               />
               <span>Multi-Timeframe Confirmation Filter</span>
             </label>
@@ -569,7 +570,7 @@ export default function RiskLabConsole({
                 type="checkbox" 
                 checked={newsFilter} 
                 onChange={(e) => setNewsFilter(e.target.checked)}
-                className="rounded border-[#30363D] bg-slate-900 text-purple-500 focus:ring-0 focus:ring-offset-0" 
+                className="rounded border-[#1E2333] bg-slate-900 text-purple-500 focus:ring-0 focus:ring-offset-0" 
               />
               <span>Avoid Trading Near High-Impact CPI/FOMC News</span>
             </label>
@@ -578,7 +579,7 @@ export default function RiskLabConsole({
                 type="checkbox" 
                 checked={trailingStop} 
                 onChange={(e) => setTrailingStop(e.target.checked)}
-                className="rounded border-[#30363D] bg-slate-900 text-emerald-500 focus:ring-0 focus:ring-offset-0" 
+                className="rounded border-[#1E2333] bg-slate-900 text-emerald-500 focus:ring-0 focus:ring-offset-0" 
               />
               <span>Rekomendasikan Trailing Stop Dinamis</span>
             </label>
@@ -594,11 +595,11 @@ export default function RiskLabConsole({
           </div>
         </div>
 
-      </div>
+      </TiltCard>
 
       {/* ================= PANEL KANAN: RECOMMENDATIONS & SIMULATORS ================= */}
-      <div className="w-full lg:w-2/5 quantum-card rounded-xl border border-[#30363D] bg-[#161B22] p-4 flex flex-col gap-4 h-full overflow-y-auto">
-        <div className="flex items-center justify-between border-b border-[#30363D] pb-3 shrink-0">
+      <TiltCard className="w-full lg:w-2/5 p-4 flex flex-col gap-4 h-full overflow-y-auto bg-[#07090F]">
+        <div className="flex items-center justify-between border-b border-[#1E2333] pb-3 shrink-0">
           <div className="flex items-center gap-2">
             <Cpu className="h-4.5 w-4.5 text-purple-400" />
             <span className="text-sm font-bold text-[#E6EDF3] uppercase tracking-wide">Oracle Recommendations</span>
@@ -624,7 +625,7 @@ export default function RiskLabConsole({
         )}
 
         {/* Coordinates Deck */}
-        <div className="bg-[#0D1117] border border-[#30363D]/80 rounded-xl p-3 flex flex-col gap-2 relative overflow-hidden">
+        <div className="bg-[#030407] border border-[#1E2333]/80 rounded-xl p-3 flex flex-col gap-2 relative overflow-hidden">
           <div className="absolute right-3 top-3 flex items-center gap-1.5 text-[9px] text-slate-500 font-mono">
             <span>R:R 1:{setup.riskRewardRatio}</span>
             <span>|</span>
@@ -634,27 +635,27 @@ export default function RiskLabConsole({
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Execution Coordinates</span>
           
           <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-            <div className="bg-[#161B22] border border-[#30363D]/40 rounded-lg p-2 flex flex-col justify-center">
+            <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-lg p-2 flex flex-col justify-center">
               <span className="text-[9px] text-slate-500 uppercase font-sans">Rekomendasi Entry:</span>
               <span className="font-bold text-slate-200">Rp {setup.entryPrice.toLocaleString('id-ID')}</span>
             </div>
             
-            <div className="bg-[#161B22] border border-rose-950/40 rounded-lg p-2 flex flex-col justify-center">
+            <div className="bg-[#07090F] border border-rose-950/40 rounded-lg p-2 flex flex-col justify-center">
               <span className="text-[9px] text-rose-400 uppercase font-sans">Stop Loss (SL):</span>
               <span className="font-bold text-rose-400">Rp {setup.stopLoss.toLocaleString('id-ID')}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-xs font-mono mt-1">
-            <div className="bg-[#161B22] border border-[#30363D]/40 rounded-lg p-2 flex flex-col justify-center">
+            <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-lg p-2 flex flex-col justify-center">
               <span className="text-[8px] text-emerald-500 uppercase font-sans">Take Profit 1 (50%):</span>
               <span className="font-bold text-emerald-400">Rp {setup.takeProfit1.toLocaleString('id-ID')}</span>
             </div>
-            <div className="bg-[#161B22] border border-[#30363D]/40 rounded-lg p-2 flex flex-col justify-center">
+            <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-lg p-2 flex flex-col justify-center">
               <span className="text-[8px] text-emerald-500 uppercase font-sans">Take Profit 2 (30%):</span>
               <span className="font-bold text-emerald-400">Rp {setup.takeProfit2.toLocaleString('id-ID')}</span>
             </div>
-            <div className="bg-[#161B22] border border-[#30363D]/40 rounded-lg p-2 flex flex-col justify-center">
+            <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-lg p-2 flex flex-col justify-center">
               <span className="text-[8px] text-emerald-500 uppercase font-sans">Take Profit 3 (20%):</span>
               <span className="font-bold text-emerald-400">Rp {setup.takeProfit3.toLocaleString('id-ID')}</span>
             </div>
@@ -681,26 +682,26 @@ export default function RiskLabConsole({
             const totalEstProfit = tp1Profit + tp2Profit + tp3Profit;
 
             return (
-              <div className="mt-2 border-t border-[#30363D]/40 pt-2 flex flex-col gap-1.5 text-[9px] font-sans text-slate-400">
+              <div className="mt-2 border-t border-[#1E2333]/40 pt-2 flex flex-col gap-1.5 text-[9px] font-sans text-slate-400">
                 <span className="font-bold text-slate-300 uppercase tracking-wider block">Partial Profit Visualizer:</span>
                 <div className="grid grid-cols-3 gap-1.5 font-mono text-[9px]">
-                  <div className="bg-[#161B22]/60 p-1.5 rounded border border-[#30363D]/30">
+                  <div className="bg-[#07090F]/60 p-1.5 rounded border border-[#1E2333]/30">
                     <span className="text-slate-500 block text-[8px]">TP1 (50%)</span>
                     <span className="text-emerald-400 font-bold block">+Rp {tp1Profit.toLocaleString('id-ID')}</span>
                     <span className="text-[8px] text-slate-500">+{tp1Pct}% PnL</span>
                   </div>
-                  <div className="bg-[#161B22]/60 p-1.5 rounded border border-[#30363D]/30">
+                  <div className="bg-[#07090F]/60 p-1.5 rounded border border-[#1E2333]/30">
                     <span className="text-slate-500 block text-[8px]">TP2 (30%)</span>
                     <span className="text-emerald-400 font-bold block">+Rp {tp2Profit.toLocaleString('id-ID')}</span>
                     <span className="text-[8px] text-slate-500">+{tp2Pct}% PnL</span>
                   </div>
-                  <div className="bg-[#161B22]/60 p-1.5 rounded border border-[#30363D]/30">
+                  <div className="bg-[#07090F]/60 p-1.5 rounded border border-[#1E2333]/30">
                     <span className="text-slate-500 block text-[8px]">TP3 (20%)</span>
                     <span className="text-emerald-400 font-bold block">+Rp {tp3Profit.toLocaleString('id-ID')}</span>
                     <span className="text-[8px] text-slate-500">+{tp3Pct}% PnL</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center text-[9px] mt-1 pt-1.5 border-t border-[#30363D]/20">
+                <div className="flex justify-between items-center text-[9px] mt-1 pt-1.5 border-t border-[#1E2333]/20">
                   <span>Target Profit: <strong className="text-emerald-400 font-mono text-[10px]">+Rp {totalEstProfit.toLocaleString('id-ID')}</strong></span>
                   <span className="text-slate-500">|</span>
                   <span>Max Loss (SL): <strong className="text-rose-450 font-mono text-rose-400 text-[10px]">-Rp {maxLoss.toLocaleString('id-ID')} (-{slPct}%)</strong></span>
@@ -711,8 +712,8 @@ export default function RiskLabConsole({
         </div>
 
         {/* Confidence Audit deck */}
-        <div className="bg-[#0D1117]/40 border border-[#30363D]/50 rounded-xl p-3 flex flex-col gap-2 font-sans text-[10px]">
-          <div className="flex items-center justify-between border-b border-[#30363D]/40 pb-2">
+        <div className="bg-[#030407]/40 border border-[#1E2333]/50 rounded-xl p-3 flex flex-col gap-2 font-sans text-[10px]">
+          <div className="flex items-center justify-between border-b border-[#1E2333]/40 pb-2">
             <div className="flex items-center gap-1.5">
               <CheckCircle className={`h-4 w-4 ${finalConfidence >= 75 ? 'text-emerald-400' : 'text-slate-500'}`} />
               <span className="font-bold text-slate-300">Confidence Audit: {finalConfidence}% ({finalConfidence >= 80 ? 'HIGH' : finalConfidence >= 65 ? 'MEDIUM' : 'LOW'})</span>
@@ -766,7 +767,7 @@ export default function RiskLabConsole({
         </div>
 
         {/* Global Trading Sessions */}
-        <div className="bg-[#0D1117]/10 border border-[#30363D]/40 rounded-xl p-3 flex flex-col gap-2">
+        <div className="bg-[#030407]/10 border border-[#1E2333]/40 rounded-xl p-3 flex flex-col gap-2">
           <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
             <Clock className="h-3.5 w-3.5 text-[#58A6FF]" />
             <span>Active Global Sessions</span>
@@ -790,8 +791,8 @@ export default function RiskLabConsole({
         </div>
 
         {/* What-If Simulator */}
-        <div className="bg-[#0D1117]/30 border border-[#30363D]/60 rounded-xl p-3 flex flex-col gap-2">
-          <div className="flex items-center justify-between border-b border-[#30363D]/30 pb-1.5">
+        <div className="bg-[#030407]/30 border border-[#1E2333]/60 rounded-xl p-3 flex flex-col gap-2">
+          <div className="flex items-center justify-between border-b border-[#1E2333]/30 pb-1.5">
             <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
               <BarChart3 className="h-3.5 w-3.5 text-purple-400" />
               <span>What-If Setup Simulator</span>
@@ -808,7 +809,7 @@ export default function RiskLabConsole({
                 type="number"
                 value={simEntry}
                 onChange={(e) => setSimEntry(e.target.value)}
-                className="w-full bg-[#0D1117] border border-[#30363D] px-2 py-1 rounded text-slate-200 font-mono text-[10px]"
+                className="w-full bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-slate-200 font-mono text-[10px]"
               />
             </div>
             <div className="flex flex-col gap-0.5">
@@ -817,7 +818,7 @@ export default function RiskLabConsole({
                 type="number"
                 value={simTp}
                 onChange={(e) => setSimTp(e.target.value)}
-                className="w-full bg-[#0D1117] border border-[#30363D] px-2 py-1 rounded text-slate-200 font-mono text-[10px]"
+                className="w-full bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-slate-200 font-mono text-[10px]"
               />
             </div>
             <div className="flex flex-col gap-0.5">
@@ -826,7 +827,7 @@ export default function RiskLabConsole({
                 type="number"
                 value={simSl}
                 onChange={(e) => setSimSl(e.target.value)}
-                className="w-full bg-[#0D1117] border border-[#30363D] px-2 py-1 rounded text-slate-200 font-mono text-[10px]"
+                className="w-full bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-slate-200 font-mono text-[10px]"
               />
             </div>
           </div>
@@ -843,8 +844,8 @@ export default function RiskLabConsole({
         </div>
 
         {/* Economic high-impact news */}
-        <div className="bg-[#0D1117]/20 border border-[#30363D]/50 rounded-xl p-2.5 flex flex-col gap-1.5">
-          <div className="flex items-center justify-between border-b border-[#30363D]/30 pb-1 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+        <div className="bg-[#030407]/20 border border-[#1E2333]/50 rounded-xl p-2.5 flex flex-col gap-1.5">
+          <div className="flex items-center justify-between border-b border-[#1E2333]/30 pb-1 text-[9px] font-bold text-slate-400 uppercase tracking-wider">
             <div className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5 text-rose-400" />
               <span>Today Economic Calendar</span>
@@ -875,10 +876,10 @@ export default function RiskLabConsole({
         </div>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-3 gap-2 mt-auto shrink-0 pt-2 border-t border-[#30363D]/50">
+        <div className="grid grid-cols-3 gap-2 mt-auto shrink-0 pt-2 border-t border-[#1E2333]/50">
           <button
             onClick={() => setShowBacktestModal(true)}
-            className="py-2.5 px-2 bg-slate-900 border border-[#30363D] hover:bg-[#30363D] rounded-xl text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5"
+            className="py-2.5 px-2 bg-slate-900 border border-[#1E2333] hover:bg-[#30363D] rounded-xl text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5"
           >
             <BarChart3 className="h-4 w-4 text-[#58A6FF]" />
             <span>Lihat Backtest</span>
@@ -889,7 +890,7 @@ export default function RiskLabConsole({
             onClick={handleApplyToSystem}
             className={`col-span-2 py-2.5 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 border shadow-lg transition-all duration-300 ${
               activeSignal === 'NEUTRAL' || (dailyDrawdownBreached && !forceEntry) || (cooldownActive && !forceEntry)
-                ? 'bg-[#30363D]/20 border-[#30363D]/40 text-slate-500 cursor-not-allowed'
+                ? 'bg-[#30363D]/20 border-[#1E2333]/40 text-slate-500 cursor-not-allowed'
                 : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 border-purple-500/40 text-white shadow-purple-600/10 hover:shadow-purple-600/20 active:scale-[0.98]'
             }`}
           >
@@ -898,13 +899,13 @@ export default function RiskLabConsole({
           </button>
         </div>
 
-      </div>
+      </TiltCard>
 
       {/* Backtest Modal Details */}
       {showBacktestModal && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="quantum-card max-w-lg w-full bg-[#161B22] border border-[#30363D] rounded-xl p-5 flex flex-col gap-4">
-            <div className="flex justify-between items-center border-b border-[#30363D] pb-3">
+          <div className="quantum-card max-w-lg w-full bg-[#07090F] border border-[#1E2333] rounded-xl p-5 flex flex-col gap-4">
+            <div className="flex justify-between items-center border-b border-[#1E2333] pb-3">
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-purple-400" />
                 <span className="text-sm font-bold text-[#E6EDF3] uppercase tracking-wider">Backtest Analytics (7 Days)</span>
@@ -918,7 +919,7 @@ export default function RiskLabConsole({
             </div>
 
             <div className="flex flex-col gap-3 font-sans text-xs text-slate-400">
-              <div className="grid grid-cols-2 gap-3 bg-[#0D1117] p-3 rounded-lg border border-[#30363D]/60 font-mono text-slate-200">
+              <div className="grid grid-cols-2 gap-3 bg-[#030407] p-3 rounded-lg border border-[#1E2333]/60 font-mono text-slate-200">
                 <div>
                   <span className="text-[9px] text-slate-500 block">Asset / Method:</span>
                   <span>{activeCoinSymbol}/IDR ({method})</span>
@@ -940,15 +941,15 @@ export default function RiskLabConsole({
               </div>
 
               <div className="grid grid-cols-3 gap-2 text-center pt-2 text-[10px]">
-                <div className="bg-[#0D1117] p-2 rounded-lg">
+                <div className="bg-[#030407] p-2 rounded-lg">
                   <span className="text-slate-500 block">Total Skenario</span>
                   <span className="font-mono font-bold text-slate-200">24 Kali</span>
                 </div>
-                <div className="bg-[#0D1117] p-2 rounded-lg">
+                <div className="bg-[#030407] p-2 rounded-lg">
                   <span className="text-slate-500 block">Skenario Profit</span>
                   <span className="font-mono font-bold text-emerald-400">{Math.round(24 * (setup.backtestWinRate/100))}</span>
                 </div>
-                <div className="bg-[#0D1117] p-2 rounded-lg">
+                <div className="bg-[#030407] p-2 rounded-lg">
                   <span className="text-slate-500 block">Skenario Loss</span>
                   <span className="font-mono font-bold text-rose-400">{24 - Math.round(24 * (setup.backtestWinRate/100))}</span>
                 </div>

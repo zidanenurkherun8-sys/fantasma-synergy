@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Send, AlertTriangle, ShieldCheck, ArrowUpRight, BarChart2, Cpu } from 'lucide-react';
+import TiltCard from './TiltCard';
 
 interface ModelConsensus {
   lstm_vote: 'LONG' | 'SHORT' | 'NEUTRAL';
@@ -150,10 +151,10 @@ export default function FantasmaSynergyReport({
     : circumference;
 
   return (
-    <div className="quantum-card rounded-xl p-5 border border-[#30363D] flex flex-col h-full bg-[#1C2333] relative min-h-[500px]">
+    <TiltCard className="p-5 flex flex-col h-full bg-[#0C0E18] relative min-h-[500px]">
       {/* Scanner Animation Overlay during load */}
       {loading && (
-        <div className="absolute inset-0 bg-[#0D1117]/85 backdrop-blur-md rounded-xl z-20 flex flex-col items-center justify-center p-6 text-center">
+        <div className="absolute inset-0 bg-[#030407]/85 backdrop-blur-md rounded-xl z-20 flex flex-col items-center justify-center p-6 text-center">
           <div className="h-10 w-10 rounded-full border-t-2 border-[#58A6FF] animate-spin mb-4" />
           <h3 className="font-bold text-sm text-[#58A6FF] tracking-wider uppercase mb-1">Mengevaluasi Model Ensemble AI...</h3>
           <p className="text-[10px] text-[#8B949E] max-w-xs font-mono">
@@ -163,7 +164,7 @@ export default function FantasmaSynergyReport({
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#30363D] pb-4 mb-4 select-none">
+      <div className="flex items-center justify-between border-b border-[#1E2333] pb-4 mb-4 select-none">
         <div className="flex items-center gap-2">
           <BarChart2 className="h-5 w-5 text-[#58A6FF]" />
           <h2 className="font-bold text-base text-[#E6EDF3] tracking-wide">AI Multi-Model Ensemble Analyst</h2>
@@ -174,7 +175,7 @@ export default function FantasmaSynergyReport({
       </div>
 
       {!report && !loading ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border border-dashed border-[#30363D] rounded-xl my-4 select-none">
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border border-dashed border-[#1E2333] rounded-xl my-4 select-none">
           <Send className="h-10 w-10 text-[#8B949E] mb-3 opacity-60" />
           <h4 className="font-bold text-xs text-[#E6EDF3] mb-1">Belum Ada Analisis yang Berjalan</h4>
           <p className="text-[10px] text-[#8B949E] max-w-xs leading-normal">
@@ -185,7 +186,7 @@ export default function FantasmaSynergyReport({
         <div className="flex-1 flex flex-col gap-5 overflow-hidden">
           {/* Actionable Setup Card Widget parsed from prediction */}
           {activePrediction && activePrediction.direction !== 'NEUTRAL' && (
-            <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-4 flex flex-col gap-3 relative">
+            <div className="bg-[#07090F] border border-[#1E2333] rounded-xl p-4 flex flex-col gap-3 relative">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-[#3FB950]" />
@@ -239,8 +240,8 @@ export default function FantasmaSynergyReport({
 
                   {/* Consensus & Detail Tooltip */}
                   {showTooltip && (
-                    <div className="absolute right-0 top-12 w-64 p-3 bg-[#1C2333] border border-[#30363D] rounded-lg shadow-xl z-30 text-[10px] text-[#8B949E] font-sans leading-normal">
-                      <div className="font-bold text-[#E6EDF3] uppercase tracking-wider text-[9px] mb-2 flex items-center gap-1 border-b border-[#30363D] pb-1">
+                    <div className="absolute right-0 top-12 w-64 p-3 bg-[#0C0E18] border border-[#1E2333] rounded-lg shadow-xl z-30 text-[10px] text-[#8B949E] font-sans leading-normal">
+                      <div className="font-bold text-[#E6EDF3] uppercase tracking-wider text-[9px] mb-2 flex items-center gap-1 border-b border-[#1E2333] pb-1">
                         <Cpu className="h-3 w-3 text-[#58A6FF]" /> Consensus Model Votes
                       </div>
                       <div className="space-y-1 font-mono">
@@ -262,14 +263,14 @@ export default function FantasmaSynergyReport({
                             {activePrediction.modelConsensus.transformer_vote}
                           </span>
                         </div>
-                        <div className="flex justify-between border-t border-[#30363D]/60 pt-1 mt-1 font-sans text-[9px]">
+                        <div className="flex justify-between border-t border-[#1E2333]/60 pt-1 mt-1 font-sans text-[9px]">
                           <span>Consensus Agreement:</span>
                           <span className="text-[#E6EDF3] font-bold">
                             {(activePrediction.modelConsensus.agreement * 100).toFixed(0)}%
                           </span>
                         </div>
                       </div>
-                      <div className="mt-2 border-t border-[#30363D]/60 pt-1.5">
+                      <div className="mt-2 border-t border-[#1E2333]/60 pt-1.5">
                         <span className="font-bold text-[#E6EDF3] block mb-0.5 text-[8px] uppercase">Rangkuman Sinyal:</span>
                         <ul className="list-disc pl-3.5 space-y-0.5 text-[9px]">
                           {activePrediction.reasoning.slice(0, 2).map((r, i) => (
@@ -283,15 +284,15 @@ export default function FantasmaSynergyReport({
               </div>
 
               <div className="grid grid-cols-3 gap-3 font-mono mt-1 text-xs select-none">
-                <div className="flex flex-col gap-0.5 bg-[#0D1117] p-2 rounded-lg border border-[#30363D]">
+                <div className="flex flex-col gap-0.5 bg-[#030407] p-2 rounded-lg border border-[#1E2333]">
                   <span className="text-[9px] text-[#8B949E] uppercase font-bold">Entry Zone</span>
                   <span className="font-bold text-[#E6EDF3]">Rp {activePrediction.entryPrice.toLocaleString('id-ID')}</span>
                 </div>
-                <div className="flex flex-col gap-0.5 bg-[#0D1117] p-2 rounded-lg border border-[#30363D]">
+                <div className="flex flex-col gap-0.5 bg-[#030407] p-2 rounded-lg border border-[#1E2333]">
                   <span className="text-[9px] text-[#8B949E] uppercase font-bold">Stop Loss</span>
                   <span className="font-bold text-[#F85149]">Rp {activePrediction.stopLoss.toLocaleString('id-ID')}</span>
                 </div>
-                <div className="flex flex-col gap-0.5 bg-[#0D1117] p-2 rounded-lg border border-[#30363D]">
+                <div className="flex flex-col gap-0.5 bg-[#030407] p-2 rounded-lg border border-[#1E2333]">
                   <span className="text-[9px] text-[#8B949E] uppercase font-bold">Target TP</span>
                   <span className="font-bold text-[#3FB950]">Rp {activePrediction.takeProfit.toLocaleString('id-ID')}</span>
                 </div>
@@ -312,7 +313,7 @@ export default function FantasmaSynergyReport({
             {report.split('\n').map((line, index) => {
               if (line.startsWith('**🪐')) {
                 return (
-                  <h3 key={index} className="text-sm font-bold text-[#58A6FF] border-b border-[#30363D] pb-1 pt-3 tracking-wide flex items-center gap-1">
+                  <h3 key={index} className="text-sm font-bold text-[#58A6FF] border-b border-[#1E2333] pb-1 pt-3 tracking-wide flex items-center gap-1">
                     {line.replace(/\*\*/g, '')}
                   </h3>
                 );
@@ -335,7 +336,7 @@ export default function FantasmaSynergyReport({
                 const parts = line.substring(2).split(':');
                 if (parts.length > 1) {
                   return (
-                    <div key={index} className="flex justify-between items-center py-1 border-b border-[#30363D]/40 px-1 font-mono text-[11px]">
+                    <div key={index} className="flex justify-between items-center py-1 border-b border-[#1E2333]/40 px-1 font-mono text-[11px]">
                       <span className="text-[#8B949E] font-sans">{parts[0]}</span>
                       <span className="font-semibold text-[#E6EDF3]">{parts.slice(1).join(':')}</span>
                     </div>
@@ -352,7 +353,7 @@ export default function FantasmaSynergyReport({
               }
               if (line.startsWith('---') || line.includes('Disclaimer:')) {
                 return (
-                  <div key={index} className="bg-[#161B22] border border-[#30363D] rounded-lg p-3 text-[10px] text-[#8B949E] flex gap-2 items-start mt-4 italic font-sans leading-normal font-bold">
+                  <div key={index} className="bg-[#07090F] border border-[#1E2333] rounded-lg p-3 text-[10px] text-[#8B949E] flex gap-2 items-start mt-4 italic font-sans leading-normal font-bold">
                     <span>{line.replace(/[\*_-]/g, '')}</span>
                   </div>
                 );
@@ -362,31 +363,31 @@ export default function FantasmaSynergyReport({
           </div>
 
           {/* Model Backtesting Performance Dashboard (4.7) */}
-          <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-3.5 mt-auto select-none">
-            <div className="flex justify-between items-center border-b border-[#30363D] pb-1.5 mb-2 font-sans">
+          <div className="bg-[#07090F] border border-[#1E2333] rounded-xl p-3.5 mt-auto select-none">
+            <div className="flex justify-between items-center border-b border-[#1E2333] pb-1.5 mb-2 font-sans">
               <span className="text-[10px] font-bold text-[#E6EDF3] uppercase tracking-wider flex items-center gap-1.5">
                 📊 Model Performance (24h)
               </span>
               <span className="text-[8px] text-[#8B949E] font-mono">Diperbarui: 1 jam yang lalu</span>
             </div>
             <div className="grid grid-cols-5 gap-2 font-mono text-center text-[10px]">
-              <div className="flex flex-col py-1 bg-[#0D1117] rounded border border-[#30363D]/60">
+              <div className="flex flex-col py-1 bg-[#030407] rounded border border-[#1E2333]/60">
                 <span className="text-[8px] text-[#8B949E] font-sans uppercase font-bold mb-0.5">Akurasi</span>
                 <span className="font-bold text-[#3FB950]">76.3%</span>
               </div>
-              <div className="flex flex-col py-1 bg-[#0D1117] rounded border border-[#30363D]/60">
+              <div className="flex flex-col py-1 bg-[#030407] rounded border border-[#1E2333]/60">
                 <span className="text-[8px] text-[#8B949E] font-sans uppercase font-bold mb-0.5">Avg Ret</span>
                 <span className="font-bold text-[#3FB950]">+2.1%</span>
               </div>
-              <div className="flex flex-col py-1 bg-[#0D1117] rounded border border-[#30363D]/60">
+              <div className="flex flex-col py-1 bg-[#030407] rounded border border-[#1E2333]/60">
                 <span className="text-[8px] text-[#8B949E] font-sans uppercase font-bold mb-0.5">Win Rate</span>
                 <span className="font-bold text-[#3FB950]">74%</span>
               </div>
-              <div className="flex flex-col py-1 bg-[#0D1117] rounded border border-[#30363D]/60">
+              <div className="flex flex-col py-1 bg-[#030407] rounded border border-[#1E2333]/60">
                 <span className="text-[8px] text-[#8B949E] font-sans uppercase font-bold mb-0.5">Sharpe</span>
                 <span className="font-bold text-[#58A6FF]">1.8</span>
               </div>
-              <div className="flex flex-col py-1 bg-[#0D1117] rounded border border-[#30363D]/60">
+              <div className="flex flex-col py-1 bg-[#030407] rounded border border-[#1E2333]/60">
                 <span className="text-[8px] text-[#8B949E] font-sans uppercase font-bold mb-0.5">Max DD</span>
                 <span className="font-bold text-[#F85149]">-4.2%</span>
               </div>
@@ -395,6 +396,6 @@ export default function FantasmaSynergyReport({
 
         </div>
       )}
-    </div>
+    </TiltCard>
   );
 }

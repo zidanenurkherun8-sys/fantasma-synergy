@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserCheck, Quote, TrendingUp, TrendingDown, HelpCircle, User, Sparkles, BookOpen, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { OracleSignal } from '@/lib/oracle-engine';
+import TiltCard from './TiltCard';
 
 interface EliteAuditorsPanelProps {
   signal: OracleSignal | null;
@@ -259,9 +260,9 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
   ];
 
   return (
-    <div className="quantum-card rounded-xl border border-[#30363D] bg-[#161B22] p-5 flex flex-col gap-4 select-none">
+    <TiltCard className="p-5 flex flex-col gap-4 select-none bg-[#07090F]">
       {/* Panel Header */}
-      <div className="flex items-center justify-between border-b border-[#30363D] pb-3">
+      <div className="flex items-center justify-between border-b border-[#1E2333] pb-3">
         <div className="flex items-center gap-2">
           <UserCheck className="h-5 w-5 text-purple-400" />
           <h3 className="text-sm font-extrabold text-[#E6EDF3] uppercase tracking-wider font-sans">
@@ -294,7 +295,7 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
               className={`p-3.5 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
                 isExpanded
                   ? 'border-purple-500/50 bg-[#1e1c2a]/45 shadow-[0_0_15px_rgba(168,85,247,0.08)] md:col-span-2 xl:col-span-3'
-                  : 'border-[#30363D] bg-[#0D1117]/80 hover:bg-[#161B22]/50 hover:border-[#58A6FF]/40'
+                  : 'border-[#1E2333] bg-[#030407]/80 hover:bg-[#07090F]/50 hover:border-[#58A6FF]/40'
               }`}
             >
               {/* Card top */}
@@ -321,7 +322,7 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
               </div>
 
               {/* Methodology details */}
-              <div className="border-t border-[#30363D]/40 pt-2 mt-2.5">
+              <div className="border-t border-[#1E2333]/40 pt-2 mt-2.5">
                 <span className="text-[8px] text-[#8B949E] uppercase font-bold tracking-wider font-mono block">
                   Metodologi: {auditor.methodology}
                 </span>
@@ -332,7 +333,7 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
 
               {/* Expanded comment detail with animation */}
               {isExpanded ? (
-                <div className="mt-3.5 bg-[#0D1117]/80 border border-purple-500/25 p-3 rounded-lg flex items-start gap-2.5 text-xs text-slate-100 font-sans animate-fadeIn leading-relaxed">
+                <div className="mt-3.5 bg-[#030407]/80 border border-purple-500/25 p-3 rounded-lg flex items-start gap-2.5 text-xs text-slate-100 font-sans animate-fadeIn leading-relaxed">
                   <Quote className="h-5 w-5 text-purple-400 shrink-0 mt-0.5 opacity-60" />
                   <div className="flex-1">
                     <span className="text-[9px] uppercase font-bold text-purple-400 block mb-1 font-mono">Tanggapan Mendalam & Analisis ke Depan:</span>
@@ -350,6 +351,6 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
           );
         })}
       </div>
-    </div>
+    </TiltCard>
   );
 }

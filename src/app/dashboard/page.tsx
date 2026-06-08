@@ -1480,7 +1480,7 @@ export default function DashboardPage() {
 
   if (!isMounted) {
     return (
-      <div className="min-h-screen bg-[#0D1117] text-[#E6EDF3] flex flex-col items-center justify-center text-center select-none font-sans">
+      <div className="min-h-screen bg-[#030407] text-[#E6EDF3] flex flex-col items-center justify-center text-center select-none font-sans">
         <div className="h-10 w-10 rounded-full border-t-2 border-[#58A6FF] animate-spin mb-4" />
         <span className="text-xs text-[#8B949E] font-mono uppercase tracking-wider">Memuat Sistem Fantasma Synergy...</span>
       </div>
@@ -1491,10 +1491,10 @@ export default function DashboardPage() {
   const activePairSymbol = selectedPairId.replace('_idr', '').toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#0D1117] text-[#E6EDF3] flex font-sans antialiased overflow-hidden select-none relative">
+    <div className="min-h-screen bg-[#030407] text-[#E6EDF3] flex font-sans antialiased overflow-hidden select-none relative">
       {/* Left Sidebar Navigation (3.6) */}
       <aside 
-        className={`fixed left-0 top-0 bottom-0 z-40 bg-[#161B22] border-r border-[#30363D] hidden md:flex flex-col justify-between transition-all duration-200 ease-in-out select-none ${
+        className={`fixed left-0 top-0 bottom-0 z-40 bg-[#07090F] border-r border-[#1E2333] hidden md:flex flex-col justify-between transition-all duration-200 ease-in-out select-none ${
           sidebarExpanded ? 'w-[220px]' : 'w-[60px]'
         }`}
         onMouseEnter={() => setSidebarExpanded(true)}
@@ -1520,8 +1520,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('DASHBOARD')}
               className={`flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer font-sans w-full text-left border-l-2 ${
                 activeTab === 'DASHBOARD'
-                  ? 'text-[#58A6FF] bg-[#1C2333] border-[#58A6FF]'
-                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#1C2333]/50 border-transparent'
+                  ? 'text-[#58A6FF] bg-[#0C0E18] border-[#58A6FF]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0C0E18]/50 border-transparent'
               }`}
             >
               <LayoutDashboard className="h-4.5 w-4.5" />
@@ -1532,8 +1532,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('SCANNER')}
               className={`flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer font-sans w-full text-left border-l-2 ${
                 activeTab === 'SCANNER'
-                  ? 'text-[#58A6FF] bg-[#1C2333] border-[#58A6FF]'
-                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#1C2333]/50 border-transparent'
+                  ? 'text-[#58A6FF] bg-[#0C0E18] border-[#58A6FF]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0C0E18]/50 border-transparent'
               }`}
             >
               <TrendingUp className="h-4.5 w-4.5" />
@@ -1544,8 +1544,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('AUDITOR')}
               className={`flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer font-sans w-full text-left border-l-2 ${
                 activeTab === 'AUDITOR'
-                  ? 'text-[#58A6FF] bg-[#1C2333] border-[#58A6FF]'
-                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#1C2333]/50 border-transparent'
+                  ? 'text-[#58A6FF] bg-[#0C0E18] border-[#58A6FF]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0C0E18]/50 border-transparent'
               }`}
             >
               <Cpu className="h-4.5 w-4.5" />
@@ -1556,8 +1556,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('RISK_LAB')}
               className={`flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer font-sans w-full text-left border-l-2 ${
                 activeTab === 'RISK_LAB'
-                  ? 'text-[#58A6FF] bg-[#1C2333] border-[#58A6FF]'
-                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#1C2333]/50 border-transparent'
+                  ? 'text-[#58A6FF] bg-[#0C0E18] border-[#58A6FF]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0C0E18]/50 border-transparent'
               }`}
             >
               <Sliders className="h-4.5 w-4.5" />
@@ -1568,8 +1568,8 @@ export default function DashboardPage() {
               onClick={() => setActiveTab('SETTINGS')}
               className={`flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer font-sans w-full text-left border-l-2 ${
                 activeTab === 'SETTINGS'
-                  ? 'text-[#58A6FF] bg-[#1C2333] border-[#58A6FF]'
-                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#1C2333]/50 border-transparent'
+                  ? 'text-[#58A6FF] bg-[#0C0E18] border-[#58A6FF]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0C0E18]/50 border-transparent'
               }`}
             >
               <Settings className="h-4.5 w-4.5" />
@@ -1579,8 +1579,8 @@ export default function DashboardPage() {
         </div>
 
         {/* User Profile Avatar at bottom (3.6) */}
-        <div className="flex items-center gap-3 p-3 border-t border-[#30363D] bg-[#0D1117]/30 select-none">
-          <div className="h-9 w-9 rounded-full bg-[#1C2333] border border-[#30363D] flex items-center justify-center text-[#58A6FF] font-bold text-xs uppercase shrink-0 shadow-sm relative overflow-hidden">
+        <div className="flex items-center gap-3 p-3 border-t border-[#1E2333] bg-[#030407]/30 select-none">
+          <div className="h-9 w-9 rounded-full bg-[#0C0E18] border border-[#1E2333] flex items-center justify-center text-[#58A6FF] font-bold text-xs uppercase shrink-0 shadow-sm relative overflow-hidden">
             <User className="h-4.5 w-4.5" />
           </div>
           {sidebarExpanded && (
@@ -1599,7 +1599,7 @@ export default function DashboardPage() {
         }`}
       >
         {/* 1. Header Terminals */}
-        <header className="border-b border-[#30363D] bg-[#161B22] px-6 py-3.5 flex items-center justify-between sticky top-0 z-35 select-none">
+        <header className="border-b border-[#1E2333] bg-[#07090F] px-6 py-3.5 flex items-center justify-between sticky top-0 z-35 select-none">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-gradient-to-tr from-[#58A6FF] to-indigo-650 flex items-center justify-center font-bold text-[#0D1117] shadow-[0_0_12px_rgba(88,166,255,0.2)]">
               Ω
@@ -1613,7 +1613,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Global Live Tickers Marquee */}
-          <div className="hidden lg:flex flex-1 max-w-[40%] mx-8 overflow-hidden relative h-7 bg-[#0D1117] rounded-md border border-[#30363D] items-center ticker-wrap">
+          <div className="hidden lg:flex flex-1 max-w-[40%] mx-8 overflow-hidden relative h-7 bg-[#030407] rounded-md border border-[#1E2333] items-center ticker-wrap">
             <div className="ticker-content text-[11px] font-mono flex gap-6 text-[#8B949E]">
               {pairs.slice(0, 10).map((pair) => (
                 <span key={`ticker-${pair.id}`} className="flex items-center gap-1.5 cursor-pointer hover:text-[#58A6FF] transition-colors">
@@ -1629,11 +1629,11 @@ export default function DashboardPage() {
 
           {/* Diagnostics & Time */}
           <div className="flex items-center gap-4 text-xs font-mono text-[#8B949E]">
-            <div className="flex items-center gap-1.5 bg-[#0D1117] border border-[#30363D] px-3 py-1.5 rounded-lg">
+            <div className="flex items-center gap-1.5 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-lg">
               <Clock className="h-3.5 w-3.5 text-[#58A6FF]" />
               <span className="text-[#E6EDF3] text-[11px]">{systemTime || '09:00:00'} WIB</span>
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 bg-[#0D1117] border border-[#30363D] px-3 py-1.5 rounded-lg">
+            <div className="hidden sm:flex items-center gap-1.5 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-lg">
               <Activity className="h-3.5 w-3.5 text-[#3FB950] pulse-dot" />
               <span className="text-[#3FB950] font-bold text-[10px] uppercase">Online</span>
             </div>
@@ -1642,7 +1642,7 @@ export default function DashboardPage() {
 
         {/* 2. Main Dashboard Layout Grid (3.6) */}
         {activeTab === 'DASHBOARD' && (
-          <main className="flex-1 p-6 grid grid-cols-1 xl:grid-cols-4 gap-6 overflow-hidden bg-[#0D1117]">
+          <main className="flex-1 p-6 grid grid-cols-1 xl:grid-cols-4 gap-6 overflow-hidden bg-[#030407]">
             {/* SIDEBAR: Scanner (1 Column) */}
             <div className="xl:col-span-1 h-[750px] xl:h-auto overflow-hidden">
               <MarketScanner
@@ -1659,7 +1659,7 @@ export default function DashboardPage() {
             <div className="xl:col-span-3 flex flex-col gap-6 overflow-y-auto">
               {/* Top Overview Bar */}
               {ticker && (
-                <div className="quantum-card rounded-xl p-4 border border-[#30363D] flex flex-wrap items-center justify-between gap-4 bg-[#161B22]">
+                <div className="quantum-card rounded-xl p-4 border border-[#1E2333] flex flex-wrap items-center justify-between gap-4 bg-[#07090F]">
                   <div className="flex items-center gap-4">
                     <div>
                       <h2 className="font-extrabold text-lg text-[#E6EDF3] flex items-center gap-2 font-sans">
@@ -1668,7 +1668,7 @@ export default function DashboardPage() {
                           href={`https://indodax.com/market/${activePairSymbol}IDR`} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          className="text-[#8B949E] hover:text-[#58A6FF] transition-colors flex items-center gap-1 text-[10px] font-mono border border-[#30363D] bg-[#0D1117] px-2 py-0.5 rounded ml-2"
+                          className="text-[#8B949E] hover:text-[#58A6FF] transition-colors flex items-center gap-1 text-[10px] font-mono border border-[#1E2333] bg-[#030407] px-2 py-0.5 rounded ml-2"
                           title="Buka Market Live di Indodax"
                         >
                           Indodax <ExternalLink className="h-3 w-3" />
@@ -1677,7 +1677,7 @@ export default function DashboardPage() {
                           href={`https://www.tradingview.com/chart/?symbol=INDODAX%3A${activePairSymbol}IDR`} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          className="text-[#8B949E] hover:text-[#58A6FF] transition-colors flex items-center gap-1 text-[10px] font-mono border border-[#30363D] bg-[#0D1117] px-2 py-0.5 rounded"
+                          className="text-[#8B949E] hover:text-[#58A6FF] transition-colors flex items-center gap-1 text-[10px] font-mono border border-[#1E2333] bg-[#030407] px-2 py-0.5 rounded"
                           title="Buka Chart di TradingView"
                         >
                           TradingView <ExternalLink className="h-3 w-3" />
@@ -1699,8 +1699,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Resolution Controls - Tabs Style (3.5) */}
-                  <div className="flex flex-wrap items-center bg-[#0D1117] border border-[#30363D] p-1 rounded-lg backdrop-blur-sm max-w-full select-none">
-                    <div className="flex items-center border-r border-[#30363D] mr-2 pr-1 overflow-x-auto">
+                  <div className="flex flex-wrap items-center bg-[#030407] border border-[#1E2333] p-1 rounded-lg backdrop-blur-sm max-w-full select-none">
+                    <div className="flex items-center border-r border-[#1E2333] mr-2 pr-1 overflow-x-auto">
                       {(
                         [
                           { id: '1', label: '1m' },
@@ -1747,7 +1747,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
                   {loading ? (
-                    <div className="quantum-card rounded-xl h-[400px] border border-[#30363D] flex flex-col items-center justify-center text-center bg-[#1C2333]">
+                    <div className="quantum-card rounded-xl h-[400px] border border-[#1E2333] flex flex-col items-center justify-center text-center bg-[#0C0E18]">
                       <div className="h-10 w-10 rounded-full border-t-2 border-[#58A6FF] animate-spin mb-4" />
                       <span className="text-xs text-[#8B949E] font-mono uppercase tracking-wider">Mencocokkan lilin historis...</span>
                     </div>
@@ -1837,17 +1837,17 @@ export default function DashboardPage() {
 
         {/* SCANNER VIEW TAB (3.6) */}
         {activeTab === 'SCANNER' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#0D1117]">
+          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#030407]">
             {/* Header Cards with summary */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="quantum-card rounded-xl p-4 border border-[#30363D] bg-[#161B22] flex items-center justify-between">
+              <div className="quantum-card rounded-xl p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans">Total Aset Dipantau</span>
                   <h3 className="text-xl font-extrabold text-[#E6EDF3] mt-1 font-mono">{pairs.length} Koin</h3>
                 </div>
                 <Database className="h-8 w-8 text-[#58A6FF] opacity-35" />
               </div>
-              <div className="quantum-card rounded-xl p-4 border border-[#30363D] bg-[#161B22] flex items-center justify-between">
+              <div className="quantum-card rounded-xl p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans">Sinyal Aktif Bot</span>
                   <h3 className="text-xl font-extrabold text-[#3FB950] mt-1 font-mono">
@@ -1856,14 +1856,14 @@ export default function DashboardPage() {
                 </div>
                 <Zap className="h-8 w-8 text-[#3FB950] opacity-35" />
               </div>
-              <div className="quantum-card rounded-xl p-4 border border-[#30363D] bg-[#161B22] flex items-center justify-between">
+              <div className="quantum-card rounded-xl p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans">Akurasi AI Backtest</span>
                   <h3 className="text-xl font-extrabold text-[#D29922] mt-1 font-mono">78.4% Win Rate</h3>
                 </div>
                 <Award className="h-8 w-8 text-[#D29922] opacity-35" />
               </div>
-              <div className="quantum-card rounded-xl p-4 border border-[#30363D] bg-[#161B22] flex items-center justify-between">
+              <div className="quantum-card rounded-xl p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans">Volume 24J Terbesar</span>
                   <h3 className="text-xl font-extrabold text-[#58A6FF] mt-1 font-mono">
@@ -1875,8 +1875,8 @@ export default function DashboardPage() {
             </div>
 
             {/* Filter and Search Controls */}
-            <div className="quantum-card rounded-xl p-4 border border-[#30363D] bg-[#161B22] flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3 bg-[#0D1117] border border-[#30363D] px-3 py-1.5 rounded-lg w-full max-w-sm">
+            <div className="quantum-card rounded-xl p-4 border border-[#1E2333] bg-[#07090F] flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-lg w-full max-w-sm">
                 <Search className="h-4 w-4 text-[#8B949E]" />
                 <input
                   id="scanner-search-input"
@@ -1891,14 +1891,14 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex bg-[#0D1117] border border-[#30363D] p-1 rounded-lg">
+                <div className="flex bg-[#030407] border border-[#1E2333] p-1 rounded-lg">
                   {(['ALL', 'TOP_GAINERS', 'HIGH_VOLATILITY', 'AI_SETUPS'] as const).map((filterOpt) => (
                     <button
                       key={filterOpt}
                       onClick={() => setScannerFilter(filterOpt)}
                       className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition ${
                         scannerFilter === filterOpt 
-                          ? 'bg-[#1C2333] text-[#58A6FF] border border-[#30363D]' 
+                          ? 'bg-[#0C0E18] text-[#58A6FF] border border-[#1E2333]' 
                           : 'text-[#8B949E] hover:text-[#E6EDF3]'
                       }`}
                     >
@@ -1907,14 +1907,14 @@ export default function DashboardPage() {
                   ))}
                 </div>
 
-                <div className="flex bg-[#0D1117] border border-[#30363D] p-1 rounded-lg">
+                <div className="flex bg-[#030407] border border-[#1E2333] p-1 rounded-lg">
                   {(['SCORE', 'CHANGE', 'VOLUME', 'SYMBOL'] as const).map((sortOpt) => (
                     <button
                       key={sortOpt}
                       onClick={() => setScannerSort(sortOpt)}
                       className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase transition ${
                         scannerSort === sortOpt 
-                          ? 'bg-[#1C2333] text-[#58A6FF] border border-[#30363D]' 
+                          ? 'bg-[#0C0E18] text-[#58A6FF] border border-[#1E2333]' 
                           : 'text-[#8B949E] hover:text-[#E6EDF3]'
                       }`}
                     >
@@ -1926,11 +1926,11 @@ export default function DashboardPage() {
             </div>
 
             {/* Grid Table of Aset */}
-            <div className="quantum-card rounded-xl border border-[#30363D] bg-[#161B22] overflow-hidden">
+            <div className="quantum-card rounded-xl border border-[#1E2333] bg-[#07090F] overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse font-sans">
                   <thead>
-                    <tr className="border-b border-[#30363D] text-[10px] text-[#8B949E] uppercase font-bold bg-[#0D1117]/35 select-none">
+                    <tr className="border-b border-[#1E2333] text-[10px] text-[#8B949E] uppercase font-bold bg-[#030407]/35 select-none">
                       <th className="py-3.5 px-4">Simbol</th>
                       <th className="py-3.5 px-4 text-right">Harga (IDR)</th>
                       <th className="py-3.5 px-4 text-right">Perubahan 24J</th>
@@ -1985,7 +1985,7 @@ export default function DashboardPage() {
 
                       return list.map((coin) => {
                         return (
-                          <tr key={`scan-grid-${coin.id}`} className="hover:bg-[#1C2333]/30 transition duration-150 select-none">
+                          <tr key={`scan-grid-${coin.id}`} className="hover:bg-[#0C0E18]/30 transition duration-150 select-none">
                             <td className="py-3 px-4 font-bold text-[#58A6FF] font-sans">
                               {coin.symbol} <span className="text-[10px] text-[#8B949E] font-mono">/IDR</span>
                             </td>
@@ -2005,7 +2005,7 @@ export default function DashboardPage() {
                                 }`}>
                                   {coin.score}
                                 </span>
-                                <div className="hidden sm:block w-12 bg-[#0D1117] h-1.5 rounded-full overflow-hidden border border-[#30363D]">
+                                <div className="hidden sm:block w-12 bg-[#030407] h-1.5 rounded-full overflow-hidden border border-[#1E2333]">
                                   <div 
                                     className={`h-full rounded-full ${coin.score >= 80 ? 'bg-[#3FB950]' : coin.score >= 70 ? 'bg-[#D29922]' : 'bg-[#8B949E]'} ${getProgressWidthClass(coin.score)}`}
                                   />
@@ -2035,7 +2035,7 @@ export default function DashboardPage() {
                                     setLoading(true);
                                     setActiveTab('DASHBOARD');
                                   }}
-                                  className="bg-[#1C2333] hover:bg-[#30363D] text-[#58A6FF] font-bold text-[10px] px-2.5 py-1.5 rounded border border-[#30363D] active:scale-[0.98] transition cursor-pointer font-sans"
+                                  className="bg-[#0C0E18] hover:bg-[#30363D] text-[#58A6FF] font-bold text-[10px] px-2.5 py-1.5 rounded border border-[#1E2333] active:scale-[0.98] transition cursor-pointer font-sans"
                                 >
                                   TERMINAL
                                 </button>
@@ -2068,7 +2068,7 @@ export default function DashboardPage() {
 
         {/* AI AUDITOR VIEW TAB (3.6 & 3.7 & 3.10) */}
         {activeTab === 'AUDITOR' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#0D1117]">
+          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#030407]">
             {/* Top Section: Full Oracle Cockpit Ratios, Coordinates, and Consensus */}
             <OracleDashboard 
               signal={oracleSignal}
@@ -2086,8 +2086,8 @@ export default function DashboardPage() {
             {/* Split layout: Prompt Chat Console and System Logs */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
               {/* Chat console (2/3 width) */}
-              <div className="lg:col-span-2 quantum-card rounded-xl border border-[#30363D] bg-[#161B22] flex flex-col h-[500px]">
-                <div className="p-3 border-b border-[#30363D] flex items-center justify-between bg-[#0D1117]/35 select-none">
+              <div className="lg:col-span-2 quantum-card rounded-xl border border-[#1E2333] bg-[#07090F] flex flex-col h-[500px]">
+                <div className="p-3 border-b border-[#1E2333] flex items-center justify-between bg-[#030407]/35 select-none">
                   <div className="flex items-center gap-2">
                     <Terminal className="h-4 w-4 text-[#58A6FF]" />
                     <span className="text-xs font-bold text-[#E6EDF3] font-sans">COGNITIVE AI AUDITOR INTERACTIVE CONSOLE</span>
@@ -2110,8 +2110,8 @@ export default function DashboardPage() {
                       </div>
                       <div className={`p-3 rounded-xl border font-normal leading-relaxed whitespace-pre-line ${
                         msg.role === 'USER' 
-                          ? 'bg-[#1C2333] border-[#30363D] text-[#E6EDF3] rounded-tr-none' 
-                          : 'bg-[#0D1117] border-[#30363D] text-slate-100 rounded-tl-none font-sans'
+                          ? 'bg-[#0C0E18] border-[#1E2333] text-[#E6EDF3] rounded-tr-none' 
+                          : 'bg-[#030407] border-[#1E2333] text-slate-100 rounded-tl-none font-sans'
                       }`}>
                         {msg.text}
                       </div>
@@ -2122,7 +2122,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-1.5 mb-1 text-[10px] text-[#8B949E] font-mono">
                         <span className="font-bold text-[#E6EDF3]">🤖 FANTASMA SYNERGY AI</span>
                       </div>
-                      <div className="bg-[#0D1117] border border-[#30363D] p-3 rounded-xl rounded-tl-none text-[#8B949E] flex items-center gap-2 font-mono">
+                      <div className="bg-[#030407] border border-[#1E2333] p-3 rounded-xl rounded-tl-none text-[#8B949E] flex items-center gap-2 font-mono">
                         <span className="h-2 w-2 rounded-full bg-[#58A6FF] animate-pulse" />
                         AI Auditor sedang membaca live scanner, Oracle, orderbook, candle, dan risk context...
                       </div>
@@ -2131,7 +2131,7 @@ export default function DashboardPage() {
                   <div ref={chatBottomRef} />
                 </div>
 
-                <form onSubmit={handleAiChatSubmit} className="p-3 border-t border-[#30363D] bg-[#0D1117]/35 flex gap-2">
+                <form onSubmit={handleAiChatSubmit} className="p-3 border-t border-[#1E2333] bg-[#030407]/35 flex gap-2">
                   <input
                     id="chat-audit-input"
                     type="text"
@@ -2141,7 +2141,7 @@ export default function DashboardPage() {
                     aria-label="Pertanyaan Audit AI"
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
-                    className="flex-1 bg-[#0D1117] border border-[#30363D] rounded-lg px-3 py-2 text-xs font-sans text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#58A6FF]"
+                    className="flex-1 bg-[#030407] border border-[#1E2333] rounded-lg px-3 py-2 text-xs font-sans text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#58A6FF]"
                   />
                   <button
                     type="submit"
@@ -2154,15 +2154,15 @@ export default function DashboardPage() {
               </div>
 
               {/* Bot Logs Terminal (1/3 width) */}
-              <div className="lg:col-span-1 quantum-card rounded-xl border border-[#30363D] bg-[#161B22] flex flex-col h-[500px] overflow-hidden">
-                <div className="p-3 border-b border-[#30363D] bg-[#0D1117]/35 flex items-center justify-between select-none">
+              <div className="lg:col-span-1 quantum-card rounded-xl border border-[#1E2333] bg-[#07090F] flex flex-col h-[500px] overflow-hidden">
+                <div className="p-3 border-b border-[#1E2333] bg-[#030407]/35 flex items-center justify-between select-none">
                   <div className="flex items-center gap-1.5">
                     <Terminal className="h-4 w-4 text-[#3FB950]" />
                     <span className="text-xs font-bold text-[#E6EDF3] font-sans">LIVE AUDIT BOT SYSTEM FEED</span>
                   </div>
                   <button
                     onClick={() => setBotLogs([])}
-                    className="text-[9px] border border-[#30363D] bg-[#0D1117] px-2 py-0.5 rounded text-[#8B949E] hover:text-[#E6EDF3] transition cursor-pointer"
+                    className="text-[9px] border border-[#1E2333] bg-[#030407] px-2 py-0.5 rounded text-[#8B949E] hover:text-[#E6EDF3] transition cursor-pointer"
                   >
                     HAPUS
                   </button>
@@ -2196,9 +2196,9 @@ export default function DashboardPage() {
 
         {/* RISK LAB VIEW TAB (v3.1) */}
         {activeTab === 'RISK_LAB' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 overflow-hidden bg-[#0D1117]">
+          <main className="flex-1 p-6 flex flex-col gap-6 overflow-hidden bg-[#030407]">
             {/* Header Title */}
-            <div className="border-b border-[#30363D] pb-3 select-none">
+            <div className="border-b border-[#1E2333] pb-3 select-none">
               <h2 className="text-lg font-extrabold text-[#E6EDF3] flex items-center gap-2 font-sans">
                 <Sliders className="h-5 w-5 text-purple-400" /> ORACLE COGNITIVE TP/SL & RISK LAB
               </h2>
@@ -2230,9 +2230,9 @@ export default function DashboardPage() {
 
         {/* SETTINGS VIEW TAB (3.6) */}
         {activeTab === 'SETTINGS' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#0D1117]">
+          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#030407]">
             {/* Header Title */}
-            <div className="border-b border-[#30363D] pb-3 select-none">
+            <div className="border-b border-[#1E2333] pb-3 select-none">
               <h2 className="text-lg font-extrabold text-[#E6EDF3] flex items-center gap-2 font-sans">
                 <Sliders className="h-5 w-5 text-[#58A6FF]" /> KONFIGURASI PARAMETER TERMINAL KUANTITATIF
               </h2>
@@ -2244,8 +2244,8 @@ export default function DashboardPage() {
               {/* Column 1: Capital Control & Limits */}
               <div className="flex flex-col gap-6">
                 {/* simulated capital card */}
-                <div className="quantum-card rounded-xl p-5 border border-[#30363D] bg-[#161B22] flex flex-col gap-4">
-                  <div className="flex items-center gap-2 border-b border-[#30363D] pb-2">
+                <div className="quantum-card rounded-xl p-5 border border-[#1E2333] bg-[#07090F] flex flex-col gap-4">
+                  <div className="flex items-center gap-2 border-b border-[#1E2333] pb-2">
                     <Coins className="h-4.5 w-4.5 text-yellow-500" />
                     <span className="text-xs font-bold text-[#E6EDF3] uppercase">Alokasi Modal Virtual (Simulasi)</span>
                   </div>
@@ -2253,7 +2253,7 @@ export default function DashboardPage() {
                   <div className="flex flex-col gap-1">
                     <label htmlFor="wallet-trading-capital" className="text-[10px] font-bold text-[#8B949E] uppercase font-mono cursor-pointer">Wallet Trading Capital (Saldo Kas)</label>
                     <div className="flex items-center gap-3">
-                      <div className="flex-1 bg-[#0D1117] border border-[#30363D] rounded-lg px-3.5 py-2 font-mono text-sm font-extrabold text-[#E6EDF3] flex items-center justify-between">
+                      <div className="flex-1 bg-[#030407] border border-[#1E2333] rounded-lg px-3.5 py-2 font-mono text-sm font-extrabold text-[#E6EDF3] flex items-center justify-between">
                         <span>Rp</span>
                         <input
                           id="wallet-trading-capital"
@@ -2280,7 +2280,7 @@ export default function DashboardPage() {
                         setTimeout(() => setBalanceChangePulse(null), 1000);
                         showToast('✅ Saldo kas di-reset menjadi Rp 10.000.000', 'success');
                       }}
-                      className="bg-[#0D1117] hover:bg-[#1C2333] border border-[#30363D] hover:border-[#58A6FF] rounded-lg py-2 text-[10px] font-bold font-mono text-[#E6EDF3] transition cursor-pointer"
+                      className="bg-[#030407] hover:bg-[#0C0E18] border border-[#1E2333] hover:border-[#58A6FF] rounded-lg py-2 text-[10px] font-bold font-mono text-[#E6EDF3] transition cursor-pointer"
                     >
                       RESET 10 JT
                     </button>
@@ -2292,7 +2292,7 @@ export default function DashboardPage() {
                         setTimeout(() => setBalanceChangePulse(null), 1000);
                         showToast('✅ Saldo kas ditambahkan menjadi Rp 50.000.000', 'success');
                       }}
-                      className="bg-[#0D1117] hover:bg-[#1C2333] border border-[#30363D] hover:border-[#58A6FF] rounded-lg py-2 text-[10px] font-bold font-mono text-[#E6EDF3] transition cursor-pointer"
+                      className="bg-[#030407] hover:bg-[#0C0E18] border border-[#1E2333] hover:border-[#58A6FF] rounded-lg py-2 text-[10px] font-bold font-mono text-[#E6EDF3] transition cursor-pointer"
                     >
                       SET 50 JT
                     </button>
@@ -2304,7 +2304,7 @@ export default function DashboardPage() {
                         setTimeout(() => setBalanceChangePulse(null), 1000);
                         showToast('✅ Saldo kas ditambahkan menjadi Rp 100.000.000', 'success');
                       }}
-                      className="bg-[#0D1117] hover:bg-[#1C2333] border border-[#30363D] hover:border-[#58A6FF] rounded-lg py-2 text-[10px] font-bold font-mono text-[#E6EDF3] transition cursor-pointer"
+                      className="bg-[#030407] hover:bg-[#0C0E18] border border-[#1E2333] hover:border-[#58A6FF] rounded-lg py-2 text-[10px] font-bold font-mono text-[#E6EDF3] transition cursor-pointer"
                     >
                       SET 100 JT
                     </button>
@@ -2312,8 +2312,8 @@ export default function DashboardPage() {
                 </div>
 
                 {/* bot limits card */}
-                <div className="quantum-card rounded-xl p-5 border border-[#30363D] bg-[#161B22] flex flex-col gap-4">
-                  <div className="flex items-center gap-2 border-b border-[#30363D] pb-2">
+                <div className="quantum-card rounded-xl p-5 border border-[#1E2333] bg-[#07090F] flex flex-col gap-4">
+                  <div className="flex items-center gap-2 border-b border-[#1E2333] pb-2">
                     <Activity className="h-4.5 w-4.5 text-[#58A6FF]" />
                     <span className="text-xs font-bold text-[#E6EDF3] uppercase">Batas Operasional Bot Scanner</span>
                   </div>
@@ -2333,7 +2333,7 @@ export default function DashboardPage() {
                       onChange={(e) => setBotTradeMargin(parseInt(e.target.value, 10))}
                       title="Modal per Transaksi Bot"
                       aria-label="Modal per Transaksi Bot"
-                      className="w-full h-1 bg-[#0D1117] rounded-lg appearance-none cursor-pointer accent-[#58A6FF] border border-[#30363D]"
+                      className="w-full h-1 bg-[#030407] rounded-lg appearance-none cursor-pointer accent-[#58A6FF] border border-[#1E2333]"
                     />
                   </div>
 
@@ -2352,7 +2352,7 @@ export default function DashboardPage() {
                       onChange={(e) => setBotMaxPositions(parseInt(e.target.value, 10))}
                       title="Kapasitas Maksimal Posisi Terbuka"
                       aria-label="Kapasitas Maksimal Posisi Terbuka"
-                      className="w-full h-1 bg-[#0D1117] rounded-lg appearance-none cursor-pointer accent-[#58A6FF] border border-[#30363D]"
+                      className="w-full h-1 bg-[#030407] rounded-lg appearance-none cursor-pointer accent-[#58A6FF] border border-[#1E2333]"
                     />
                   </div>
                 </div>
@@ -2361,14 +2361,14 @@ export default function DashboardPage() {
               {/* Column 2: Leverage and Strategy */}
               <div className="flex flex-col gap-6">
                 {/* leverage options card */}
-                <div className="quantum-card rounded-xl p-5 border border-[#30363D] bg-[#161B22] flex flex-col gap-4">
-                  <div className="flex items-center gap-2 border-b border-[#30363D] pb-2">
+                <div className="quantum-card rounded-xl p-5 border border-[#1E2333] bg-[#07090F] flex flex-col gap-4">
+                  <div className="flex items-center gap-2 border-b border-[#1E2333] pb-2">
                     <Cpu className="h-4.5 w-4.5 text-[#3FB950]" />
                     <span className="text-xs font-bold text-[#E6EDF3] uppercase">Algoritma Manajemen Risiko Leverage</span>
                   </div>
 
                   {/* strategy toggle buttons */}
-                  <div className="grid grid-cols-2 gap-2 p-1 bg-[#0D1117] border border-[#30363D] rounded-lg">
+                  <div className="grid grid-cols-2 gap-2 p-1 bg-[#030407] border border-[#1E2333] rounded-lg">
                     <button
                       type="button"
                       onClick={() => {
@@ -2377,7 +2377,7 @@ export default function DashboardPage() {
                       }}
                       className={`py-2 text-[10px] font-bold uppercase rounded-md transition cursor-pointer ${
                         leverageStrategy === 'DYNAMIC' 
-                          ? 'bg-[#1C2333] text-[#58A6FF] border border-[#30363D]' 
+                          ? 'bg-[#0C0E18] text-[#58A6FF] border border-[#1E2333]' 
                           : 'text-[#8B949E] hover:text-[#E6EDF3]'
                       }`}
                     >
@@ -2391,7 +2391,7 @@ export default function DashboardPage() {
                       }}
                       className={`py-2 text-[10px] font-bold uppercase rounded-md transition cursor-pointer ${
                         leverageStrategy === 'FIXED' 
-                          ? 'bg-[#1C2333] text-[#58A6FF] border border-[#30363D]' 
+                          ? 'bg-[#0C0E18] text-[#58A6FF] border border-[#1E2333]' 
                           : 'text-[#8B949E] hover:text-[#E6EDF3]'
                       }`}
                     >
@@ -2400,7 +2400,7 @@ export default function DashboardPage() {
                   </div>
 
                   {leverageStrategy === 'DYNAMIC' ? (
-                    <div className="flex flex-col gap-1.5 p-3 rounded-lg bg-[#0D1117] border border-[#30363D] mt-1">
+                    <div className="flex flex-col gap-1.5 p-3 rounded-lg bg-[#030407] border border-[#1E2333] mt-1">
                       <label htmlFor="max-leverage-cap" className="flex justify-between items-center text-[10px] font-bold uppercase font-mono cursor-pointer">
                         <span className="text-[#8B949E]">AI Dynamic Leverage Cap</span>
                         <span className="text-[#E6EDF3] font-bold">{maxLeverageCap}x</span>
@@ -2415,14 +2415,14 @@ export default function DashboardPage() {
                         onChange={(e) => setMaxLeverageCap(parseInt(e.target.value, 10))}
                         title="AI Dynamic Leverage Cap"
                         aria-label="AI Dynamic Leverage Cap"
-                        className="w-full h-1 bg-[#161B22] rounded-lg appearance-none cursor-pointer accent-[#58A6FF] border border-[#30363D]"
+                        className="w-full h-1 bg-[#07090F] rounded-lg appearance-none cursor-pointer accent-[#58A6FF] border border-[#1E2333]"
                       />
                       <span className="text-[9px] text-[#8B949E] leading-normal font-sans italic mt-1.5">
                         *AI secara otomatis mengalikan probabilitas b coin setup dengan Max Cap ini untuk menghasilkan leverage optimal per detiknya: leverage = Round(Cap * b).
                       </span>
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-1.5 p-3 rounded-lg bg-[#0D1117] border border-[#30363D] mt-1">
+                    <div className="flex flex-col gap-1.5 p-3 rounded-lg bg-[#030407] border border-[#1E2333] mt-1">
                       <label htmlFor="fixed-leverage-multiplier" className="flex justify-between items-center text-[10px] font-bold uppercase font-mono cursor-pointer">
                         <span className="text-[#8B949E]">Fixed Leverage Multiplier</span>
                         <span className="text-[#E6EDF3] font-bold">{fixedLeverage}x</span>
@@ -2437,7 +2437,7 @@ export default function DashboardPage() {
                         onChange={(e) => setFixedLeverage(parseInt(e.target.value, 10))}
                         title="Fixed Leverage Multiplier"
                         aria-label="Fixed Leverage Multiplier"
-                        className="w-full h-1 bg-[#161B22] rounded-lg appearance-none cursor-pointer accent-[#58A6FF] border border-[#30363D]"
+                        className="w-full h-1 bg-[#07090F] rounded-lg appearance-none cursor-pointer accent-[#58A6FF] border border-[#1E2333]"
                       />
                       <span className="text-[9px] text-[#8B949E] leading-normal font-sans italic mt-1.5">
                         *Seluruh setup bot dan manual order simulator akan dieksekusi menggunakan leverage multiplier tetap ini tanpa mempertimbangkan probabilitas b.
@@ -2447,8 +2447,8 @@ export default function DashboardPage() {
                 </div>
 
                 {/* API / UI LATENCY CARD */}
-                <div className="quantum-card rounded-xl p-5 border border-[#30363D] bg-[#161B22] flex flex-col gap-3 text-xs">
-                  <div className="flex items-center gap-2 border-b border-[#30363D] pb-2 text-yellow-500">
+                <div className="quantum-card rounded-xl p-5 border border-[#1E2333] bg-[#07090F] flex flex-col gap-3 text-xs">
+                  <div className="flex items-center gap-2 border-b border-[#1E2333] pb-2 text-yellow-500">
                     <Globe className="h-4.5 w-4.5" />
                     <span className="text-xs font-bold text-[#E6EDF3] uppercase">Status Konektivitas & Reset</span>
                   </div>
@@ -2488,7 +2488,7 @@ export default function DashboardPage() {
         )}
 
         {/* 3. Footer Banner Disclaimer */}
-        <footer className="border-t border-[#30363D] bg-[#161B22] px-6 py-4 flex flex-col md:flex-row items-center justify-between text-[10px] text-[#8B949E] gap-3 select-none">
+        <footer className="border-t border-[#1E2333] bg-[#07090F] px-6 py-4 flex flex-col md:flex-row items-center justify-between text-[10px] text-[#8B949E] gap-3 select-none">
           <div className="flex items-center gap-1.5">
             <Shield className="h-4 w-4 text-[#58A6FF]" />
             <span>Terminal Perdagangan Kuantitatif Fantasma Synergy. Didukung oleh Next.js 15 & Data Pasar Indodax.</span>
@@ -2501,14 +2501,14 @@ export default function DashboardPage() {
 
       {/* TOAST UI NOTIFICATIONS (1.5) */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#1C2333] border border-[#30363D] text-[#E6EDF3] px-4 py-3.5 rounded-xl shadow-2xl flex items-center gap-2.5 animate-fadeIn select-none font-sans font-bold text-xs max-w-sm">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#0C0E18] border border-[#1E2333] text-[#E6EDF3] px-4 py-3.5 rounded-xl shadow-2xl flex items-center gap-2.5 animate-fadeIn select-none font-sans font-bold text-xs max-w-sm">
           <div className="shrink-0 text-base">{toast.type === 'success' ? '✅' : '⚠️'}</div>
           <span className="leading-normal">{toast.message}</span>
         </div>
       )}
 
       {/* Mobile Bottom Navigation Bar (Visible on mobile/tablet only) */}
-      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#161B22] border-t border-[#30363D] justify-around py-1.5 px-2 select-none shadow-2xl backdrop-blur-md bg-opacity-90">
+      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#07090F] border-t border-[#1E2333] justify-around py-1.5 px-2 select-none shadow-2xl backdrop-blur-md bg-opacity-90">
         <button 
           type="button"
           onClick={() => setActiveTab('DASHBOARD')}

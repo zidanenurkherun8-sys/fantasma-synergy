@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Position, ClosedTrade, BotLog } from '@/app/dashboard/page';
 import { MarketPair } from '@/components/MarketScanner';
+import TiltCard from './TiltCard';
 
 interface PaperTradingConsoleProps {
   cashBalance: number;
@@ -253,7 +254,7 @@ export default function PaperTradingConsole({
     : 0;
 
   return (
-    <div className="quantum-card rounded-xl p-5 border border-slate-800 bg-[#0d1324]/80 backdrop-blur-md relative overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
+    <TiltCard className="p-5 bg-[#0d1324]/80 relative overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.3)]">
       {/* Glow Effect */}
       <div className="absolute -right-20 -top-20 w-44 h-44 bg-purple-500/10 rounded-full blur-[80px]" />
       <div className="absolute -left-20 -bottom-20 w-44 h-44 bg-blue-500/10 rounded-full blur-[80px]" />
@@ -274,7 +275,7 @@ export default function PaperTradingConsole({
 
         {/* Dynamic Bot Auto-Trading Controls & Close All Positions Button */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-3 bg-slate-950/60 border border-[#30363D] px-3 py-2 rounded-xl">
+          <div className="flex items-center gap-3 bg-slate-950/60 border border-[#1E2333] px-3 py-2 rounded-xl">
             <div className="flex items-center gap-2">
               <Cpu className={`h-4.5 w-4.5 ${autoTrading ? 'text-[#58A6FF] animate-spin' : 'text-[#8B949E]'}`} style={{ animationDuration: '4s' }} />
               <div className="flex flex-col">
@@ -290,7 +291,7 @@ export default function PaperTradingConsole({
               className={`p-1.5 rounded-lg border transition cursor-pointer ${
                 showBotSettings 
                   ? 'bg-[#58A6FF]/20 text-[#58A6FF] border-[#58A6FF]/30' 
-                  : 'bg-[#161B22] text-[#8B949E] border-[#30363D] hover:text-[#E6EDF3]'
+                  : 'bg-[#07090F] text-[#8B949E] border-[#1E2333] hover:text-[#E6EDF3]'
               }`}
               title="Pengaturan AI Bot"
             >
@@ -485,32 +486,32 @@ export default function PaperTradingConsole({
 
       {/* SECTION 1: Performance Matrix Grid (1.5 & 3.2) */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <div className={`bg-[#161B22]/60 border border-[#30363D] rounded-xl p-3 flex flex-col justify-center transition-all duration-300 ${
+        <div className={`bg-[#07090F]/60 border border-[#1E2333] rounded-xl p-3 flex flex-col justify-center transition-all duration-300 ${
           balanceChangePulse === 'gain' ? 'pulse-gain bg-[#3FB950]/5 border-[#3FB950]/30' :
           balanceChangePulse === 'loss' ? 'pulse-loss bg-[#F85149]/5 border-[#F85149]/30' : ''
         }`}>
           <span className="text-[9px] text-[#8B949E] font-bold uppercase tracking-wider block mb-1">Portfolio Equity</span>
           <span className="text-sm font-extrabold text-[#E6EDF3] font-mono">Rp {Math.round(accountEquity).toLocaleString('id-ID')}</span>
         </div>
-        <div className={`bg-[#161B22]/60 border border-[#30363D] rounded-xl p-3 flex flex-col justify-center transition-all duration-300 ${
+        <div className={`bg-[#07090F]/60 border border-[#1E2333] rounded-xl p-3 flex flex-col justify-center transition-all duration-300 ${
           balanceChangePulse === 'gain' ? 'pulse-gain bg-[#3FB950]/5 border-[#3FB950]/30' :
           balanceChangePulse === 'loss' ? 'pulse-loss bg-[#F85149]/5 border-[#F85149]/30' : ''
         }`}>
           <span className="text-[9px] text-[#8B949E] font-bold uppercase tracking-wider block mb-1">Cash Balance</span>
           <span className="text-sm font-extrabold text-[#8B949E] font-mono">Rp {Math.round(cashBalance).toLocaleString('id-ID')}</span>
         </div>
-        <div className="bg-[#161B22]/60 border border-[#30363D] rounded-xl p-3 flex flex-col justify-center">
+        <div className="bg-[#07090F]/60 border border-[#1E2333] rounded-xl p-3 flex flex-col justify-center">
           <span className="text-[9px] text-[#8B949E] font-bold uppercase tracking-wider block mb-1">Active Margin</span>
           <span className="text-sm font-extrabold text-[#58A6FF] font-mono">Rp {Math.round(activeMargin).toLocaleString('id-ID')}</span>
         </div>
-        <div className="bg-[#161B22]/60 border border-[#30363D] rounded-xl p-3 flex flex-col justify-center">
+        <div className="bg-[#07090F]/60 border border-[#1E2333] rounded-xl p-3 flex flex-col justify-center">
           <span className="text-[9px] text-[#8B949E] font-bold uppercase tracking-wider block mb-1">Unrealized P&L</span>
           <span className={`text-sm font-extrabold font-mono flex items-center gap-1 ${totalUnrealizedPnl >= 0 ? 'text-[#3FB950]' : 'text-[#F85149]'}`}>
             {totalUnrealizedPnl >= 0 ? <ArrowUpRight className="h-4.5 w-4.5 shrink-0" /> : <ArrowDownRight className="h-4.5 w-4.5 shrink-0" />}
             Rp {Math.abs(Math.round(totalUnrealizedPnl)).toLocaleString('id-ID')}
           </span>
         </div>
-        <div className="bg-[#161B22]/60 border border-[#30363D] rounded-xl p-3 flex flex-col justify-center col-span-2 md:col-span-1">
+        <div className="bg-[#07090F]/60 border border-[#1E2333] rounded-xl p-3 flex flex-col justify-center col-span-2 md:col-span-1">
           <span className="text-[9px] text-[#8B949E] font-bold uppercase tracking-wider block mb-1">Win Rate & Trades</span>
           <span className="text-sm font-extrabold text-[#58A6FF] font-mono flex items-center gap-1.5">
             <History className="h-4 w-4 shrink-0 text-[#58A6FF]" />
@@ -916,7 +917,7 @@ export default function PaperTradingConsole({
           </div>
 
           {/* Leverage Slider (2.2, 2.3, 2.4) */}
-          <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-4">
+          <div className="bg-[#07090F] border border-[#1E2333] rounded-xl p-4">
             <div className="flex justify-between items-center mb-3">
               <span className="text-[10px] text-[#E6EDF3] font-bold uppercase tracking-wider flex flex-wrap items-center gap-1.5 font-sans select-none">
                 <Layers className="h-3.5 w-3.5 text-[#58A6FF]" /> Leverage
@@ -968,7 +969,7 @@ export default function PaperTradingConsole({
                     className={`px-2.5 py-1 text-[10px] font-mono rounded border transition-all duration-150 cursor-pointer ${
                       isActive 
                         ? `${activeBg} border-transparent font-extrabold shadow-sm` 
-                        : 'bg-[#161B22] text-[#8B949E] border-[#30363D] hover:text-[#E6EDF3]'
+                        : 'bg-[#07090F] text-[#8B949E] border-[#1E2333] hover:text-[#E6EDF3]'
                     }`}
                   >
                     {levPreset}x
@@ -978,7 +979,7 @@ export default function PaperTradingConsole({
             </div>
 
             {/* Estimated Liquidation & Real-time Warning Tooltip (2.2) */}
-            <div className="mt-3.5 bg-[#0D1117]/60 border border-[#30363D] rounded-lg p-3 space-y-1.5 font-sans select-none">
+            <div className="mt-3.5 bg-[#030407]/60 border border-[#1E2333] rounded-lg p-3 space-y-1.5 font-sans select-none">
               <div className="flex justify-between text-[10px] text-[#8B949E]">
                 <span>Leverage Terpilih:</span>
                 <span className="font-mono font-bold text-[#E6EDF3]">{leverage}x</span>
@@ -1175,8 +1176,8 @@ export default function PaperTradingConsole({
       {/* CLOSE ALL CONFIRMATION MODAL (1.3) */}
       {showCloseAllModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[8px] transition-all duration-200 p-4">
-          <div className="bg-[#1C2333] border border-[#30363D] rounded-xl p-5 max-w-sm w-full shadow-2xl animate-fadeIn select-none">
-            <h3 className="font-bold text-sm text-[#E6EDF3] uppercase tracking-wider mb-2 flex items-center gap-1.5 border-b border-[#30363D] pb-2">
+          <div className="bg-[#0C0E18] border border-[#1E2333] rounded-xl p-5 max-w-sm w-full shadow-2xl animate-fadeIn select-none">
+            <h3 className="font-bold text-sm text-[#E6EDF3] uppercase tracking-wider mb-2 flex items-center gap-1.5 border-b border-[#1E2333] pb-2">
               <BadgeAlert className="h-4.5 w-4.5 text-[#F85149]" /> Konfirmasi Close All Positions
             </h3>
             <p className="text-xs text-[#8B949E] mb-5 leading-relaxed font-sans">
@@ -1189,7 +1190,7 @@ export default function PaperTradingConsole({
               <button
                 type="button"
                 onClick={() => setShowCloseAllModal(false)}
-                className="px-4 py-2 border border-[#30363D] text-[#8B949E] hover:text-[#E6EDF3] rounded-lg hover:bg-slate-900 transition uppercase cursor-pointer"
+                className="px-4 py-2 border border-[#1E2333] text-[#8B949E] hover:text-[#E6EDF3] rounded-lg hover:bg-slate-900 transition uppercase cursor-pointer"
               >
                 Cancel
               </button>
@@ -1207,6 +1208,6 @@ export default function PaperTradingConsole({
           </div>
         </div>
       )}
-    </div>
+    </TiltCard>
   );
 }
