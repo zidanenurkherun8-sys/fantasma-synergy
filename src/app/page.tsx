@@ -431,10 +431,10 @@ export default function Home() {
         ctx.shadowBlur = 0;
       }
 
-      // Smoothly interpolate mouse positioning
+      // Smoothly interpolate mouse positioning (disabled cursor offset parallax)
       const mouse = mouseRef.current;
-      mouse.x += (mouse.targetX - mouse.x) * 0.06;
-      mouse.y += (mouse.targetY - mouse.y) * 0.06;
+      mouse.x = width / 2;
+      mouse.y = height / 2;
 
       // Draw background spectral nebula glows
       const glowGrad = ctx.createRadialGradient(
