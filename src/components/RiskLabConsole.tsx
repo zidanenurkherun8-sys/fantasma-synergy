@@ -259,10 +259,10 @@ export default function RiskLabConsole({
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden h-[calc(100vh-130px)]">
+    <div className="flex-1 flex flex-col lg:flex-row gap-6 lg:overflow-hidden h-auto lg:h-[calc(100vh-200px)] pb-16 lg:pb-0">
       
       {/* ================= PANEL KIRI: DIKTATOR ASSET ================= */}
-      <TiltCard className="w-full lg:w-1/5 flex flex-col h-full shrink-0 bg-[#07090F]">
+      <TiltCard className="w-full lg:w-1/5 flex flex-col h-[350px] lg:h-full shrink-0 bg-[#07090F]">
         <div className="p-3 border-b border-[#1E2333] bg-[#030407]/35">
           <span className="text-xs font-bold text-[#E6EDF3] uppercase tracking-wider block mb-2 font-sans">Asset Directory</span>
           <div className="relative">
@@ -336,7 +336,7 @@ export default function RiskLabConsole({
       </TiltCard>
 
       {/* ================= PANEL TENGAH: CONFIGURATION DECK ================= */}
-      <TiltCard className="flex-1 p-4 flex flex-col gap-5 h-full overflow-y-auto bg-[#07090F]">
+      <TiltCard className="w-full lg:flex-1 p-4 flex flex-col gap-5 h-auto lg:h-full lg:overflow-y-auto bg-[#07090F]">
         <div className="flex items-center justify-between border-b border-[#1E2333] pb-3">
           <div className="flex items-center gap-2">
             <Sliders className="h-4.5 w-4.5 text-[#58A6FF]" />
@@ -598,7 +598,7 @@ export default function RiskLabConsole({
       </TiltCard>
 
       {/* ================= PANEL KANAN: RECOMMENDATIONS & SIMULATORS ================= */}
-      <TiltCard className="w-full lg:w-2/5 p-4 flex flex-col gap-4 h-full overflow-y-auto bg-[#07090F]">
+      <TiltCard className="w-full lg:w-2/5 p-4 flex flex-col gap-4 h-auto lg:h-full lg:overflow-y-auto bg-[#07090F]">
         <div className="flex items-center justify-between border-b border-[#1E2333] pb-3 shrink-0">
           <div className="flex items-center gap-2">
             <Cpu className="h-4.5 w-4.5 text-purple-400" />

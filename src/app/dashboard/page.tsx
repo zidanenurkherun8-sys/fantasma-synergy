@@ -2253,7 +2253,7 @@ export default function DashboardPage() {
 
         {/* RISK LAB VIEW TAB (v3.1) */}
         {activeTab === 'RISK_LAB' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 overflow-hidden bg-[#030407]">
+          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto lg:overflow-hidden bg-[#030407]">
             {/* Header Title */}
             <div className="border-b border-[#1E2333] pb-3 select-none">
               <h2 className="text-lg font-extrabold text-[#E6EDF3] flex items-center gap-2 font-sans">
