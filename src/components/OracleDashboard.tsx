@@ -25,7 +25,7 @@ export default function OracleDashboard({
 
   if (loading) {
     return (
-      <div className="quantum-card rounded-xl border border-[#1E2333] bg-[#07090F] p-8 flex flex-col items-center justify-center min-h-[500px] select-none">
+      <div className="quantum-card rounded-[3px] border border-[#1E2333] bg-[#07090F] p-8 flex flex-col items-center justify-center min-h-[500px] select-none">
         <div className="relative h-20 w-20 flex items-center justify-center mb-6">
           <div className="absolute inset-0 rounded-full border-2 border-t-2 border-[#1E2333] border-t-[#58A6FF] animate-spin" />
           <div className="absolute inset-3 rounded-full border-2 border-b-2 border-transparent border-b-indigo-400 animate-spin" style={{ animationDirection: 'reverse' }} />
@@ -41,7 +41,7 @@ export default function OracleDashboard({
 
   if (!signal) {
     return (
-      <div className="quantum-card rounded-xl border border-[#1E2333] bg-[#07090F] p-12 flex flex-col items-center justify-center text-center min-h-[500px] select-none text-slate-500 font-sans">
+      <div className="quantum-card rounded-[3px] border border-[#1E2333] bg-[#07090F] p-12 flex flex-col items-center justify-center text-center min-h-[500px] select-none text-slate-500 font-sans">
         <ShieldAlert className="h-16 w-16 mb-4 text-[#8B949E] opacity-35 animate-bounce" style={{ animationDuration: '3s' }} />
         <h3 className="text-base font-extrabold text-[#E6EDF3] uppercase tracking-wide">Menunggu Sinyal Kuantitatif Oracle</h3>
         <p className="text-xs text-[#8B949E] font-mono mt-2 max-w-md leading-normal">
@@ -142,13 +142,13 @@ export default function OracleDashboard({
                   onImportTargets(signal.entryPrice, signal.stopLoss, signal.takeProfit2);
                   if (typeof window !== 'undefined') {
                     const toast = document.createElement('div');
-                    toast.className = 'fixed bottom-6 right-6 z-50 bg-[#0C0E18] border border-[#1E2333] text-[#E6EDF3] px-4 py-3.5 rounded-xl shadow-2xl flex items-center gap-2 animate-fadeIn text-xs font-bold font-sans';
+                    toast.className = 'fixed bottom-6 right-6 z-50 bg-[#0C0E18] border border-[#1E2333] text-[#E6EDF3] px-4 py-3.5 rounded-[3px] shadow-2xl flex items-center gap-2 animate-fadeIn text-xs font-bold font-sans';
                     toast.innerHTML = '✅ Kooridinat target Oracle berhasil di-import ke kalkulator!';
                     document.body.appendChild(toast);
                     setTimeout(() => toast.remove(), 3000);
                   }
                 }}
-                className="bg-[#030407] hover:bg-[#0C0E18] border border-[#1E2333] hover:border-[#58A6FF] text-[#E6EDF3] font-bold text-xs px-4 py-2.5 rounded-lg transition active:scale-[0.98] cursor-pointer"
+                className="bg-[#030407] hover:bg-[#0C0E18] border border-[#1E2333] hover:border-[#58A6FF] text-[#E6EDF3] font-bold text-xs px-4 py-2.5 rounded-[3px] transition active:scale-[0.98] cursor-pointer"
               >
                 IMPORT TARGETS
               </button>
@@ -172,27 +172,27 @@ export default function OracleDashboard({
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3 font-mono text-center text-xs">
-                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-lg">
+                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-[3px]">
                   <span className="text-[9px] text-[#8B949E] block mb-1">ENTRY ZONE</span>
                   <span className="font-extrabold text-[#E6EDF3]">Rp {signal.entryPrice.toLocaleString('id-ID')}</span>
                 </div>
                 
-                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-lg border-l-2 border-l-[#F85149]">
+                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-[3px] border-l-2 border-l-[#F85149]">
                   <span className="text-[9px] text-[#8B949E] block mb-1">STOP LOSS (ATR)</span>
                   <span className="font-extrabold text-[#F85149]">Rp {signal.stopLoss.toLocaleString('id-ID')}</span>
                 </div>
 
-                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-lg border-l-2 border-l-[#3FB950]">
+                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-[3px] border-l-2 border-l-[#3FB950]">
                   <span className="text-[9px] text-[#8B949E] block mb-1">STAGE 1 (1.5R)</span>
                   <span className="font-extrabold text-[#3FB950]">Rp {signal.takeProfit1.toLocaleString('id-ID')}</span>
                 </div>
 
-                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-lg border-l-2 border-l-[#3FB950]">
+                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-[3px] border-l-2 border-l-[#3FB950]">
                   <span className="text-[9px] text-[#8B949E] block mb-1">STAGE 2 (3R)</span>
                   <span className="font-extrabold text-[#3FB950]">Rp {signal.takeProfit2.toLocaleString('id-ID')}</span>
                 </div>
 
-                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-lg border-l-2 border-l-[#3FB950]">
+                <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-[3px] border-l-2 border-l-[#3FB950]">
                   <span className="text-[9px] text-[#8B949E] block mb-1">STAGE 3 (TRAILING)</span>
                   <span className="font-extrabold text-[#3FB950]">Rp {signal.takeProfit3.toLocaleString('id-ID')}</span>
                 </div>
@@ -200,7 +200,7 @@ export default function OracleDashboard({
 
               {/* Position Execution Area */}
               {onExecutePosition && (
-                <div className="bg-[#030407] border border-[#1E2333] p-4 rounded-lg flex flex-wrap items-center justify-between gap-4 mt-1.5">
+                <div className="bg-[#030407] border border-[#1E2333] p-4 rounded-[3px] flex flex-wrap items-center justify-between gap-4 mt-1.5">
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col">
                       <span className="text-[9px] text-[#8B949E] uppercase font-bold font-mono">Suggested Margin (Kelly)</span>
@@ -227,7 +227,7 @@ export default function OracleDashboard({
                   <button
                     type="button"
                     onClick={handleQuickExecute}
-                    className="bg-[#3FB950] hover:bg-[#3FB950]/90 text-[#0D1117] font-extrabold text-xs px-5 py-2.5 rounded-lg active:scale-[0.98] transition cursor-pointer font-sans"
+                    className="bg-[#3FB950] hover:bg-[#3FB950]/90 text-[#0D1117] font-extrabold text-xs px-5 py-2.5 rounded-[3px] active:scale-[0.98] transition cursor-pointer font-sans"
                   >
                     EKSEKUSI BOT SEKARANG ({signal.kellySize}% Kelly)
                   </button>
@@ -265,7 +265,7 @@ export default function OracleDashboard({
               {activeReasonTab === 'ALL' && (
                 <div className="flex flex-col gap-2.5">
                   {signal.reasoningChain.map((reason, idx) => (
-                    <div key={`reason-${idx}`} className="flex items-start gap-2.5 bg-[#030407]/35 border border-[#1E2333] p-3 rounded-lg">
+                    <div key={`reason-${idx}`} className="flex items-start gap-2.5 bg-[#030407]/35 border border-[#1E2333] p-3 rounded-[3px]">
                       <span className="h-5 w-5 bg-[#58A6FF]/10 text-[#58A6FF] rounded border border-[#58A6FF]/20 flex items-center justify-center text-[10px] font-mono shrink-0 font-bold">
                         {idx + 1}
                       </span>
@@ -296,7 +296,7 @@ export default function OracleDashboard({
                     </div>
                   </div>
                   {signal.harmonicScan.patternDetected !== 'None' && (
-                    <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-slate-100 leading-relaxed font-sans text-xs mt-3 flex items-start gap-2.5">
+                    <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-[3px] text-slate-100 leading-relaxed font-sans text-xs mt-3 flex items-start gap-2.5">
                       <Award className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                       <div>
                         <strong className="block text-amber-400 font-bold mb-0.5">Pola Harmonik Auto-Detected: {signal.harmonicScan.patternDetected}</strong>
@@ -368,7 +368,7 @@ export default function OracleDashboard({
                 return (
                   <div 
                     key={`model-grid-${m.name}`}
-                    className={`p-3 rounded-lg border text-left flex items-center justify-between font-sans ${cardBorder}`}
+                    className={`p-3 rounded-[3px] border text-left flex items-center justify-between font-sans ${cardBorder}`}
                   >
                     <div>
                       <span className="text-[10px] font-bold text-[#E6EDF3] leading-none block font-sans">{m.name.split(' ')[0]}</span>
@@ -428,7 +428,7 @@ export default function OracleDashboard({
             </div>
 
             {/* mini chart mockup line */}
-            <div className="h-10 bg-[#030407] border border-[#1E2333] rounded-lg mt-1 p-2 flex items-center justify-between font-mono text-[9px] relative overflow-hidden">
+            <div className="h-10 bg-[#030407] border border-[#1E2333] rounded-[3px] mt-1 p-2 flex items-center justify-between font-mono text-[9px] relative overflow-hidden">
               <span className="text-[#8B949E] z-10 font-bold font-sans">90D EQUITY CURVE</span>
               <span className="text-[#3FB950] z-10 font-bold">+412.5%</span>
               

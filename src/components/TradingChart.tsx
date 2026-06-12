@@ -350,7 +350,7 @@ export default function TradingChart({ candles, timeframe, tickerName, currentPr
   };
 
   return (
-    <div className="quantum-card rounded-xl p-4 border border-slate-800 bg-[#0d1324]/50">
+    <div className="quantum-card rounded-[3px] p-4 border border-slate-800 bg-[#0d1324]/50">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-slate-800 pb-3">
         <div className="flex items-center gap-3">
           <div className="h-2 w-2 rounded-full bg-emerald-500 pulse-dot" />
@@ -365,14 +365,14 @@ export default function TradingChart({ candles, timeframe, tickerName, currentPr
           <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500/30" /> Vol</span>
           <div className="group relative flex items-center gap-1 cursor-help text-[10px] text-slate-500 font-mono">
             <Info className="h-3 w-3" /> Indicator Info
-            <div className="pointer-events-none absolute right-0 top-6 w-56 rounded-lg bg-slate-900 border border-slate-800 p-2.5 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity z-40 text-[10px] text-slate-400 font-sans leading-normal">
+            <div className="pointer-events-none absolute right-0 top-6 w-56 rounded-[3px] bg-slate-900 border border-slate-800 p-2.5 shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity z-40 text-[10px] text-slate-400 font-sans leading-normal">
               <strong className="text-slate-200 block mb-1">EMA Lookback Notice</strong>
               EMA 8 dan EMA 21 membutuhkan waktu lookback (8 & 21 candle pertama) agar dapat mulai di-plot secara matematis di chart.
             </div>
           </div>
         </div>
       </div>
-      <div ref={chartContainerRef} className="w-full relative bg-[#070a13] rounded-lg" style={{ height: '400px' }} />
+      <div ref={chartContainerRef} className="w-full relative bg-[#070a13] rounded-[3px]" style={{ height: '400px' }} />
     </div>
   );
 }

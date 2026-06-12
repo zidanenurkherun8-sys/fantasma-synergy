@@ -75,7 +75,7 @@ export default function RiskCalculator({
             type="number"
             value={balance}
             onChange={(e) => onBalanceChange(parseFloat(e.target.value) || 0)}
-            className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
+            className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-3 py-2 text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
           />
         </div>
 
@@ -93,7 +93,7 @@ export default function RiskCalculator({
               step="0.1"
               value={riskPercent}
               onChange={(e) => onRiskChange(parseFloat(e.target.value))}
-              className="flex-1 accent-[#3FB950] h-1 bg-[#030407] rounded-lg appearance-none cursor-pointer"
+              className="flex-1 accent-[#3FB950] h-1 bg-[#030407] rounded-[3px] appearance-none cursor-pointer"
             />
           </div>
         </div>
@@ -109,7 +109,7 @@ export default function RiskCalculator({
               type="number"
               value={entryPrice}
               onChange={(e) => setEntryPrice(parseFloat(e.target.value) || 0)}
-              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-lg px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
+              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
             />
           </div>
           <div>
@@ -118,7 +118,7 @@ export default function RiskCalculator({
               type="number"
               value={slPrice}
               onChange={(e) => setSlPrice(parseFloat(e.target.value) || 0)}
-              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-lg px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-[#F85149]"
+              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-[#F85149]"
             />
           </div>
           <div>
@@ -127,13 +127,13 @@ export default function RiskCalculator({
               type="number"
               value={tpPrice}
               onChange={(e) => setTpPrice(parseFloat(e.target.value) || 0)}
-              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-lg px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
+              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
             />
           </div>
         </div>
 
         {/* Calculator Output Grid */}
-        <div className="mt-2 bg-[#030407] border border-[#1E2333] rounded-xl p-3 flex flex-col gap-3 font-mono">
+        <div className="mt-2 bg-[#030407] border border-[#1E2333] rounded-[3px] p-3 flex flex-col gap-3 font-mono">
           <div className="flex justify-between items-center text-xs">
             <span className="text-[#8B949E] flex items-center gap-1.5 font-sans"><ShieldAlert className="h-3.5 w-3.5 text-[#F85149]" /> Risiko Maks (IDR)</span>
             <span className="font-bold text-[#F85149]">Rp {Math.round(riskAmountIdr).toLocaleString('id-ID')}</span>
@@ -154,7 +154,7 @@ export default function RiskCalculator({
           <div className="border-t border-[#1E2333] my-1" />
 
           {/* SIZING HIGHLIGHT */}
-          <div className="flex flex-col gap-1.5 bg-[#07090F] border border-[#1E2333]/60 rounded-lg p-2.5">
+          <div className="flex flex-col gap-1.5 bg-[#07090F] border border-[#1E2333]/60 rounded-[3px] p-2.5">
             <div className="text-[10px] text-[#8B949E] font-bold uppercase tracking-wider font-sans">Ukuran Posisi Disarankan</div>
             <div className="text-sm font-bold text-[#3FB950]">
               Rp {Math.round(positionSizeIdr).toLocaleString('id-ID')}

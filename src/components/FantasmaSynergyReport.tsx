@@ -154,7 +154,7 @@ export default function FantasmaSynergyReport({
     <TiltCard className="p-5 flex flex-col h-full bg-[#0C0E18] relative min-h-[500px]">
       {/* Scanner Animation Overlay during load */}
       {loading && (
-        <div className="absolute inset-0 bg-[#030407]/85 backdrop-blur-md rounded-xl z-20 flex flex-col items-center justify-center p-6 text-center">
+        <div className="absolute inset-0 bg-[#030407]/85 backdrop-blur-md rounded-[3px] z-20 flex flex-col items-center justify-center p-6 text-center">
           <div className="h-10 w-10 rounded-full border-t-2 border-[#58A6FF] animate-spin mb-4" />
           <h3 className="font-bold text-sm text-[#58A6FF] tracking-wider uppercase mb-1">Mengevaluasi Model Ensemble AI...</h3>
           <p className="text-[10px] text-[#8B949E] max-w-xs font-mono">
@@ -175,7 +175,7 @@ export default function FantasmaSynergyReport({
       </div>
 
       {!report && !loading ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border border-dashed border-[#1E2333] rounded-xl my-4 select-none">
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border border-dashed border-[#1E2333] rounded-[3px] my-4 select-none">
           <Send className="h-10 w-10 text-[#8B949E] mb-3 opacity-60" />
           <h4 className="font-bold text-xs text-[#E6EDF3] mb-1">Belum Ada Analisis yang Berjalan</h4>
           <p className="text-[10px] text-[#8B949E] max-w-xs leading-normal">
@@ -186,7 +186,7 @@ export default function FantasmaSynergyReport({
         <div className="flex-1 flex flex-col gap-5 overflow-hidden">
           {/* Actionable Setup Card Widget parsed from prediction */}
           {activePrediction && activePrediction.direction !== 'NEUTRAL' && (
-            <div className="bg-[#07090F] border border-[#1E2333] rounded-xl p-4 flex flex-col gap-3 relative">
+            <div className="bg-[#07090F] border border-[#1E2333] rounded-[3px] p-4 flex flex-col gap-3 relative">
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-[#3FB950]" />
@@ -240,7 +240,7 @@ export default function FantasmaSynergyReport({
 
                   {/* Consensus & Detail Tooltip */}
                   {showTooltip && (
-                    <div className="absolute right-0 top-12 w-64 p-3 bg-[#0C0E18] border border-[#1E2333] rounded-lg shadow-xl z-30 text-[10px] text-[#8B949E] font-sans leading-normal">
+                    <div className="absolute right-0 top-12 w-64 p-3 bg-[#0C0E18] border border-[#1E2333] rounded-[3px] shadow-xl z-30 text-[10px] text-[#8B949E] font-sans leading-normal">
                       <div className="font-bold text-[#E6EDF3] uppercase tracking-wider text-[9px] mb-2 flex items-center gap-1 border-b border-[#1E2333] pb-1">
                         <Cpu className="h-3 w-3 text-[#58A6FF]" /> Consensus Model Votes
                       </div>
@@ -284,15 +284,15 @@ export default function FantasmaSynergyReport({
               </div>
 
               <div className="grid grid-cols-3 gap-3 font-mono mt-1 text-xs select-none">
-                <div className="flex flex-col gap-0.5 bg-[#030407] p-2 rounded-lg border border-[#1E2333]">
+                <div className="flex flex-col gap-0.5 bg-[#030407] p-2 rounded-[3px] border border-[#1E2333]">
                   <span className="text-[9px] text-[#8B949E] uppercase font-bold">Entry Zone</span>
                   <span className="font-bold text-[#E6EDF3]">Rp {activePrediction.entryPrice.toLocaleString('id-ID')}</span>
                 </div>
-                <div className="flex flex-col gap-0.5 bg-[#030407] p-2 rounded-lg border border-[#1E2333]">
+                <div className="flex flex-col gap-0.5 bg-[#030407] p-2 rounded-[3px] border border-[#1E2333]">
                   <span className="text-[9px] text-[#8B949E] uppercase font-bold">Stop Loss</span>
                   <span className="font-bold text-[#F85149]">Rp {activePrediction.stopLoss.toLocaleString('id-ID')}</span>
                 </div>
-                <div className="flex flex-col gap-0.5 bg-[#030407] p-2 rounded-lg border border-[#1E2333]">
+                <div className="flex flex-col gap-0.5 bg-[#030407] p-2 rounded-[3px] border border-[#1E2333]">
                   <span className="text-[9px] text-[#8B949E] uppercase font-bold">Target TP</span>
                   <span className="font-bold text-[#3FB950]">Rp {activePrediction.takeProfit.toLocaleString('id-ID')}</span>
                 </div>
@@ -301,7 +301,7 @@ export default function FantasmaSynergyReport({
               <button
                 type="button"
                 onClick={() => onImportTargets(activePrediction.entryPrice, activePrediction.stopLoss, activePrediction.takeProfit)}
-                className="w-full bg-[#58A6FF] hover:bg-[#58A6FF]/95 text-[#0D1117] font-bold text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 transition-all active:scale-[0.99] select-none cursor-pointer"
+                className="w-full bg-[#58A6FF] hover:bg-[#58A6FF]/95 text-[#0D1117] font-bold text-xs py-2 rounded-[3px] flex items-center justify-center gap-1.5 transition-all active:scale-[0.99] select-none cursor-pointer"
               >
                 Impor Setup ke Kalkulator <ArrowUpRight className="h-4 w-4" />
               </button>
@@ -353,7 +353,7 @@ export default function FantasmaSynergyReport({
               }
               if (line.startsWith('---') || line.includes('Disclaimer:')) {
                 return (
-                  <div key={index} className="bg-[#07090F] border border-[#1E2333] rounded-lg p-3 text-[10px] text-[#8B949E] flex gap-2 items-start mt-4 italic font-sans leading-normal font-bold">
+                  <div key={index} className="bg-[#07090F] border border-[#1E2333] rounded-[3px] p-3 text-[10px] text-[#8B949E] flex gap-2 items-start mt-4 italic font-sans leading-normal font-bold">
                     <span>{line.replace(/[\*_-]/g, '')}</span>
                   </div>
                 );
@@ -363,7 +363,7 @@ export default function FantasmaSynergyReport({
           </div>
 
           {/* Model Backtesting Performance Dashboard (4.7) */}
-          <div className="bg-[#07090F] border border-[#1E2333] rounded-xl p-3.5 mt-auto select-none">
+          <div className="bg-[#07090F] border border-[#1E2333] rounded-[3px] p-3.5 mt-auto select-none">
             <div className="flex justify-between items-center border-b border-[#1E2333] pb-1.5 mb-2 font-sans">
               <span className="text-[10px] font-bold text-[#E6EDF3] uppercase tracking-wider flex items-center gap-1.5">
                 📊 Model Performance (24h)

@@ -37,7 +37,7 @@ export default function OrderBookVisualizer({ bids, asks, trades, currentPrice }
   const maxAskAmount = Math.max(...displayAsks.map(a => a.amount), 1);
 
   return (
-    <div className="quantum-card rounded-xl p-4 border border-slate-800 flex flex-col h-[400px] bg-[#0d1324]/50">
+    <div className="quantum-card rounded-[3px] p-4 border border-slate-800 flex flex-col h-[400px] bg-[#0d1324]/50">
       {/* TABS HEADER */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3 select-none">
         <div className="flex gap-2">

@@ -292,7 +292,7 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
             <div
               key={`auditor-card-${auditor.name}`}
               onClick={() => setExpandedAuditor(isExpanded ? null : auditor.name)}
-              className={`p-3.5 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+              className={`p-3.5 rounded-[3px] border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
                 isExpanded
                   ? 'border-purple-500/50 bg-[#1e1c2a]/45 shadow-[0_0_15px_rgba(168,85,247,0.08)] md:col-span-2 xl:col-span-3'
                   : 'border-[#1E2333] bg-[#030407]/80 hover:bg-[#07090F]/50 hover:border-[#58A6FF]/40'
@@ -333,7 +333,7 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
 
               {/* Expanded comment detail with animation */}
               {isExpanded ? (
-                <div className="mt-3.5 bg-[#030407]/80 border border-purple-500/25 p-3 rounded-lg flex items-start gap-2.5 text-xs text-slate-100 font-sans animate-fadeIn leading-relaxed">
+                <div className="mt-3.5 bg-[#030407]/80 border border-purple-500/25 p-3 rounded-[3px] flex items-start gap-2.5 text-xs text-slate-100 font-sans animate-fadeIn leading-relaxed">
                   <Quote className="h-5 w-5 text-purple-400 shrink-0 mt-0.5 opacity-60" />
                   <div className="flex-1">
                     <span className="text-[9px] uppercase font-bold text-purple-400 block mb-1 font-mono">Tanggapan Mendalam & Analisis ke Depan:</span>
