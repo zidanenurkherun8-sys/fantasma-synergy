@@ -37,7 +37,7 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
   const maxAskAmount = Math.max(...displayAsks.map(a => a.amount), 1);
 
   return (
-    <div className="quantum-card rounded-[3px] p-4 border border-slate-800 flex flex-col h-[400px] bg-[#0d1324]/50">
+    <div className="quantum-card rounded-[3px] p-3 md:p-4 border border-slate-800 flex flex-col h-[400px] bg-[#0d1324]/50">
       {/* TABS HEADER */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3 select-none">
         <div className="flex gap-2">
@@ -87,7 +87,7 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
           </div>
 
           {/* Grid Headers */}
-          <div className="grid grid-cols-2 gap-4 text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-2">
+          <div className="grid grid-cols-2 gap-2 md:gap-4 text-[8.5px] min-[400px]:text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">
             <div className="grid grid-cols-2">
               <span>Amount</span>
               <span className="text-right">Bid (IDR)</span>
@@ -116,7 +116,7 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
                         className="fill-emerald-500/5 transition-all duration-200" 
                       />
                     </svg>
-                    <span className="text-slate-400 truncate">{bid.amount.toFixed(4)}</span>
+                    <span className="text-slate-400 truncate">{bid.amount.toFixed(bid.amount >= 10 ? 2 : 4)}</span>
                     <span className="text-right text-emerald-400 font-bold">
                       {Math.round(bid.price).toLocaleString('id-ID')}
                     </span>
@@ -147,7 +147,7 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
                     <span className="text-rose-400 font-bold">
                       {Math.round(ask.price).toLocaleString('id-ID')}
                     </span>
-                    <span className="text-right text-slate-400 truncate">{ask.amount.toFixed(4)}</span>
+                    <span className="text-right text-slate-400 truncate">{ask.amount.toFixed(ask.amount >= 10 ? 2 : 4)}</span>
                   </div>
                 );
               })}

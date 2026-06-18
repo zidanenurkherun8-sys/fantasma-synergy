@@ -303,7 +303,7 @@ function IntelligenceConsole() {
                         <img
                           src={item.imageUrl}
                           alt="news_thumb"
-                          className="h-16 w-16 md:h-20 md:w-20 object-cover rounded-[2px] border border-[#1E2333] shrink-0"
+                          className="h-12 w-12 min-[400px]:h-16 min-[400px]:w-16 md:h-20 md:w-20 object-cover rounded-[2px] border border-[#1E2333] shrink-0"
                           onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                         />
                       )}
@@ -385,7 +385,7 @@ function IntelligenceConsole() {
             <span className="text-xs font-extrabold uppercase text-[#8B949E] tracking-wider mb-2 block border-b border-[#1E2333] pb-2 font-sans">
               Modul Edukasi Kuantitatif
             </span>
-            <div className="flex flex-col gap-2 overflow-y-auto font-sans">
+            <div className="flex flex-col sm:grid sm:grid-cols-3 lg:flex lg:flex-col gap-2 overflow-y-auto font-sans">
               {ACADEMY_MODULES.map((mod) => (
                 <button
                   key={mod.id}

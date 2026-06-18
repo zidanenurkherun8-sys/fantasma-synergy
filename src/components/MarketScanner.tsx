@@ -224,7 +224,7 @@ function MarketScanner({ pairs, selectedPairId, onSelectPair }: MarketScannerPro
     .slice(0, 3);
 
   return (
-    <div className="quantum-card p-4 flex flex-col h-full bg-[#07090F] select-none">
+    <div className="quantum-card p-3 md:p-4 flex flex-col h-full bg-[#07090F] select-none">
       {/* Scanner Title */}
       <div className="flex items-center gap-2 mb-4 border-b border-[#1E2333] pb-3">
         <Flame className="h-5 w-5 text-[#58A6FF]" />
@@ -272,7 +272,7 @@ function MarketScanner({ pairs, selectedPairId, onSelectPair }: MarketScannerPro
           placeholder="Cari koin (misal BTC, ETH)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-[#58A6FF] transition-colors font-sans"
+          className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] pl-9 pr-4 py-2 text-base md:text-xs focus:outline-none focus:border-[#58A6FF] transition-colors font-sans"
         />
       </div>
 

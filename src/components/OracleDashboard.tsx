@@ -171,7 +171,7 @@ function OracleDashboard({
                 <span className="text-xs uppercase font-extrabold text-[#E6EDF3]">KOORDINAT TRANSASKI ORACLE</span>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 font-mono text-center text-xs">
+              <div className="grid grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-5 gap-3 font-mono text-center text-xs">
                 <div className="bg-[#030407] border border-[#1E2333] p-2.5 rounded-[3px]">
                   <span className="text-[9px] text-[#8B949E] block mb-1">ENTRY ZONE</span>
                   <span className="font-extrabold text-[#E6EDF3]">Rp {signal.entryPrice.toLocaleString('id-ID')}</span>
@@ -200,8 +200,8 @@ function OracleDashboard({
 
               {/* Position Execution Area */}
               {onExecutePosition && (
-                <div className="bg-[#030407] border border-[#1E2333] p-4 rounded-[3px] flex flex-wrap items-center justify-between gap-4 mt-1.5">
-                  <div className="flex items-center gap-4">
+                <div className="bg-[#030407] border border-[#1E2333] p-4 rounded-[3px] flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-1.5">
+                  <div className="flex flex-col min-[400px]:flex-row min-[400px]:items-center gap-4">
                     <div className="flex flex-col">
                       <span className="text-[9px] text-[#8B949E] uppercase font-bold font-mono">Suggested Margin (Kelly)</span>
                       <span className="text-xs font-bold text-slate-100 font-mono mt-0.5">
@@ -215,7 +215,7 @@ function OracleDashboard({
                       <select 
                         value={selectedLeverage}
                         onChange={(e) => setSelectedLeverage(parseInt(e.target.value, 10))}
-                        className="bg-[#07090F] border border-[#1E2333] rounded px-2.5 py-1 text-xs font-mono text-[#E6EDF3] focus:outline-none"
+                        className="bg-[#07090F] border border-[#1E2333] rounded px-2.5 py-1 text-base md:text-xs font-mono text-[#E6EDF3] focus:outline-none"
                       >
                         {[5, 10, 25, 50, 100, 250, 500, 1000].map(lv => (
                           <option key={`lev-sel-${lv}`} value={lv}>{lv}x</option>
@@ -227,7 +227,7 @@ function OracleDashboard({
                   <button
                     type="button"
                     onClick={handleQuickExecute}
-                    className="bg-[#3FB950] hover:bg-[#3FB950]/90 text-[#0D1117] font-extrabold text-xs px-5 py-2.5 rounded-[3px] active:scale-[0.98] transition cursor-pointer font-sans"
+                    className="w-full sm:w-auto bg-[#3FB950] hover:bg-[#3FB950]/90 text-[#0D1117] font-extrabold text-xs px-5 py-2.5 rounded-[3px] active:scale-[0.98] transition cursor-pointer font-sans"
                   >
                     EKSEKUSI BOT SEKARANG ({signal.kellySize}% Kelly)
                   </button>
@@ -243,7 +243,7 @@ function OracleDashboard({
                 <Terminal className="h-4.5 w-4.5 text-[#D29922]" />
                 <span className="text-xs uppercase font-extrabold text-[#E6EDF3]">REASONING CHAIN - KENAPA AI YAKIN?</span>
               </div>
-              <div className="flex bg-[#030407] border border-[#1E2333] p-0.5 rounded">
+              <div className="flex flex-wrap sm:flex-nowrap justify-center bg-[#030407] border border-[#1E2333] p-0.5 rounded">
                 {(['ALL', 'TECHNICAL', 'SMART', 'FUNDAMENTALS'] as const).map((tab) => (
                   <button
                     key={`reason-tab-${tab}`}
@@ -359,7 +359,7 @@ function OracleDashboard({
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 min-[480px]:grid-cols-2 sm:grid-cols-3 gap-4">
               {models.map((m) => {
                 const hasDissent = m.data.vote !== signal.direction && m.data.vote !== 'NEUTRAL';
                 const cardBorder = hasDissent ? 'border-amber-500/40 bg-amber-500/5 shadow-[0_0_10px_rgba(245,158,11,0.05)]' : 'border-[#1E2333] bg-[#030407]';

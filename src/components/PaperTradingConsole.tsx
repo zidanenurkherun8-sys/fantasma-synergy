@@ -349,7 +349,7 @@ function PaperTradingConsole({
                     type="number"
                     value={cashBalance}
                     onChange={(e) => onSetCashBalance(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-[3px] pl-8 pr-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-xs"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-[3px] pl-8 pr-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-base md:text-xs"
                     placeholder="Total Capital"
                   />
                 </div>
@@ -382,7 +382,7 @@ function PaperTradingConsole({
                     type="number"
                     value={botTradeMargin}
                     onChange={(e) => onBotTradeMarginChange(Math.max(50000, parseInt(e.target.value, 10) || 0))}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-[3px] pl-8 pr-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-xs"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-[3px] pl-8 pr-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-base md:text-xs"
                   />
                 </div>
               </div>
@@ -394,7 +394,7 @@ function PaperTradingConsole({
                   max="20"
                   value={botMaxPositions}
                   onChange={(e) => onBotMaxPositionsChange(Math.max(1, parseInt(e.target.value, 10) || 0))}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-[3px] px-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-xs"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-[3px] px-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-base md:text-xs"
                 />
               </div>
             </div>
@@ -860,7 +860,7 @@ function PaperTradingConsole({
           )}
 
           {/* Sizing Toggles */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2">Order Direction</label>
               <div className="grid grid-cols-2 gap-2">
@@ -901,7 +901,7 @@ function PaperTradingConsole({
                       setMarginInput(parseInt(e.target.value, 10) || 0);
                       setValidationError('');
                     }}
-                    className="w-full bg-[#070a13] border border-slate-800 rounded-[3px] pl-8 pr-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-xs"
+                    className="w-full bg-[#070a13] border border-slate-800 rounded-[3px] pl-8 pr-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-base md:text-xs"
                     placeholder="Masukkan jumlah margin..."
                   />
                 </div>
@@ -1019,14 +1019,14 @@ function PaperTradingConsole({
             </div>
 
             {useSlTp && (
-              <div className="grid grid-cols-2 gap-4 animate-slideDown">
+              <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-4 animate-slideDown">
                 <div>
                   <label className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Stop Loss Price (Rp)</label>
                   <input
                     type="number"
                     value={slPrice}
                     onChange={(e) => setSlPrice(parseInt(e.target.value, 10) || 0)}
-                    className="w-full bg-[#070a13] border border-slate-800 rounded-[3px] px-3 py-1.5 text-slate-300 font-mono font-bold focus:outline-none focus:border-rose-500"
+                    className="w-full bg-[#070a13] border border-slate-800 rounded-[3px] px-3 py-1.5 text-slate-300 font-mono font-bold focus:outline-none focus:border-rose-500 text-base md:text-xs"
                   />
                   <span className="text-[9px] text-slate-500 block mt-1">Membatasi kerugian maksimal.</span>
                 </div>
@@ -1036,7 +1036,7 @@ function PaperTradingConsole({
                     type="number"
                     value={tpPrice}
                     onChange={(e) => setTpPrice(parseInt(e.target.value, 10) || 0)}
-                    className="w-full bg-[#070a13] border border-slate-800 rounded-[3px] px-3 py-1.5 text-slate-300 font-mono font-bold focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-[#070a13] border border-slate-800 rounded-[3px] px-3 py-1.5 text-slate-300 font-mono font-bold focus:outline-none focus:border-emerald-500 text-base md:text-xs"
                   />
                   <span className="text-[9px] text-slate-500 block mt-1">Mengunci profit target secara otomatis.</span>
                 </div>

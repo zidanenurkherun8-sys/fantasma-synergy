@@ -75,7 +75,7 @@ function RiskCalculator({
             type="number"
             value={balance}
             onChange={(e) => onBalanceChange(parseFloat(e.target.value) || 0)}
-            className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-3 py-2 text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
+            className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-3 py-2 text-base md:text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
           />
         </div>
 
@@ -102,14 +102,14 @@ function RiskCalculator({
         <div className="border-t border-[#1E2333] my-1" />
 
         {/* Trade Parameter Inputs */}
-        <div className="grid grid-cols-3 gap-2 font-sans">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-3 gap-2 font-sans">
           <div>
             <label className="text-[9px] text-[#8B949E] font-semibold uppercase mb-1 block">Entry (Rp)</label>
             <input
               type="number"
               value={entryPrice}
               onChange={(e) => setEntryPrice(parseFloat(e.target.value) || 0)}
-              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
+              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-base md:text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
             />
           </div>
           <div>
@@ -118,7 +118,7 @@ function RiskCalculator({
               type="number"
               value={slPrice}
               onChange={(e) => setSlPrice(parseFloat(e.target.value) || 0)}
-              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-[#F85149]"
+              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-base md:text-xs font-mono focus:outline-none focus:border-[#F85149]"
             />
           </div>
           <div>
@@ -127,7 +127,7 @@ function RiskCalculator({
               type="number"
               value={tpPrice}
               onChange={(e) => setTpPrice(parseFloat(e.target.value) || 0)}
-              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
+              className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-base md:text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
             />
           </div>
         </div>

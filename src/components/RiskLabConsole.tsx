@@ -272,7 +272,7 @@ function RiskLabConsole({
               placeholder="Cari pair koin..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 bg-[#030407] border border-[#1E2333] rounded-[3px] text-xs text-[#E6EDF3] placeholder-slate-600 focus:outline-none focus:border-[#58A6FF]"
+              className="w-full pl-8 pr-3 py-1.5 bg-[#030407] border border-[#1E2333] rounded-[3px] text-base md:text-xs text-[#E6EDF3] placeholder-slate-600 focus:outline-none focus:border-[#58A6FF]"
             />
           </div>
         </div>
@@ -349,7 +349,7 @@ function RiskLabConsole({
             <select
               value={activePreset}
               onChange={(e) => setActivePreset(e.target.value)}
-              className="bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-[10px] font-mono text-slate-300 focus:outline-none focus:border-[#58A6FF]"
+              className="bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-base md:text-[10px] font-mono text-slate-300 focus:outline-none focus:border-[#58A6FF]"
             >
               {savedPresets.map(preset => (
                 <option key={preset} value={preset}>{preset}</option>
@@ -375,7 +375,7 @@ function RiskLabConsole({
                 value={newPresetName}
                 onChange={(e) => setNewPresetName(e.target.value)}
                 placeholder="Nama preset..."
-                className="flex-1 bg-slate-950 border border-[#1E2333] rounded px-2 py-1 text-xs text-slate-200"
+                className="flex-1 bg-slate-950 border border-[#1E2333] rounded px-2 py-1 text-base md:text-xs text-slate-200"
               />
               <button onClick={handleSavePreset} className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs">Simpan</button>
               <button onClick={() => setShowPresetSaveInput(false)} className="px-3 py-1 bg-[#21262D] text-slate-400 rounded text-xs">Batal</button>
@@ -386,7 +386,7 @@ function RiskLabConsole({
         {/* Style selection */}
         <div className="flex flex-col gap-2">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">1. Gaya Trading (Timeframe Target)</span>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 min-[480px]:grid-cols-4 gap-2">
             {[
               { id: 'SCALPING', label: 'SCALPING', desc: '< 15 Menit' },
               { id: 'SHORT', label: 'INTRADAY', desc: '15m - 4 Jam' },
@@ -402,8 +402,8 @@ function RiskLabConsole({
                     : 'bg-[#030407] border-[#1E2333] text-slate-400 hover:border-slate-700'
                 }`}
               >
-                <span className="text-[10px] block">{item.label}</span>
-                <span className="text-[8px] text-slate-500 block mt-0.5">{item.desc}</span>
+                <span className="text-[10px] block font-sans">{item.label}</span>
+                <span className="text-[8px] text-slate-500 block mt-0.5 font-sans">{item.desc}</span>
               </button>
             ))}
           </div>
@@ -634,7 +634,7 @@ function RiskLabConsole({
 
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">Execution Coordinates</span>
           
-          <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+          <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 text-xs font-mono">
             <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-[3px] p-2 flex flex-col justify-center">
               <span className="text-[9px] text-slate-500 uppercase font-sans">Rekomendasi Entry:</span>
               <span className="font-bold text-slate-200">Rp {setup.entryPrice.toLocaleString('id-ID')}</span>
@@ -646,7 +646,7 @@ function RiskLabConsole({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-xs font-mono mt-1">
+          <div className="grid grid-cols-1 min-[480px]:grid-cols-3 gap-2 text-xs font-mono mt-1">
             <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-[3px] p-2 flex flex-col justify-center">
               <span className="text-[8px] text-emerald-500 uppercase font-sans">Take Profit 1 (50%):</span>
               <span className="font-bold text-emerald-400">Rp {setup.takeProfit1.toLocaleString('id-ID')}</span>
@@ -684,7 +684,7 @@ function RiskLabConsole({
             return (
               <div className="mt-2 border-t border-[#1E2333]/40 pt-2 flex flex-col gap-1.5 text-[9px] font-sans text-slate-400">
                 <span className="font-bold text-slate-300 uppercase tracking-wider block">Partial Profit Visualizer:</span>
-                <div className="grid grid-cols-3 gap-1.5 font-mono text-[9px]">
+                <div className="grid grid-cols-1 min-[360px]:grid-cols-3 gap-1.5 font-mono text-[9px]">
                   <div className="bg-[#07090F]/60 p-1.5 rounded border border-[#1E2333]/30">
                     <span className="text-slate-500 block text-[8px]">TP1 (50%)</span>
                     <span className="text-emerald-400 font-bold block">+Rp {tp1Profit.toLocaleString('id-ID')}</span>
@@ -772,7 +772,7 @@ function RiskLabConsole({
             <Clock className="h-3.5 w-3.5 text-[#58A6FF]" />
             <span>Active Global Sessions</span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 min-[360px]:grid-cols-3 gap-2">
             {sessions.map((sess, idx) => (
               <div 
                 key={idx} 
@@ -802,14 +802,14 @@ function RiskLabConsole({
             )}
           </div>
           
-          <div className="grid grid-cols-3 gap-2 text-[10px]">
+          <div className="grid grid-cols-1 min-[360px]:grid-cols-3 gap-2 text-[10px]">
             <div className="flex flex-col gap-0.5">
               <span className="text-[8px] text-slate-500 font-mono">Hypothetical Entry:</span>
               <input
                 type="number"
                 value={simEntry}
                 onChange={(e) => setSimEntry(e.target.value)}
-                className="w-full bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-slate-200 font-mono text-[10px]"
+                className="w-full bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-slate-200 font-mono text-base md:text-[10px]"
               />
             </div>
             <div className="flex flex-col gap-0.5">
@@ -818,7 +818,7 @@ function RiskLabConsole({
                 type="number"
                 value={simTp}
                 onChange={(e) => setSimTp(e.target.value)}
-                className="w-full bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-slate-200 font-mono text-[10px]"
+                className="w-full bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-slate-200 font-mono text-base md:text-[10px]"
               />
             </div>
             <div className="flex flex-col gap-0.5">
@@ -827,7 +827,7 @@ function RiskLabConsole({
                 type="number"
                 value={simSl}
                 onChange={(e) => setSimSl(e.target.value)}
-                className="w-full bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-slate-200 font-mono text-[10px]"
+                className="w-full bg-[#030407] border border-[#1E2333] px-2 py-1 rounded text-slate-200 font-mono text-base md:text-[10px]"
               />
             </div>
           </div>
@@ -876,7 +876,7 @@ function RiskLabConsole({
         </div>
 
         {/* Action buttons */}
-        <div className="grid grid-cols-3 gap-2 mt-auto shrink-0 pt-2 border-t border-[#1E2333]/50">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-3 gap-2 mt-auto shrink-0 pt-2 border-t border-[#1E2333]/50">
           <button
             onClick={() => setShowBacktestModal(true)}
             className="py-2.5 px-2 bg-slate-900 border border-[#1E2333] hover:bg-[#30363D] rounded-[3px] text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5"
@@ -888,7 +888,7 @@ function RiskLabConsole({
           <button
             disabled={activeSignal === 'NEUTRAL' || (dailyDrawdownBreached && !forceEntry) || (cooldownActive && !forceEntry)}
             onClick={handleApplyToSystem}
-            className={`col-span-2 py-2.5 px-3 rounded-[3px] font-extrabold text-xs flex items-center justify-center gap-2 border shadow-lg transition-all duration-300 ${
+            className={`min-[400px]:col-span-2 py-2.5 px-3 rounded-[3px] font-extrabold text-xs flex items-center justify-center gap-2 border shadow-lg transition-all duration-300 ${
               activeSignal === 'NEUTRAL' || (dailyDrawdownBreached && !forceEntry) || (cooldownActive && !forceEntry)
                 ? 'bg-[#30363D]/20 border-[#1E2333]/40 text-slate-500 cursor-not-allowed'
                 : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 border-purple-500/40 text-white shadow-purple-600/10 hover:shadow-purple-600/20 active:scale-[0.98]'

@@ -1705,14 +1705,14 @@ export default function DashboardPage() {
         className="flex-1 flex flex-col min-h-screen md:pl-[220px] pb-[60px] md:pb-0"
       >
         {/* 1. Header Terminals */}
-        <header className="border-b border-[#1E2333] bg-[#07090F] px-6 py-3.5 flex items-center justify-between sticky top-0 z-35 select-none">
+        <header className="border-b border-[#1E2333] bg-[#07090F] px-3 md:px-6 py-2.5 md:py-3.5 flex items-center justify-between sticky top-0 z-35 select-none">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-[3px] bg-gradient-to-tr from-[#58A6FF] to-indigo-650 flex items-center justify-center font-bold text-[#0D1117] shadow-[0_0_12px_rgba(88,166,255,0.2)]"><Shield className="h-4.5 w-4.5" /></div>
             <div>
               <h1 className="font-extrabold text-base tracking-wide bg-gradient-to-r from-[#58A6FF] to-indigo-300 bg-clip-text text-transparent uppercase flex items-center gap-1.5 font-sans">
-                Fantasma Synergy <span className="text-[10px] text-[#58A6FF] font-mono tracking-widest bg-[#58A6FF]/10 border border-[#58A6FF]/20 px-2 py-0.5 rounded">Core v1.0</span>
+                Fantasma Synergy <span className="text-[10px] text-[#58A6FF] font-mono tracking-widest bg-[#58A6FF]/10 border border-[#58A6FF]/20 px-2 py-0.5 rounded hidden xs:inline-block">Core v1.0</span>
               </h1>
-              <span className="text-[10px] text-[#8B949E] font-mono block">Sistem Kuantitatif Cryptocurrency - Indodax IDR</span>
+              <span className="text-[10px] text-[#8B949E] font-mono hidden sm:block">Sistem Kuantitatif Cryptocurrency - Indodax IDR</span>
             </div>
           </div>
 
@@ -1732,7 +1732,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Diagnostics & Time */}
-          <div className="flex items-center gap-4 text-xs font-mono text-[#8B949E]">
+          <div className="flex items-center gap-2 md:gap-4 text-xs font-mono text-[#8B949E]">
             <button
               onClick={() => {
                 if (audio) {
@@ -1748,7 +1748,7 @@ export default function DashboardPage() {
             >
               {mutedState ? <VolumeX className="h-4 w-4 text-rose-500" /> : <Volume2 className="h-4 w-4 text-[#58A6FF]" />}
             </button>
-            <div className="flex items-center gap-1.5 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-[3px]">
+            <div className="hidden sm:flex items-center gap-1.5 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-[3px]">
               <Clock className="h-3.5 w-3.5 text-[#58A6FF]" />
               <SystemClock />
             </div>
@@ -1761,9 +1761,9 @@ export default function DashboardPage() {
 
         {/* 2. Main Dashboard Layout Grid (3.6) */}
         {activeTab === 'DASHBOARD' && (
-          <main className="flex-1 p-6 grid grid-cols-1 xl:grid-cols-4 gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-4 md:p-6 grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6 bg-[#030407] scroll-reveal">
             {/* SIDEBAR: Scanner (1 Column) */}
-            <div className="xl:col-span-1 h-[500px] xl:h-full flex flex-col">
+            <div className="xl:col-span-1 h-[380px] xl:h-full flex flex-col">
               <MarketScanner
                 pairs={pairs}
                 selectedPairId={selectedPairId}
@@ -1781,7 +1781,7 @@ export default function DashboardPage() {
                 <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] flex flex-wrap items-center justify-between gap-4 bg-[#07090F]">
                   <div className="flex items-center gap-4">
                     <div>
-                      <h2 className="font-extrabold text-lg text-[#E6EDF3] flex items-center gap-2 font-sans">
+                      <h2 className="font-extrabold text-base md:text-lg text-[#E6EDF3] flex flex-wrap items-center gap-1.5 md:gap-2 font-sans">
                         <Coins className="h-5 w-5 text-yellow-500 animate-[spin_6s_linear_infinite]" /> {ticker.name} <span className="text-xs text-[#8B949E] font-mono">({activePairSymbol}/IDR)</span>
                         <a 
                           href={`https://indodax.com/market/${activePairSymbol}IDR`} 
@@ -1818,8 +1818,8 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Resolution Controls - Tabs Style (3.5) */}
-                  <div className="flex flex-wrap items-center bg-[#030407] border border-[#1E2333] p-1 rounded-[3px] backdrop-blur-sm max-w-full select-none">
-                    <div className="flex items-center border-r border-[#1E2333] mr-2 pr-1 overflow-x-auto">
+                  <div className="flex flex-col sm:flex-row sm:items-center bg-[#030407] border border-[#1E2333] p-1 rounded-[3px] backdrop-blur-sm w-full sm:w-auto select-none gap-2">
+                    <div className="flex items-center border-r border-[#1E2333] mr-2 pr-1 overflow-x-auto w-full sm:w-auto">
                       {(
                         [
                           { id: '1', label: '1m' },
@@ -1854,7 +1854,7 @@ export default function DashboardPage() {
                       type="button"
                       onClick={() => handleTriggerAnalysis()}
                       disabled={reportLoading}
-                      className="bg-[#58A6FF] hover:bg-[#58A6FF]/90 text-[#0D1117] font-extrabold text-[11px] px-4 py-1.5 rounded-[3px] flex items-center gap-1.5 active:scale-[0.98] transition disabled:opacity-50 cursor-pointer font-sans"
+                      className="bg-[#58A6FF] hover:bg-[#58A6FF]/90 text-[#0D1117] font-extrabold text-[11px] px-4 py-1.5 rounded-[3px] flex items-center justify-center gap-1.5 active:scale-[0.98] transition disabled:opacity-50 cursor-pointer font-sans w-full sm:w-auto"
                     >
                       <Cpu className="h-4.5 w-4.5 text-[#0D1117]" /> COGNITIVE RUN
                     </button>
@@ -1956,9 +1956,9 @@ export default function DashboardPage() {
 
         {/* SCANNER VIEW TAB (3.6) */}
         {activeTab === 'SCANNER' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal">
             {/* Header Cards with summary */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
               <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
                   <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans">Total Aset Dipantau</span>
@@ -2005,7 +2005,7 @@ export default function DashboardPage() {
                   aria-label="Cari simbol koin"
                   value={scannerSearch}
                   onChange={(e) => setScannerSearch(e.target.value)}
-                  className="bg-transparent border-none text-[#E6EDF3] text-xs focus:outline-none w-full font-mono placeholder-[#8B949E]"
+                  className="bg-transparent border-none text-[#E6EDF3] text-base md:text-xs focus:outline-none w-full font-mono placeholder-[#8B949E]"
                 />
               </div>
 
@@ -2187,7 +2187,7 @@ export default function DashboardPage() {
 
         {/* AI AUDITOR VIEW TAB (3.6 & 3.7 & 3.10) */}
         {activeTab === 'AUDITOR' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal">
             {/* Top Section: Full Oracle Cockpit Ratios, Coordinates, and Consensus */}
             <OracleDashboard 
               signal={oracleSignal}
@@ -2315,7 +2315,7 @@ export default function DashboardPage() {
 
         {/* RISK LAB VIEW TAB (v3.1) */}
         {activeTab === 'RISK_LAB' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal">
             {/* Header Title */}
             <div className="border-b border-[#1E2333] pb-3 select-none">
               <h2 className="text-lg font-extrabold text-[#E6EDF3] flex items-center gap-2 font-sans">
@@ -2354,7 +2354,7 @@ export default function DashboardPage() {
 
         {/* SETTINGS VIEW TAB (3.6) */}
         {activeTab === 'SETTINGS' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal">
             {/* Header Title */}
             <div className="border-b border-[#1E2333] pb-3 select-none">
               <h2 className="text-lg font-extrabold text-[#E6EDF3] flex items-center gap-2 font-sans">
@@ -2389,7 +2389,7 @@ export default function DashboardPage() {
                             const val = parseFloat(e.target.value) || 0;
                             setCashBalance(val);
                           }}
-                          className="bg-transparent border-none text-right focus:outline-none w-full font-mono text-[#E6EDF3] ml-2 font-extrabold"
+                          className="bg-transparent border-none text-right focus:outline-none w-full font-mono text-[#E6EDF3] ml-2 font-extrabold text-base md:text-sm"
                         />
                       </div>
                     </div>
@@ -2625,7 +2625,7 @@ export default function DashboardPage() {
 
       {/* TOAST UI NOTIFICATIONS (1.5) */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#0C0E18] border border-[#1E2333] text-[#E6EDF3] px-4 py-3.5 rounded-[3px] shadow-2xl flex items-center gap-2.5 animate-fadeIn select-none font-sans font-bold text-xs max-w-sm">
+        <div className="fixed bottom-[76px] md:bottom-6 left-4 right-4 md:left-auto md:right-6 z-50 bg-[#0C0E18] border border-[#1E2333] text-[#E6EDF3] px-4 py-3.5 rounded-[3px] shadow-2xl flex items-center gap-2.5 animate-fadeIn select-none font-sans font-bold text-xs max-w-none md:max-w-sm">
           {toast.type === 'success' ? (
             <CheckCircle className="h-4 w-4 text-[#3FB950] shrink-0" />
           ) : (
