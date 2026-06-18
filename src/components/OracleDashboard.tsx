@@ -12,7 +12,7 @@ interface OracleDashboardProps {
   walletBalance: number;
 }
 
-export default function OracleDashboard({
+function OracleDashboard({
   signal,
   loading,
   onImportTargets,
@@ -450,3 +450,5 @@ export default function OracleDashboard({
     </div>
   );
 }
+
+export default React.memo(OracleDashboard);

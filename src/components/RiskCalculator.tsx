@@ -15,7 +15,7 @@ interface RiskCalculatorProps {
   onRiskChange: (val: number) => void;
 }
 
-export default function RiskCalculator({
+function RiskCalculator({
   balance,
   riskPercent,
   entryPrice: initialEntry,
@@ -174,3 +174,5 @@ export default function RiskCalculator({
     </TiltCard>
   );
 }
+
+export default React.memo(RiskCalculator);

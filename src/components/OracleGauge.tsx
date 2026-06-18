@@ -7,7 +7,7 @@ interface OracleGaugeProps {
   loading: boolean;
 }
 
-export default function OracleGauge({ signal, loading }: OracleGaugeProps) {
+function OracleGauge({ signal, loading }: OracleGaugeProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   if (loading) {
@@ -174,3 +174,5 @@ export default function OracleGauge({ signal, loading }: OracleGaugeProps) {
     </div>
   );
 }
+
+export default React.memo(OracleGauge);

@@ -162,7 +162,7 @@ const SOCIAL_POOL = [
   }
 ];
 
-export default function IntelligenceConsole() {
+function IntelligenceConsole() {
   const [activeTab, setActiveTab] = useState<'news' | 'academy'>('news');
   const [selectedModule, setSelectedModule] = useState(ACADEMY_MODULES[0]);
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
@@ -438,3 +438,5 @@ export default function IntelligenceConsole() {
     </main>
   );
 }
+
+export default React.memo(IntelligenceConsole);

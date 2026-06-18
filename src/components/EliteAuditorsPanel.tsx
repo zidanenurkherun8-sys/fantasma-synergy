@@ -20,7 +20,7 @@ interface AuditorOpinion {
   icon: string;
 }
 
-export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPanelProps) {
+function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPanelProps) {
   const [expandedAuditor, setExpandedAuditor] = useState<string | null>(null);
 
   if (loading || !signal) {
@@ -354,3 +354,5 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
     </TiltCard>
   );
 }
+
+export default React.memo(EliteAuditorsPanel);

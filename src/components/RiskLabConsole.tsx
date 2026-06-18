@@ -39,7 +39,7 @@ interface RiskLabConsoleProps {
   recentSlPairs: Record<string, number>; // Maps pairId to SL timestamp
 }
 
-export default function RiskLabConsole({
+function RiskLabConsole({
   pairs,
   selectedPairId,
   onSelectPair,
@@ -975,3 +975,5 @@ export default function RiskLabConsole({
     </div>
   );
 }
+
+export default React.memo(RiskLabConsole);

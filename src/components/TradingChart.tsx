@@ -20,7 +20,7 @@ interface TradingChartProps {
   currentPrice?: number;
 }
 
-export default function TradingChart({ candles, timeframe, tickerName, currentPrice }: TradingChartProps) {
+function TradingChart({ candles, timeframe, tickerName, currentPrice }: TradingChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candlestickSeriesRef = useRef<any>(null);
@@ -376,3 +376,5 @@ export default function TradingChart({ candles, timeframe, tickerName, currentPr
     </div>
   );
 }
+
+export default React.memo(TradingChart);

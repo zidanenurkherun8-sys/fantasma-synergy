@@ -88,6 +88,19 @@ const FALLBACK_PAIRS: MarketPair[] = [
   { id: 'sol_idr', symbol: 'SOL', name: 'Solana', price: 2650000, change24h: 2.4, volumeIdr: 42000000000 }
 ];
 
+const SystemClock = React.memo(() => {
+  const [time, setTime] = useState('');
+  useEffect(() => {
+    setTime(new Date().toLocaleTimeString('id-ID'));
+    const timer = setInterval(() => {
+      setTime(new Date().toLocaleTimeString('id-ID'));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+  return <span className="text-[#E6EDF3] text-[11px]">{time || '09:00:00'} WIB</span>;
+});
+SystemClock.displayName = 'SystemClock';
+
 export default function DashboardPage() {
   const [isMounted, setIsMounted] = useState(false);
   const closedPositionsRef = React.useRef<Set<string>>(new Set());
@@ -321,21 +334,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [reportLoading, setReportLoading] = useState(false);
   const [report, setReport] = useState('');
-  const [systemTime, setSystemTime] = useState('');
 
   // Add a bot audit log helper
   const addBotLog = (message: string, type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' = 'INFO') => {
     const timestamp = new Date().toLocaleTimeString('id-ID');
     setBotLogs(prev => [...prev.slice(-99), { timestamp, message, type }]); // Keep last 100 logs
   };
-
-  // Clock tick
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setSystemTime(new Date().toLocaleTimeString('id-ID'));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Fetch summaries once on mount and every 10 seconds for scanning efficiency
   useEffect(() => {
@@ -360,6 +364,8 @@ export default function DashboardPage() {
 
   // Fetch details every 1 second for live pricing, depth, trades, and charts (real-time per detiknya)
   useEffect(() => {
+    if (activeTab !== 'DASHBOARD') return;
+
     let active = true;
     async function fetchDetails() {
       try {
@@ -410,7 +416,7 @@ export default function DashboardPage() {
       active = false;
       clearInterval(interval);
     };
-  }, [selectedPairId, timeframe]);
+  }, [selectedPairId, timeframe, activeTab]);
 
   // Position Monitoring: Stops, Profits, Liquidations evaluated globally across ALL active positions on ticker or pairs update
   useEffect(() => {
@@ -476,6 +482,16 @@ export default function DashboardPage() {
       setTpPrice(ticker.last * 1.06);
     }
   }, [selectedPairId, ticker === null]);
+
+  // Auto-trigger analysis when visiting the AI Auditor tab for a new coin
+  useEffect(() => {
+    if (isMounted && activeTab === 'AUDITOR') {
+      const activeSymbol = selectedPairId.replace('_idr', '').toUpperCase();
+      if (!oracleSignal || oracleSignal.symbol !== activeSymbol) {
+        handleTriggerAnalysis(selectedPairId);
+      }
+    }
+  }, [activeTab, selectedPairId, oracleSignal, isMounted]);
 
   // Position Open Simulator
   const handleOpenPosition = (
@@ -736,6 +752,7 @@ export default function DashboardPage() {
   // 1. Ticking Dynamic Market-Wide Quant Scanner loop: rotates through all liquid market pairs
   useEffect(() => {
     if (pairs.length === 0) return;
+    if (activeTab !== 'DASHBOARD' && activeTab !== 'SCANNER') return;
     
     let index = 0;
     const interval = setInterval(() => {
@@ -746,7 +763,7 @@ export default function DashboardPage() {
       index = (index + 1) % allPairs.length;
     }, 2500); // Pulse rapidly to cover the full market list smoothly
     return () => clearInterval(interval);
-  }, [pairs.length]);
+  }, [pairs.length, activeTab]);
 
   // 2. Multi-Factor Quantitative Technical Scoring (High-Accuracy Engine)
   useEffect(() => {
@@ -1487,7 +1504,8 @@ export default function DashboardPage() {
   };
 
   // Trigger serverless AI and Oracle analysis posts in parallel (3.8)
-  const handleTriggerAnalysis = async () => {
+  const handleTriggerAnalysis = async (pairOverride?: string) => {
+    const targetPair = pairOverride || selectedPairId;
     setReportLoading(true);
     setOracleLoading(true);
     setReport('');
@@ -1501,7 +1519,7 @@ export default function DashboardPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            pair: selectedPairId,
+            pair: targetPair,
             balance: cashBalance,
             riskPercent,
             timeframe: ['1', '5', '15', '30'].includes(timeframe) ? 'Scalping' : ['60', '240'].includes(timeframe) ? 'Intraday' : ['720', '1D'].includes(timeframe) ? 'Swing' : 'Position',
@@ -1513,7 +1531,7 @@ export default function DashboardPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            pair: selectedPairId,
+            pair: targetPair,
           }),
         })
       ]);
@@ -1732,7 +1750,7 @@ export default function DashboardPage() {
             </button>
             <div className="flex items-center gap-1.5 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-[3px]">
               <Clock className="h-3.5 w-3.5 text-[#58A6FF]" />
-              <span className="text-[#E6EDF3] text-[11px]">{systemTime || '09:00:00'} WIB</span>
+              <SystemClock />
             </div>
             <div className="hidden sm:flex items-center gap-1.5 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-[3px]">
               <Activity className="h-3.5 w-3.5 text-[#3FB950] pulse-dot" />
@@ -1834,7 +1852,7 @@ export default function DashboardPage() {
                     {/* Cognitive run action trigger */}
                     <button
                       type="button"
-                      onClick={handleTriggerAnalysis}
+                      onClick={() => handleTriggerAnalysis()}
                       disabled={reportLoading}
                       className="bg-[#58A6FF] hover:bg-[#58A6FF]/90 text-[#0D1117] font-extrabold text-[11px] px-4 py-1.5 rounded-[3px] flex items-center gap-1.5 active:scale-[0.98] transition disabled:opacity-50 cursor-pointer font-sans"
                     >
@@ -2147,7 +2165,7 @@ export default function DashboardPage() {
                                     setLoading(true);
                                     setActiveTab('AUDITOR');
                                     setTimeout(() => {
-                                      handleTriggerAnalysis();
+                                      handleTriggerAnalysis(coin.id);
                                     }, 500);
                                   }}
                                   className="bg-[#58A6FF] hover:bg-[#58A6FF]/95 text-[#0D1117] font-extrabold text-[10px] px-2.5 py-1.5 rounded active:scale-[0.98] transition cursor-pointer font-sans"

@@ -36,31 +36,35 @@ class AudioSynth {
 
   private playTone(freq: number, type: OscillatorType, duration: number, volume: number = 0.1, slideTo?: number) {
     if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
+    
+    // Defer initialization to avoid blocking the main UI thread during click events
+    setTimeout(() => {
+      this.init();
+      if (!this.ctx) return;
 
-    try {
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      try {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
 
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
 
-      if (slideTo) {
-        osc.frequency.exponentialRampToValueAtTime(slideTo, this.ctx.currentTime + duration);
+        if (slideTo) {
+          osc.frequency.exponentialRampToValueAtTime(slideTo, this.ctx.currentTime + duration);
+        }
+
+        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+      } catch (e) {
+        console.warn('Synth playTone failed:', e);
       }
-
-      gain.gain.setValueAtTime(volume, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + duration);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      osc.start();
-      osc.stop(this.ctx.currentTime + duration);
-    } catch (e) {
-      console.warn('Synth playTone failed:', e);
-    }
+    }, 0);
   }
 
   // Subtle digital click for hovers
@@ -85,15 +89,18 @@ class AudioSynth {
   // Rising digital chime for success / entry
   public playSuccess() {
     if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
+    
+    setTimeout(() => {
+      this.init();
+      if (!this.ctx) return;
 
-    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-    notes.forEach((freq, idx) => {
-      setTimeout(() => {
-        this.playTone(freq, 'sine', 0.22, 0.06);
-      }, idx * 70);
-    });
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      notes.forEach((freq, idx) => {
+        setTimeout(() => {
+          this.playTone(freq, 'sine', 0.22, 0.06);
+        }, idx * 70);
+      });
+    }, 0);
   }
 
   // Long sweeping charge sound for gateway portal decryption
@@ -105,40 +112,43 @@ class AudioSynth {
   // Noise explosion for meteor impacts
   public playExplosion() {
     if (this.muted) return;
-    this.init();
-    if (!this.ctx) return;
+    
+    setTimeout(() => {
+      this.init();
+      if (!this.ctx) return;
 
-    try {
-      const bufferSize = this.ctx.sampleRate * 0.35; // 0.35 seconds
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const data = buffer.getChannelData(0);
+      try {
+        const bufferSize = this.ctx.sampleRate * 0.35; // 0.35 seconds
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
 
-      // Fill buffer with white noise
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
+        // Fill buffer with white noise
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(500, this.ctx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 0.35);
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + 0.35);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        noise.start();
+        noise.stop(this.ctx.currentTime + 0.35);
+      } catch (e) {
+        console.warn('Synth playExplosion failed:', e);
       }
-
-      const noise = this.ctx.createBufferSource();
-      noise.buffer = buffer;
-
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(500, this.ctx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 0.35);
-
-      const gain = this.ctx.createGain();
-      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.00001, this.ctx.currentTime + 0.35);
-
-      noise.connect(filter);
-      filter.connect(gain);
-      gain.connect(this.ctx.destination);
-
-      noise.start();
-      noise.stop(this.ctx.currentTime + 0.35);
-    } catch (e) {
-      console.warn('Synth playExplosion failed:', e);
-    }
+    }, 0);
   }
 }
 

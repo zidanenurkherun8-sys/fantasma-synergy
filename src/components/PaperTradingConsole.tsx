@@ -71,7 +71,7 @@ interface PaperTradingConsoleProps {
   balanceChangePulse?: 'gain' | 'loss' | null;
 }
 
-export default function PaperTradingConsole({
+function PaperTradingConsole({
   cashBalance,
   activePositions,
   closedTrades,
@@ -1216,3 +1216,5 @@ export default function PaperTradingConsole({
     </TiltCard>
   );
 }
+
+export default React.memo(PaperTradingConsole);

@@ -11,7 +11,7 @@ interface OrderBookVisualizerProps {
   currentPrice: number;
 }
 
-export default function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisualizerProps) {
+function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisualizerProps) {
   const [activeTab, setActiveTab] = useState<'depth' | 'trades'>('depth');
 
   // Take top 15 depth layers for clean visual display
@@ -198,3 +198,5 @@ export default function OrderBookVisualizer({ bids, asks, trades, currentPrice }
     </div>
   );
 }
+
+export default React.memo(OrderBookVisualizer);

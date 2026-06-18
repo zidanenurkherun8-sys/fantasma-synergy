@@ -21,7 +21,7 @@ interface MarketScannerProps {
 
 
 
-export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: MarketScannerProps) {
+function MarketScanner({ pairs, selectedPairId, onSelectPair }: MarketScannerProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'GAINERS' | 'VOLUME'>('ALL');
   const radarCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -367,3 +367,5 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
     </div>
   );
 }
+
+export default React.memo(MarketScanner);

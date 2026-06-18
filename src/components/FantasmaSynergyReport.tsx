@@ -43,7 +43,7 @@ interface FantasmaSynergyReportProps {
   }) => void;
 }
 
-export default function FantasmaSynergyReport({ 
+function FantasmaSynergyReport({ 
   report, 
   prediction,
   loading, 
@@ -399,3 +399,5 @@ export default function FantasmaSynergyReport({
     </TiltCard>
   );
 }
+
+export default React.memo(FantasmaSynergyReport);
