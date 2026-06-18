@@ -219,7 +219,7 @@ function IntelligenceConsole() {
   };
 
   return (
-    <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#030407] h-full scroll-premium scroll-reveal">
+    <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal">
       {/* 1. Header Section */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#1E2333] pb-4 select-none">
         <div className="flex items-center gap-3">
@@ -265,10 +265,10 @@ function IntelligenceConsole() {
 
       {/* 2. Content View Tab (News & Socials) */}
       {activeTab === 'news' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Column A & B (2/3 Width): Live Global News */}
-          <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
+          <div className="lg:col-span-2 flex flex-col gap-4">
             <div className="flex items-center justify-between border-b border-[#1E2333]/80 pb-2">
               <span className="text-xs font-extrabold uppercase text-[#58A6FF] tracking-wider flex items-center gap-2">
                 <Globe className="h-4 w-4 text-[#58A6FF]" /> Agregasi Berita Global Real-Time
@@ -285,7 +285,7 @@ function IntelligenceConsole() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-4 [-webkit-overflow-scrolling:touch]">
+            <div className="flex flex-col gap-4 lg:max-h-[800px] lg:overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
               {newsLoading ? (
                 <div className="quantum-card rounded-[3px] border border-[#1E2333] bg-[#07090F] h-[350px] flex flex-col items-center justify-center text-center">
                   <div className="h-9 w-9 rounded-full border-t-2 border-[#58A6FF] animate-spin mb-3" />
@@ -338,7 +338,7 @@ function IntelligenceConsole() {
           </div>
 
           {/* Column C (1/3 Width): Real-Time Scraped Social Feed */}
-          <div className="lg:col-span-1 flex flex-col gap-4 min-h-0 bg-[#07090F]/45 border border-[#1E2333] rounded-[3px] p-4">
+          <div className="lg:col-span-1 flex flex-col gap-4 bg-[#07090F]/45 border border-[#1E2333] rounded-[3px] p-4 lg:max-h-[860px]">
             <div className="border-b border-[#1E2333] pb-2 flex items-center justify-between">
               <span className="text-xs font-extrabold uppercase text-purple-400 tracking-wider flex items-center gap-2 font-sans">
                 <Clock className="h-4 w-4 text-purple-400 animate-pulse" /> Live Scraped Sentiment
@@ -346,7 +346,7 @@ function IntelligenceConsole() {
               <span className="h-2 w-2 rounded-full bg-[#3FB950] animate-ping" />
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 [-webkit-overflow-scrolling:touch]">
+            <div className="flex flex-col gap-3 lg:max-h-[780px] lg:overflow-y-auto pr-1 [-webkit-overflow-scrolling:touch]">
               {socials.map((post) => (
                 <div key={post.id} className="bg-[#030407] border border-[#1E2333] p-3 rounded-[3px] flex flex-col gap-1.5 font-mono relative overflow-hidden select-none hover:border-purple-500/35 transition-colors">
                   <div className="flex items-center justify-between text-[9px] font-bold">
@@ -378,14 +378,14 @@ function IntelligenceConsole() {
 
       {/* 3. Content View Tab (Synergy Academy) */}
       {activeTab === 'academy' && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           
           {/* Left Panel (1/4 Width): Modules Navigation */}
-          <div className="lg:col-span-1 flex flex-col gap-2.5 min-h-0 bg-[#07090F]/45 border border-[#1E2333] rounded-[3px] p-4">
+          <div className="lg:col-span-1 flex flex-col gap-2.5 bg-[#07090F]/45 border border-[#1E2333] rounded-[3px] p-4">
             <span className="text-xs font-extrabold uppercase text-[#8B949E] tracking-wider mb-2 block border-b border-[#1E2333] pb-2 font-sans">
               Modul Edukasi Kuantitatif
             </span>
-            <div className="flex flex-col sm:grid sm:grid-cols-3 lg:flex lg:flex-col gap-2 overflow-y-auto font-sans">
+            <div className="flex flex-col sm:grid sm:grid-cols-3 lg:flex lg:flex-col gap-2 font-sans lg:max-h-[600px] lg:overflow-y-auto pr-1">
               {ACADEMY_MODULES.map((mod) => (
                 <button
                   key={mod.id}
@@ -407,7 +407,7 @@ function IntelligenceConsole() {
           </div>
 
           {/* Right Panel (3/4 Width): Selected Module Content Reader */}
-          <div className="lg:col-span-3 flex flex-col gap-4 bg-[#07090F] border border-[#1E2333] rounded-[3px] p-6 overflow-y-auto select-none font-sans [-webkit-overflow-scrolling:touch]">
+          <div className="lg:col-span-3 flex flex-col gap-4 bg-[#07090F] border border-[#1E2333] rounded-[3px] p-6 lg:max-h-[700px] lg:overflow-y-auto select-none font-sans [-webkit-overflow-scrolling:touch] pr-1">
             <div className="border-b border-[#1E2333] pb-3 mb-2">
               <span className="text-[9px] font-mono text-[#58A6FF] uppercase font-bold tracking-widest bg-[#58A6FF]/10 px-2.5 py-0.5 rounded border border-[#58A6FF]/20 mb-2 inline-block">
                 FANTASMA ACADEMY READOUT
