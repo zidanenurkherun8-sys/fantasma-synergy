@@ -194,11 +194,22 @@ export default function DashboardPage() {
   const [maxLeverageCap, setMaxLeverageCap] = useState<number>(10);
   const [fixedLeverage, setFixedLeverage] = useState<number>(5);
 
+  const [show3DAnimation, setShow3DAnimation] = useState(true);
+
+  const handleToggle3DAnimation = (checked: boolean) => {
+    setShow3DAnimation(checked);
+    localStorage.setItem('fantasma_bypass_portal', (!checked) ? 'true' : 'false');
+    showToast(checked ? 'Portal animasi 3D akan selalu ditampilkan saat masuk.' : 'Portal animasi 3D dinonaktifkan (masuk instan).', 'success');
+  };
+
   // Load settings and states from LocalStorage on mount
   useEffect(() => {
     setIsMounted(true);
     if (typeof window !== 'undefined') {
       try {
+        const bypass = localStorage.getItem('fantasma_bypass_portal') === 'true';
+        setShow3DAnimation(!bypass);
+
         const savedBalance = localStorage.getItem('ag_cashBalance');
         if (savedBalance) setCashBalance(parseFloat(savedBalance));
 
@@ -2588,6 +2599,68 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   )}
+                </div>
+
+                {/* visual customization card */}
+                <div className="quantum-card rounded-[3px] p-5 border border-[#1E2333] bg-[#07090F] flex flex-col gap-4">
+                  <div className="flex items-center gap-2 border-b border-[#1E2333] pb-2 text-[#58A6FF]">
+                    <Sparkles className="h-4.5 w-4.5" />
+                    <span className="text-xs font-bold text-[#E6EDF3] uppercase">Kustomisasi Visual & Antarmuka</span>
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    {/* Toggle Switch 1: 3D Landing Portal */}
+                    <div className="flex items-center justify-between p-3 rounded-[3px] bg-[#030407] border border-[#1E2333] hover:border-[#1E2333]/80 transition select-none">
+                      <div className="flex flex-col gap-1 pr-4">
+                        <span className="text-[11px] font-bold text-[#E6EDF3] uppercase tracking-wide">Portal Animasi 3D</span>
+                        <span className="text-[9px] text-[#8B949E] leading-normal">
+                          Tampilkan gerbang Quantum Decryption Vault berpartikel 3D saat memuat situs.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleToggle3DAnimation(!show3DAnimation)}
+                        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          show3DAnimation ? 'bg-[#58A6FF]' : 'bg-[#1E2333]'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-[#07090F] shadow ring-0 transition duration-200 ease-in-out ${
+                            show3DAnimation ? 'translate-x-4' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Toggle Switch 2: Sound FX */}
+                    <div className="flex items-center justify-between p-3 rounded-[3px] bg-[#030407] border border-[#1E2333] hover:border-[#1E2333]/80 transition select-none">
+                      <div className="flex flex-col gap-1 pr-4">
+                        <span className="text-[11px] font-bold text-[#E6EDF3] uppercase tracking-wide">Efek Suara Haptik</span>
+                        <span className="text-[9px] text-[#8B949E] leading-normal">
+                          Aktifkan audio synthesizer haptik real-time untuk interaksi tombol & simulasi.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (audio) {
+                            const isMuted = audio.toggleMute();
+                            setMutedState(isMuted);
+                            showToast(isMuted ? 'Efek suara haptik dinonaktifkan.' : 'Efek suara haptik diaktifkan.', 'info');
+                          }
+                        }}
+                        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          !mutedState ? 'bg-[#58A6FF]' : 'bg-[#1E2333]'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-[#07090F] shadow ring-0 transition duration-200 ease-in-out ${
+                            !mutedState ? 'translate-x-4' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* API / UI LATENCY CARD */}
