@@ -30,7 +30,12 @@ body {
   background-image: 
     radial-gradient(circle at 10% 20%, rgba(157, 78, 221, 0.03) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(0, 229, 255, 0.02) 0%, transparent 40%);
-  background-attachment: fixed;
+}
+
+@media (min-width: 768px) {
+  body {
+    background-attachment: fixed;
+  }
 }
 
 /* Monospace fonts for numbers and metrics */

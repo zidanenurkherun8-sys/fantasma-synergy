@@ -120,7 +120,6 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const root = document.querySelector<HTMLElement>('[data-dashboard-scroll]');
     const elements = Array.from(document.querySelectorAll<HTMLElement>('.scroll-reveal'));
     if (elements.length === 0) return;
 
@@ -132,7 +131,7 @@ export default function DashboardPage() {
           }
         });
       },
-      { root, threshold: 0.14, rootMargin: '0px 0px -6% 0px' }
+      { root: null, threshold: 0.1, rootMargin: '0px' }
     );
 
     elements.forEach(element => observer.observe(element));
@@ -1779,7 +1778,7 @@ export default function DashboardPage() {
               {/* Top Overview Bar */}
               {ticker && (
                 <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] flex flex-wrap items-center justify-between gap-4 bg-[#07090F]">
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-4">
                     <div>
                       <h2 className="font-extrabold text-base md:text-lg text-[#E6EDF3] flex flex-wrap items-center gap-1.5 md:gap-2 font-sans">
                         <Coins className="h-5 w-5 text-yellow-500 animate-[spin_6s_linear_infinite]" /> {ticker.name} <span className="text-xs text-[#8B949E] font-mono">({activePairSymbol}/IDR)</span>
@@ -1956,46 +1955,46 @@ export default function DashboardPage() {
 
         {/* SCANNER VIEW TAB (3.6) */}
         {activeTab === 'SCANNER' && (
-          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-3 md:p-6 flex flex-col gap-3 md:gap-6 bg-[#030407] scroll-reveal">
             {/* Header Cards with summary */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-              <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
+              <div className="quantum-card rounded-[3px] p-3 md:p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans">Total Aset Dipantau</span>
-                  <h3 className="text-xl font-extrabold text-[#E6EDF3] mt-1 font-mono">{pairs.length} Koin</h3>
+                  <span className="text-[9px] min-[360px]:text-[10px] text-[#8B949E] uppercase font-bold font-sans">Total Aset Dipantau</span>
+                  <h3 className="text-lg md:text-xl font-extrabold text-[#E6EDF3] mt-1 font-mono">{pairs.length} Koin</h3>
                 </div>
-                <Database className="h-8 w-8 text-[#58A6FF] opacity-35" />
+                <Database className="h-6 w-6 sm:h-8 sm:w-8 text-[#58A6FF] opacity-35 shrink-0" />
               </div>
-              <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
+              <div className="quantum-card rounded-[3px] p-3 md:p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans">Sinyal Aktif Bot</span>
-                  <h3 className="text-xl font-extrabold text-[#3FB950] mt-1 font-mono">
+                  <span className="text-[9px] min-[360px]:text-[10px] text-[#8B949E] uppercase font-bold font-sans">Sinyal Aktif Bot</span>
+                  <h3 className="text-lg md:text-xl font-extrabold text-[#3FB950] mt-1 font-mono">
                     {Object.values(scannedCoinsData).filter(c => c.status === 'SETUP').length} Setup
                   </h3>
                 </div>
-                <Zap className="h-8 w-8 text-[#3FB950] opacity-35" />
+                <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-[#3FB950] opacity-35 shrink-0" />
               </div>
-              <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
+              <div className="quantum-card rounded-[3px] p-3 md:p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans">Akurasi AI Backtest</span>
-                  <h3 className="text-xl font-extrabold text-[#D29922] mt-1 font-mono">78.4% Win Rate</h3>
+                  <span className="text-[9px] min-[360px]:text-[10px] text-[#8B949E] uppercase font-bold font-sans">Akurasi AI Backtest</span>
+                  <h3 className="text-lg md:text-xl font-extrabold text-[#D29922] mt-1 font-mono">78.4% Win Rate</h3>
                 </div>
-                <Award className="h-8 w-8 text-[#D29922] opacity-35" />
+                <Award className="h-6 w-6 sm:h-8 sm:w-8 text-[#D29922] opacity-35 shrink-0" />
               </div>
-              <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
+              <div className="quantum-card rounded-[3px] p-3 md:p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-[#8B949E] uppercase font-bold font-sans">Volume 24J Terbesar</span>
-                  <h3 className="text-xl font-extrabold text-[#58A6FF] mt-1 font-mono">
+                  <span className="text-[9px] min-[360px]:text-[10px] text-[#8B949E] uppercase font-bold font-sans">Volume 24J Terbesar</span>
+                  <h3 className="text-lg md:text-xl font-extrabold text-[#58A6FF] mt-1 font-mono">
                     {pairs.length > 0 ? [...pairs].sort((a,b) => b.volumeIdr - a.volumeIdr)[0]?.symbol : 'BTC'}
                   </h3>
                 </div>
-                <Globe className="h-8 w-8 text-[#58A6FF] opacity-35" />
+                <Globe className="h-6 w-6 sm:h-8 sm:w-8 text-[#58A6FF] opacity-35 shrink-0" />
               </div>
             </div>
 
             {/* Filter and Search Controls */}
-            <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] bg-[#07090F] flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-[3px] w-full max-w-sm">
+            <div className="quantum-card rounded-[3px] p-3 md:p-4 border border-[#1E2333] bg-[#07090F] flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+              <div className="flex items-center gap-3 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-[3px] w-full xl:max-w-xs">
                 <Search className="h-4 w-4 text-[#8B949E]" />
                 <input
                   id="scanner-search-input"
@@ -2009,35 +2008,35 @@ export default function DashboardPage() {
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="flex bg-[#030407] border border-[#1E2333] p-1 rounded-[3px]">
+              <div className="flex flex-col min-[540px]:flex-row items-stretch min-[540px]:items-center gap-2 w-full xl:w-auto">
+                <div className="flex flex-wrap bg-[#030407] border border-[#1E2333] p-0.5 rounded-[3px] gap-0.5 w-full min-[540px]:w-auto justify-center">
                   {(['ALL', 'TOP_GAINERS', 'HIGH_VOLATILITY', 'AI_SETUPS'] as const).map((filterOpt) => (
                     <button
                       key={filterOpt}
                       onClick={() => setScannerFilter(filterOpt)}
-                      className={`px-3 py-1 rounded-[2px] text-[10px] font-bold uppercase transition ${
+                      className={`flex-1 min-[540px]:flex-initial text-center px-2 py-1 rounded-[2px] text-[9px] font-bold uppercase transition cursor-pointer ${
                         scannerFilter === filterOpt 
                           ? 'bg-[#0C0E18] text-[#58A6FF] border border-[#1E2333]' 
                           : 'text-[#8B949E] hover:text-[#E6EDF3]'
                       }`}
                     >
-                      {filterOpt.replace('_', ' ')}
+                      {filterOpt === 'TOP_GAINERS' ? 'GAINERS' : filterOpt === 'HIGH_VOLATILITY' ? 'VOLATILITY' : filterOpt.replace('_', ' ')}
                     </button>
                   ))}
                 </div>
 
-                <div className="flex bg-[#030407] border border-[#1E2333] p-1 rounded-[3px]">
+                <div className="flex flex-wrap bg-[#030407] border border-[#1E2333] p-0.5 rounded-[3px] gap-0.5 w-full min-[540px]:w-auto justify-center">
                   {(['SCORE', 'CHANGE', 'VOLUME', 'SYMBOL'] as const).map((sortOpt) => (
                     <button
                       key={sortOpt}
                       onClick={() => setScannerSort(sortOpt)}
-                      className={`px-3 py-1 rounded-[2px] text-[10px] font-bold uppercase transition ${
+                      className={`flex-1 min-[540px]:flex-initial text-center px-2 py-1 rounded-[2px] text-[9px] font-bold uppercase transition cursor-pointer ${
                         scannerSort === sortOpt 
                           ? 'bg-[#0C0E18] text-[#58A6FF] border border-[#1E2333]' 
                           : 'text-[#8B949E] hover:text-[#E6EDF3]'
                       }`}
                     >
-                      SORT: {sortOpt}
+                      <span className="hidden min-[400px]:inline">SORT: </span>{sortOpt}
                     </button>
                   ))}
                 </div>
@@ -2046,18 +2045,18 @@ export default function DashboardPage() {
 
             {/* Grid Table of Aset */}
             <div className="quantum-card rounded-[3px] border border-[#1E2333] bg-[#07090F] overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse font-sans">
+              <div className="overflow-x-auto scrollbar-thin">
+                <table className="w-full text-left border-collapse font-sans min-w-0">
                   <thead>
                     <tr className="border-b border-[#1E2333] text-[10px] text-[#8B949E] uppercase font-bold bg-[#030407]/35 select-none">
-                      <th className="py-3.5 px-4">Simbol</th>
-                      <th className="py-3.5 px-4 text-right">Harga (IDR)</th>
-                      <th className="py-3.5 px-4 text-right">Perubahan 24J</th>
-                      <th className="py-3.5 px-4 text-right">Volume (24J)</th>
-                      <th className="py-3.5 px-4 text-center">Quant Score</th>
-                      <th className="py-3.5 px-4 text-center">Sinyal Bot</th>
-                      <th className="py-3.5 px-4 text-center">Deteksi Pola</th>
-                      <th className="py-3.5 px-4 text-center">Aksi Kunci</th>
+                      <th className="py-3 px-1 min-[360px]:px-2 md:px-4">Simbol</th>
+                      <th className="py-3 px-1 min-[360px]:px-2 md:px-4 text-right">Harga (IDR)</th>
+                      <th className="py-3 px-1 min-[360px]:px-2 md:px-4 text-right">Perubahan 24J</th>
+                      <th className="py-3 px-1 min-[360px]:px-2 md:px-4 text-right hidden sm:table-cell">Volume (24J)</th>
+                      <th className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center hidden md:table-cell">Quant Score</th>
+                      <th className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center hidden min-[480px]:table-cell">Sinyal Bot</th>
+                      <th className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center hidden lg:table-cell">Deteksi Pola</th>
+                      <th className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center">Aksi Kunci</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#30363D] font-mono text-xs text-[#E6EDF3]">
@@ -2105,19 +2104,35 @@ export default function DashboardPage() {
                       return list.map((coin) => {
                         return (
                           <tr key={`scan-grid-${coin.id}`} className="hover:bg-[#0C0E18]/30 transition duration-150 select-none">
-                            <td className="py-3 px-4 font-bold text-[#58A6FF] font-sans">
-                              {coin.symbol} <span className="text-[10px] text-[#8B949E] font-mono">/IDR</span>
+                            <td className="py-3 px-1 min-[360px]:px-2 md:px-4 font-bold font-sans">
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[#58A6FF]">{coin.symbol}</span>
+                                  <span className="text-[10px] text-[#8B949E] font-mono">/IDR</span>
+                                </div>
+                                <div className="block min-[480px]:hidden">
+                                  <span className={`px-1 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
+                                    coin.signal === 'LONG' 
+                                      ? 'bg-[#3FB950]/15 text-[#3FB950] border border-[#3FB950]/30' 
+                                      : coin.signal === 'SHORT' 
+                                        ? 'bg-[#F85149]/15 text-[#F85149] border border-[#F85149]/30' 
+                                        : 'bg-[#8B949E]/10 text-[#8B949E]'
+                                  }`}>
+                                    {coin.signal}
+                                  </span>
+                                </div>
+                              </div>
                             </td>
-                            <td className="py-3 px-4 text-right font-bold font-mono">
+                            <td className="py-3 px-1 min-[360px]:px-2 md:px-4 text-right font-bold font-mono">
                               Rp {coin.price >= 1000 ? Math.round(coin.price).toLocaleString('id-ID') : coin.price.toFixed(2)}
                             </td>
-                            <td className={`py-3 px-4 text-right font-bold font-mono ${coin.change24h >= 0 ? 'text-[#3FB950]' : 'text-[#F85149]'}`}>
+                            <td className={`py-3 px-1 min-[360px]:px-2 md:px-4 text-right font-bold font-mono ${coin.change24h >= 0 ? 'text-[#3FB950]' : 'text-[#F85149]'}`}>
                               {coin.change24h >= 0 ? '+' : ''}{coin.change24h.toFixed(2)}%
                             </td>
-                            <td className="py-3 px-4 text-right font-mono text-[#8B949E]">
+                            <td className="py-3 px-1 min-[360px]:px-2 md:px-4 text-right font-mono text-[#8B949E] hidden sm:table-cell">
                               Rp {(coin.volumeIdr / 1e6).toFixed(1)} Juta
                             </td>
-                            <td className="py-3 px-4 text-center">
+                            <td className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center hidden md:table-cell">
                               <div className="flex items-center justify-center gap-2">
                                 <span className={`font-bold px-1.5 py-0.5 rounded text-[11px] ${
                                   coin.score >= 80 ? 'bg-[#3FB950]/15 text-[#3FB950]' : coin.score >= 70 ? 'bg-[#D29922]/15 text-[#D29922]' : 'bg-[#8B949E]/15 text-[#8B949E]'
@@ -2131,7 +2146,7 @@ export default function DashboardPage() {
                                 </div>
                               </div>
                             </td>
-                            <td className="py-3 px-4 text-center">
+                            <td className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center hidden min-[480px]:table-cell">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
                                 coin.signal === 'LONG' 
                                   ? 'bg-[#3FB950]/15 text-[#3FB950] border border-[#3FB950]/30' 
@@ -2142,11 +2157,11 @@ export default function DashboardPage() {
                                 {coin.signal}
                               </span>
                             </td>
-                            <td className="py-3 px-4 text-center text-[10px] font-sans text-slate-300 italic font-bold">
+                            <td className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center text-[10px] font-sans text-slate-300 italic font-bold hidden lg:table-cell">
                               {coin.pattern && coin.pattern !== 'None' ? coin.pattern : '-'}
                             </td>
-                            <td className="py-3 px-4 text-center">
-                              <div className="flex items-center justify-center gap-1.5">
+                            <td className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center">
+                              <div className="flex flex-col min-[480px]:flex-row items-center justify-center gap-1">
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -2154,7 +2169,7 @@ export default function DashboardPage() {
                                     setLoading(true);
                                     setActiveTab('DASHBOARD');
                                   }}
-                                  className="bg-[#0C0E18] hover:bg-[#30363D] text-[#58A6FF] font-bold text-[10px] px-2.5 py-1.5 rounded border border-[#1E2333] active:scale-[0.98] transition cursor-pointer font-sans"
+                                  className="bg-[#0C0E18] hover:bg-[#30363D] text-[#58A6FF] font-bold text-[10px] px-1.5 py-1 min-[480px]:px-2.5 min-[480px]:py-1.5 rounded border border-[#1E2333] active:scale-[0.98] transition cursor-pointer font-sans"
                                 >
                                   TERMINAL
                                 </button>
@@ -2168,7 +2183,7 @@ export default function DashboardPage() {
                                       handleTriggerAnalysis(coin.id);
                                     }, 500);
                                   }}
-                                  className="bg-[#58A6FF] hover:bg-[#58A6FF]/95 text-[#0D1117] font-extrabold text-[10px] px-2.5 py-1.5 rounded active:scale-[0.98] transition cursor-pointer font-sans"
+                                  className="bg-[#58A6FF] hover:bg-[#58A6FF]/95 text-[#0D1117] font-extrabold text-[10px] px-1.5 py-1 min-[480px]:px-2.5 min-[480px]:py-1.5 rounded active:scale-[0.98] transition cursor-pointer font-sans"
                                 >
                                   AUDIT AI
                                 </button>
@@ -2636,66 +2651,66 @@ export default function DashboardPage() {
       )}
 
       {/* Mobile Bottom Navigation Bar (Visible on mobile/tablet only) */}
-      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#07090F] border-t border-[#1E2333] justify-around py-1.5 px-2 select-none shadow-2xl backdrop-blur-md bg-opacity-90">
+      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#07090F]/90 border-t border-[#1E2333] py-1 px-0.5 select-none shadow-2xl backdrop-blur-md">
         <button 
           type="button"
           onClick={() => setActiveTab('DASHBOARD')}
-          className={`flex flex-col items-center gap-1 py-1 px-3.5 rounded-[3px] text-[10px] font-bold uppercase transition-all cursor-pointer font-sans ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'DASHBOARD' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
-          <LayoutDashboard className="h-5 w-5" />
-          <span>Dashboard</span>
+          <LayoutDashboard className="h-4.5 w-4.5" />
+          <span className="truncate w-full text-center">Dashboard</span>
         </button>
         <button 
           type="button"
           onClick={() => setActiveTab('SCANNER')}
-          className={`flex flex-col items-center gap-1 py-1 px-3.5 rounded-[3px] text-[10px] font-bold uppercase transition-all cursor-pointer font-sans ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'SCANNER' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
-          <TrendingUp className="h-5 w-5" />
-          <span>Scanner</span>
+          <TrendingUp className="h-4.5 w-4.5" />
+          <span className="truncate w-full text-center">Scanner</span>
         </button>
         <button 
           type="button"
           onClick={() => setActiveTab('INTELLIGENCE')}
-          className={`flex flex-col items-center gap-1 py-1 px-3.5 rounded-[3px] text-[10px] font-bold uppercase transition-all cursor-pointer font-sans ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'INTELLIGENCE' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
-          <Globe className="h-5 w-5" />
-          <span>Live Intel</span>
+          <Globe className="h-4.5 w-4.5" />
+          <span className="truncate w-full text-center">Intel</span>
         </button>
         <button 
           type="button"
           onClick={() => setActiveTab('AUDITOR')}
-          className={`flex flex-col items-center gap-1 py-1 px-3.5 rounded-[3px] text-[10px] font-bold uppercase transition-all cursor-pointer font-sans ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'AUDITOR' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
-          <Cpu className="h-5 w-5" />
-          <span>Auditor</span>
+          <Cpu className="h-4.5 w-4.5" />
+          <span className="truncate w-full text-center">Auditor</span>
         </button>
         <button 
           type="button"
           onClick={() => setActiveTab('RISK_LAB')}
-          className={`flex flex-col items-center gap-1 py-1 px-3.5 rounded-[3px] text-[10px] font-bold uppercase transition-all cursor-pointer font-sans ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'RISK_LAB' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
-          <Sliders className="h-5 w-5" />
-          <span>Risk Lab</span>
+          <Sliders className="h-4.5 w-4.5" />
+          <span className="truncate w-full text-center">Risk Lab</span>
         </button>
         <button 
           type="button"
           onClick={() => setActiveTab('SETTINGS')}
-          className={`flex flex-col items-center gap-1 py-1 px-3.5 rounded-[3px] text-[10px] font-bold uppercase transition-all cursor-pointer font-sans ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'SETTINGS' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
-          <Settings className="h-5 w-5" />
-          <span>Settings</span>
+          <Settings className="h-4.5 w-4.5" />
+          <span className="truncate w-full text-center">Settings</span>
         </button>
       </nav>
     </div>

@@ -1,9 +1,16 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Fantasma Synergy: Institutional Crypto Trading Intelligence',
   description: 'Sistem kecerdasan trading cryptocurrency tingkat institusional untuk pasar Indodax (IDR Pairs). Dapatkan analisis premium, grafik real-time, dan manajemen risiko yang disiplin.',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
