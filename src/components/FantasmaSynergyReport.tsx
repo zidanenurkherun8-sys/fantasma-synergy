@@ -311,10 +311,10 @@ export default function FantasmaSynergyReport({
           {/* Actual Markdown report output pane */}
           <div className="flex-1 overflow-y-auto pr-1 text-[#E6EDF3] font-sans text-xs leading-relaxed space-y-4 max-h-[360px]">
             {report.split('\n').map((line, index) => {
-              if (line.startsWith('**🪐')) {
+              if (line.startsWith('**FANTASMA') || line.startsWith('**🪐') || line.startsWith('**ðŸª')) {
                 return (
                   <h3 key={index} className="text-sm font-bold text-[#58A6FF] border-b border-[#1E2333] pb-1 pt-3 tracking-wide flex items-center gap-1">
-                    {line.replace(/\*\*/g, '')}
+                    {line.replace(/\*\*/g, '').replace('🪐 ', '').replace('ðŸª ', '')}
                   </h3>
                 );
               }
@@ -366,7 +366,7 @@ export default function FantasmaSynergyReport({
           <div className="bg-[#07090F] border border-[#1E2333] rounded-[3px] p-3.5 mt-auto select-none">
             <div className="flex justify-between items-center border-b border-[#1E2333] pb-1.5 mb-2 font-sans">
               <span className="text-[10px] font-bold text-[#E6EDF3] uppercase tracking-wider flex items-center gap-1.5">
-                📊 Model Performance (24h)
+                Model Performance (24h)
               </span>
               <span className="text-[8px] text-[#8B949E] font-mono">Diperbarui: 1 jam yang lalu</span>
             </div>

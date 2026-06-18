@@ -307,7 +307,7 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
                   </div>
                   <div>
                     <h4 className="font-extrabold text-xs text-[#E6EDF3] leading-tight flex items-center gap-1.5 font-sans">
-                      {auditor.name} <span className="text-[14px]">{auditor.icon}</span>
+                      {auditor.name}
                     </h4>
                     <span className="text-[8px] text-[#8B949E] block mt-0.5 leading-none font-mono">
                       {auditor.title}
@@ -327,7 +327,7 @@ export default function EliteAuditorsPanel({ signal, loading }: EliteAuditorsPan
                   Metodologi: {auditor.methodology}
                 </span>
                 <p className="text-[10px] text-slate-300 font-sans mt-1.5 font-semibold leading-normal">
-                  🔍 <span className="italic">"{auditor.outlook}"</span>
+                  <span className="italic">"{auditor.outlook}"</span>
                 </p>
               </div>
 

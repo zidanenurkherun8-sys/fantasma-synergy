@@ -323,7 +323,7 @@ export default function MarketScanner({ pairs, selectedPairId, onSelectPair }: M
       </div>
 
       {/* Token List */}
-      <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-1 select-none scroll-smooth [will-change:transform] [-webkit-overflow-scrolling:touch]">
+      <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-1 select-none [will-change:transform] [-webkit-overflow-scrolling:touch]">
         {filteredPairs.map((pair) => {
           const isSelected = pair.id === selectedPairId;
           const volIdrB = pair.volumeIdr / 1e9; // Billions

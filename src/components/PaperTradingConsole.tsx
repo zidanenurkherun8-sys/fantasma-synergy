@@ -927,7 +927,7 @@ export default function PaperTradingConsole({
               <span className="text-[10px] text-[#E6EDF3] font-bold uppercase tracking-wider flex flex-wrap items-center gap-1.5 font-sans select-none">
                 <Layers className="h-3.5 w-3.5 text-[#58A6FF]" /> Leverage
                 <span className="bg-gradient-to-r from-[#58A6FF]/20 to-[#9333ea]/20 text-[#58A6FF] border border-[#58A6FF]/20 text-[9px] font-medium font-sans px-2.5 py-0.5 rounded-full">
-                  🤖 AI Suggest: {aiRecommendation.recommended}x ({aiRecommendation.confidence}% confidence)
+                  AI Suggest: {aiRecommendation.recommended}x ({aiRecommendation.confidence}% confidence)
                 </span>
               </span>
               <span className="text-xs font-bold font-mono bg-[#58A6FF]/10 border border-[#58A6FF]/20 px-2.5 py-0.5 rounded text-[#58A6FF] select-none">
@@ -997,7 +997,7 @@ export default function PaperTradingConsole({
               </div>
               {leverage > 100 && (
                 <div className="text-[9px] text-[#F85149] font-bold mt-1.5 flex items-center gap-1.5 animate-pulse uppercase tracking-wider">
-                  ⚠️ Risiko Sangat Tinggi
+                  Risiko Sangat Tinggi
                 </div>
               )}
             </div>

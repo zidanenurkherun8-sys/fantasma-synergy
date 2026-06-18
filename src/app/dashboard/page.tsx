@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Clock, Shield, Activity, Cpu, Coins, ExternalLink, LayoutDashboard, TrendingUp, Settings, User, Search, BarChart2, Zap, Brain, Sliders, CheckCircle, Database, HelpCircle, Terminal, Globe, Award, Sparkles, Filter, ChevronRight, Lock, Volume2, VolumeX } from 'lucide-react';
+import { Clock, Shield, ShieldAlert, Activity, Cpu, Coins, ExternalLink, LayoutDashboard, TrendingUp, Settings, User, Search, BarChart2, Zap, Brain, Sliders, CheckCircle, Database, HelpCircle, Terminal, Globe, Award, Sparkles, Filter, ChevronRight, Lock, Volume2, VolumeX } from 'lucide-react';
 import { audio } from '@/lib/audio';
 import MarketScanner, { MarketPair } from '@/components/MarketScanner';
 import TradingChart from '@/components/TradingChart';
@@ -82,6 +82,11 @@ const calculateDynamicLeverage = (score: number): number => {
 
 const HIGH_ACCURACY_SIGNAL_THRESHOLD = 80;
 const FAILED_SIGNAL_COOLDOWN_MS = 4 * 60 * 60 * 1000;
+const FALLBACK_PAIRS: MarketPair[] = [
+  { id: 'btc_idr', symbol: 'BTC', name: 'Bitcoin', price: 1050000000, change24h: 1.8, volumeIdr: 185000000000 },
+  { id: 'eth_idr', symbol: 'ETH', name: 'Ethereum', price: 52000000, change24h: -0.7, volumeIdr: 94000000000 },
+  { id: 'sol_idr', symbol: 'SOL', name: 'Solana', price: 2650000, change24h: 2.4, volumeIdr: 42000000000 }
+];
 
 export default function DashboardPage() {
   const [isMounted, setIsMounted] = useState(false);
@@ -100,6 +105,26 @@ export default function DashboardPage() {
       setMutedState(audio.isMuted());
     }
   }, []);
+
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>('[data-dashboard-scroll]');
+    const elements = Array.from(document.querySelectorAll<HTMLElement>('.scroll-reveal'));
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      },
+      { root, threshold: 0.14, rootMargin: '0px 0px -6% 0px' }
+    );
+
+    elements.forEach(element => observer.observe(element));
+    return () => observer.disconnect();
+  }, [activeTab]);
 
   const setActiveTab = (tab: typeof activeTab | ((prev: typeof activeTab) => typeof activeTab)) => {
     audio?.playClick();
@@ -133,7 +158,7 @@ export default function DashboardPage() {
 
   // Dashboard state
   const [riskPercent, setRiskPercent] = useState(1); // Default 1%
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [balanceChangePulse, setBalanceChangePulse] = useState<'gain' | 'loss' | null>(null);
   const [aiPrediction, setAiPrediction] = useState<any>(null);
@@ -319,10 +344,13 @@ export default function DashboardPage() {
         const response = await fetch('/api/market/pairs');
         if (response.ok) {
           const data = await response.json();
-          setPairs(data.pairs || []);
+          setPairs(data.pairs?.length ? data.pairs : FALLBACK_PAIRS);
+        } else if (pairs.length === 0) {
+          setPairs(FALLBACK_PAIRS);
         }
       } catch (err) {
-        console.error('Error fetching pairs summaries:', err);
+        if (pairs.length === 0) setPairs(FALLBACK_PAIRS);
+        console.warn('Market pairs API unavailable, using fallback UI data.', err);
       }
     }
     fetchPairs();
@@ -346,9 +374,34 @@ export default function DashboardPage() {
           setTrades(data.trades);
           setCandles(data.candles || []);
           setLoading(false);
+        } else if (active && !ticker) {
+          const fallbackPair = FALLBACK_PAIRS.find(pair => pair.id === selectedPairId) || FALLBACK_PAIRS[0];
+          setTicker({
+            name: fallbackPair.name,
+            last: fallbackPair.price,
+            high: fallbackPair.price * 1.02,
+            low: fallbackPair.price * 0.98,
+            vol_idr: fallbackPair.volumeIdr,
+            change24h: fallbackPair.change24h,
+            pairId: fallbackPair.id
+          });
+          setLoading(false);
         }
       } catch (err) {
-        console.error('Error fetching pair details:', err);
+        if (active && !ticker) {
+          const fallbackPair = FALLBACK_PAIRS.find(pair => pair.id === selectedPairId) || FALLBACK_PAIRS[0];
+          setTicker({
+            name: fallbackPair.name,
+            last: fallbackPair.price,
+            high: fallbackPair.price * 1.02,
+            low: fallbackPair.price * 0.98,
+            vol_idr: fallbackPair.volumeIdr,
+            change24h: fallbackPair.change24h,
+            pairId: fallbackPair.id
+          });
+          setLoading(false);
+        }
+        console.warn('Market details API unavailable, using fallback UI data.', err);
       }
     }
     fetchDetails();
@@ -582,7 +635,7 @@ export default function DashboardPage() {
 
     // Trigger toast notification feedback (1.5)
     const pnlSign = realizedPnl >= 0 ? '+' : '';
-    showToast(`✅ Posisi ${pos.symbol}/IDR ditutup (${reason === 'MANUAL' ? 'MANUAL' : reason}). P/L: ${pnlSign}Rp ${Math.round(realizedPnl).toLocaleString('id-ID')} (${realizedPnlPercent.toFixed(1)}%)`, realizedPnl >= 0 ? 'success' : 'error');
+    showToast(`Posisi ${pos.symbol}/IDR ditutup (${reason === 'MANUAL' ? 'MANUAL' : reason}). P/L: ${pnlSign}Rp ${Math.round(realizedPnl).toLocaleString('id-ID')} (${realizedPnlPercent.toFixed(1)}%)`, realizedPnl >= 0 ? 'success' : 'error');
 
     let logType: 'SUCCESS' | 'WARNING' | 'ERROR' = 'SUCCESS';
     if (realizedPnl < 0) logType = 'ERROR';
@@ -677,7 +730,7 @@ export default function DashboardPage() {
 
     // Trigger Success Toast
     const pnlSign = totalPnl >= 0 ? '+' : '';
-    showToast(`✅ Semua posisi (${idsToClose.length}) berhasil ditutup. Total P/L: ${pnlSign}Rp ${Math.round(totalPnl).toLocaleString('id-ID')}`, 'success');
+    showToast(`Semua posisi (${idsToClose.length}) berhasil ditutup. Total P/L: ${pnlSign}Rp ${Math.round(totalPnl).toLocaleString('id-ID')}`, 'success');
   };
 
   // 1. Ticking Dynamic Market-Wide Quant Scanner loop: rotates through all liquid market pairs
@@ -1145,11 +1198,11 @@ export default function DashboardPage() {
         
         // Validation check for SL > 50% (Rule 5)
         if (levels.stopLossPercent > 50.0) {
-          return `${index + 1}. **${item.symbol}/IDR** | Sinyal: **${item.signal}** | ⚠️ *Rekomendasi Ditahan: Stop Loss > 50% dari entry*`;
+          return `${index + 1}. **${item.symbol}/IDR** | Sinyal: **${item.signal}** | *Rekomendasi Ditahan: Stop Loss > 50% dari entry*`;
         }
 
         const isLongTerm = ['720', '1D', '1W', '1M'].includes(timeframe);
-        const warningText = (isLongTerm && levels.tp2Percent < 2.0) ? ' ⚠️ *Terlalu kecil, sesuaikan timeframe*' : '';
+        const warningText = (isLongTerm && levels.tp2Percent < 2.0) ? ' *Terlalu kecil, sesuaikan timeframe*' : '';
 
         const itemVolatilityFactor = Math.min(0.5, Math.abs(item.change24h) / 20);
         const kVal = Math.max(5, Math.min(25, Math.round((item.score / 100) * 0.25 * (1 - itemVolatilityFactor) * 100)));
@@ -1163,11 +1216,11 @@ export default function DashboardPage() {
         
         // Validation check for SL > 50% (Rule 5)
         if (levels.stopLossPercent > 50.0) {
-          return `${index + 1}. **${item.symbol}/IDR** | Sinyal: **${item.signal}** | ⚠️ *Rekomendasi Ditahan: Stop Loss > 50% dari entry*`;
+          return `${index + 1}. **${item.symbol}/IDR** | Sinyal: **${item.signal}** | *Rekomendasi Ditahan: Stop Loss > 50% dari entry*`;
         }
 
         const isLongTerm = ['720', '1D', '1W', '1M'].includes(timeframe);
-        const warningText = (isLongTerm && levels.tp2Percent < 2.0) ? ' ⚠️ *Terlalu kecil, sesuaikan timeframe*' : '';
+        const warningText = (isLongTerm && levels.tp2Percent < 2.0) ? ' *Terlalu kecil, sesuaikan timeframe*' : '';
 
         const itemVolatilityFactor = Math.min(0.5, Math.abs(item.change24h) / 20);
         const kVal = Math.max(5, Math.min(25, Math.round((item.score / 100) * 0.25 * (1 - itemVolatilityFactor) * 100)));
@@ -1196,7 +1249,7 @@ export default function DashboardPage() {
       lowerText.includes('koin') ||
       lowerText.includes('setup terbaik')
     ) {
-      return `### 🚀 Hasil Pemindaian Setup Koin & Rekomendasi Entry\n\n` +
+      return `### Hasil Pemindaian Setup Koin & Rekomendasi Entry\n\n` +
         `Berdasarkan data real-time scanner dari **Oracle Investment Engine v3.0**, berikut adalah hasil analisis untuk setup trading:\n\n` +
         `${setupSummary}\n\n` +
         `**Snapshot Koin Teraktif (Likuiditas)**:\n` +
@@ -1228,7 +1281,7 @@ export default function DashboardPage() {
           `- Whale Score / CVD: **${oracleSignal.smartMoney?.whaleScore}/100** / *${oracleSignal.microstructure?.cvdStatus}*`
         : '';
 
-      return `### 🔮 Deep Audit AI Kuantitatif: **${targetCoinSymbol}/IDR**\n\n` +
+      return `### Deep Audit AI Kuantitatif: **${targetCoinSymbol}/IDR**\n\n` +
         `*   **Harga Saat Ini**: Rp ${Math.round(activePrice).toLocaleString('id-ID')} (${ticker?.change24h >= 0 ? '+' : ''}${(ticker?.change24h || 0).toFixed(2)}%)\n` +
         `*   **AI Technical Score**: **${activeScore}/100**\n` +
         `*   **Sinyal & Pola**: **${activeSignal}** (*${activePattern}*)\n` +
@@ -1256,7 +1309,7 @@ export default function DashboardPage() {
       lowerText.includes('rumus') ||
       lowerText.includes('matematika')
     ) {
-      return `### 📐 Manajemen Risiko & Model Kelly Sizing\n\n` +
+      return `### Manajemen Risiko & Model Kelly Sizing\n\n` +
         `Sistem simulator ini menerapkan formula matematika **Modified Half-Kelly Criterion** untuk menghitung alokasi margin per trade:\n\n` +
         `$$\\mathbf{f^* = \\frac{b \\cdot p - q}{b} \\cdot 0.5}$$\n\n` +
         `**Keterangan Parameter**:\n` +
@@ -1300,7 +1353,7 @@ export default function DashboardPage() {
           }).join('\n')
         : 'Tidak ada posisi trading yang aktif saat ini.';
       
-      return `### 📊 Laporan Audit Portofolio Simulasi\n\n` +
+      return `### Laporan Audit Portofolio Simulasi\n\n` +
         `*   **Saldo Kas Tersedia**: Rp ${cashBalance.toLocaleString('id-ID')}\n` +
         `*   **Margin Posisi Aktif**: Rp ${openRisk.toLocaleString('id-ID')}\n` +
         `*   **Total Ekuitas Portofolio**: Rp ${Math.round(currentEquity).toLocaleString('id-ID')}\n` +
@@ -1321,7 +1374,7 @@ export default function DashboardPage() {
       lowerText.includes('model') ||
       lowerText.includes('ensemble')
     ) {
-      return `### ⚙️ Cara Kerja & Arsitektur Oracle Investment Engine v3.0\n\n` +
+      return `### Cara Kerja & Arsitektur Oracle Investment Engine v3.0\n\n` +
         `Sistem ini bekerja dengan menganalisis pasar melalui 6 lapisan kuantitatif:\n\n` +
         `1.  **Multi-Timeframe Confluence (7 Layers)**: Menggabungkan sinyal dari 7 timeframe sekaligus (\`1m\` hingga \`1D\`) secara real-time dengan parallel request.\n` +
         `2.  **Smart Money & Orderbook Depth**: Menghitung ketimpangan volume bids/asks di orderbook secara riil untuk membaca akumulasi/distribusi whale.\n` +
@@ -1333,7 +1386,7 @@ export default function DashboardPage() {
     }
 
     // Default conversational fallback
-    return `### 🤖 AI Auditor Core v3.0\n\n` +
+    return `### AI Auditor Core v3.0\n\n` +
       `Saya mendengarkan pesan Anda: "${userText}".\n\n` +
       `Berikut adalah status pasar live untuk **${targetCoinSymbol}/IDR** saat ini:\n` +
       `-   **Harga Saat Ini**: Rp ${Math.round(activePrice).toLocaleString('id-ID')}\n` +
@@ -1521,21 +1574,15 @@ export default function DashboardPage() {
   const activePairSymbol = selectedPairId.replace('_idr', '').toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#030407] text-[#E6EDF3] flex font-sans antialiased overflow-hidden select-none relative">
+    <div className="min-h-screen bg-[#030407] text-[#E6EDF3] flex font-sans antialiased overflow-x-hidden select-none relative">
       {/* Left Sidebar Navigation (3.6) */}
       <aside 
-        className={`fixed left-0 top-0 bottom-0 z-40 bg-[#07090F] border-r border-[#1E2333] hidden md:flex flex-col justify-between transition-all duration-200 ease-in-out select-none ${
-          sidebarExpanded ? 'w-[220px]' : 'w-[60px]'
-        }`}
-        onMouseEnter={() => setSidebarExpanded(true)}
-        onMouseLeave={() => setSidebarExpanded(false)}
+        className="fixed left-0 top-0 bottom-0 z-40 bg-[#07090F] border-r border-[#1E2333] hidden md:flex flex-col justify-between w-[220px] select-none"
       >
         <div className="flex flex-col gap-6 py-5">
           {/* Logo Brand / Icon */}
           <div className="flex items-center gap-3 px-3.5">
-            <div className="h-9 w-9 rounded-[3px] bg-gradient-to-tr from-[#58A6FF] to-indigo-650 flex items-center justify-center font-bold text-[#0D1117] shadow-[0_0_12px_rgba(88,166,255,0.2)] shrink-0">
-              Ω
-            </div>
+            <div className="h-9 w-9 rounded-[3px] bg-gradient-to-tr from-[#58A6FF] to-indigo-650 flex items-center justify-center font-bold text-[#0D1117] shadow-[0_0_12px_rgba(88,166,255,0.2)] shrink-0"><Shield className="h-4.5 w-4.5" /></div>
             {sidebarExpanded && (
               <span className="font-extrabold text-sm tracking-wide text-[#E6EDF3] uppercase animate-fadeIn font-sans">
                 Fantasma Synergy
@@ -1636,16 +1683,13 @@ export default function DashboardPage() {
 
       {/* Main Content Workspace Layout */}
       <div 
-        className={`flex-1 flex flex-col min-h-screen overflow-y-auto transition-all duration-200 ease-in-out pb-[60px] md:pb-0 ${
-          sidebarExpanded ? 'md:pl-[220px]' : 'md:pl-[60px]'
-        }`}
+        data-dashboard-scroll
+        className="flex-1 flex flex-col min-h-screen md:pl-[220px] pb-[60px] md:pb-0"
       >
         {/* 1. Header Terminals */}
         <header className="border-b border-[#1E2333] bg-[#07090F] px-6 py-3.5 flex items-center justify-between sticky top-0 z-35 select-none">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-[3px] bg-gradient-to-tr from-[#58A6FF] to-indigo-650 flex items-center justify-center font-bold text-[#0D1117] shadow-[0_0_12px_rgba(88,166,255,0.2)]">
-              Ω
-            </div>
+            <div className="h-9 w-9 rounded-[3px] bg-gradient-to-tr from-[#58A6FF] to-indigo-650 flex items-center justify-center font-bold text-[#0D1117] shadow-[0_0_12px_rgba(88,166,255,0.2)]"><Shield className="h-4.5 w-4.5" /></div>
             <div>
               <h1 className="font-extrabold text-base tracking-wide bg-gradient-to-r from-[#58A6FF] to-indigo-300 bg-clip-text text-transparent uppercase flex items-center gap-1.5 font-sans">
                 Fantasma Synergy <span className="text-[10px] text-[#58A6FF] font-mono tracking-widest bg-[#58A6FF]/10 border border-[#58A6FF]/20 px-2 py-0.5 rounded">Core v1.0</span>
@@ -1699,7 +1743,7 @@ export default function DashboardPage() {
 
         {/* 2. Main Dashboard Layout Grid (3.6) */}
         {activeTab === 'DASHBOARD' && (
-          <main className="flex-1 p-6 grid grid-cols-1 xl:grid-cols-4 gap-6 overflow-y-auto xl:overflow-hidden bg-[#030407]">
+          <main className="flex-1 p-6 grid grid-cols-1 xl:grid-cols-4 gap-6 bg-[#030407] scroll-reveal">
             {/* SIDEBAR: Scanner (1 Column) */}
             <div className="xl:col-span-1 h-[500px] xl:h-full flex flex-col">
               <MarketScanner
@@ -1713,7 +1757,7 @@ export default function DashboardPage() {
             </div>
 
             {/* WORKSPACE AREA: Charts, Depth, AI & Calculator (3 Columns) */}
-            <div className="xl:col-span-3 flex flex-col gap-6 overflow-y-auto">
+            <div className="xl:col-span-3 flex flex-col gap-6">
               {/* Top Overview Bar */}
               {ticker && (
                 <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] flex flex-wrap items-center justify-between gap-4 bg-[#07090F]">
@@ -1894,7 +1938,7 @@ export default function DashboardPage() {
 
         {/* SCANNER VIEW TAB (3.6) */}
         {activeTab === 'SCANNER' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#030407]">
+          <main className="flex-1 p-6 flex flex-col gap-6 bg-[#030407] scroll-reveal">
             {/* Header Cards with summary */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="quantum-card rounded-[3px] p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
@@ -2125,7 +2169,7 @@ export default function DashboardPage() {
 
         {/* AI AUDITOR VIEW TAB (3.6 & 3.7 & 3.10) */}
         {activeTab === 'AUDITOR' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#030407]">
+          <main className="flex-1 p-6 flex flex-col gap-6 bg-[#030407] scroll-reveal">
             {/* Top Section: Full Oracle Cockpit Ratios, Coordinates, and Consensus */}
             <OracleDashboard 
               signal={oracleSignal}
@@ -2161,7 +2205,7 @@ export default function DashboardPage() {
                       className={`flex flex-col max-w-[85%] ${msg.role === 'USER' ? 'self-end items-end' : 'self-start items-start'}`}
                     >
                       <div className="flex items-center gap-1.5 mb-1 text-[10px] text-[#8B949E] font-mono">
-                        <span className="font-bold text-[#E6EDF3]">{msg.role === 'USER' ? 'ELITE USER' : '🤖 FANTASMA SYNERGY AI'}</span>
+                        <span className="font-bold text-[#E6EDF3]">{msg.role === 'USER' ? 'ELITE USER' : 'FANTASMA SYNERGY AI'}</span>
                         <span>•</span>
                         <span>{msg.timestamp}</span>
                       </div>
@@ -2177,7 +2221,7 @@ export default function DashboardPage() {
                   {aiChatLoading && (
                     <div className="flex flex-col items-start self-start max-w-[85%]">
                       <div className="flex items-center gap-1.5 mb-1 text-[10px] text-[#8B949E] font-mono">
-                        <span className="font-bold text-[#E6EDF3]">🤖 FANTASMA SYNERGY AI</span>
+                        <span className="font-bold text-[#E6EDF3]">FANTASMA SYNERGY AI</span>
                       </div>
                       <div className="bg-[#030407] border border-[#1E2333] p-3 rounded-[3px] rounded-tl-none text-[#8B949E] flex items-center gap-2 font-mono">
                         <span className="h-2 w-2 rounded-full bg-[#58A6FF] animate-pulse" />
@@ -2253,7 +2297,7 @@ export default function DashboardPage() {
 
         {/* RISK LAB VIEW TAB (v3.1) */}
         {activeTab === 'RISK_LAB' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto lg:overflow-hidden bg-[#030407]">
+          <main className="flex-1 p-6 flex flex-col gap-6 bg-[#030407] scroll-reveal">
             {/* Header Title */}
             <div className="border-b border-[#1E2333] pb-3 select-none">
               <h2 className="text-lg font-extrabold text-[#E6EDF3] flex items-center gap-2 font-sans">
@@ -2278,7 +2322,7 @@ export default function DashboardPage() {
                 
                 // Switch to main dashboard tab to review filled inputs
                 setActiveTab('DASHBOARD');
-                showToast(`🚀 Setup Risk Lab berhasil diterapkan untuk ${activePairSymbol}/IDR! Sinyal: ${direction}, SL: Rp ${sl.toLocaleString('id-ID')}, TP2: Rp ${tp2.toLocaleString('id-ID')}.`, 'success');
+                showToast(`Setup Risk Lab berhasil diterapkan untuk ${activePairSymbol}/IDR. Sinyal: ${direction}, SL: Rp ${sl.toLocaleString('id-ID')}, TP2: Rp ${tp2.toLocaleString('id-ID')}.`, 'success');
               }}
               recentSlPairs={recentSlPairs}
             />
@@ -2292,7 +2336,7 @@ export default function DashboardPage() {
 
         {/* SETTINGS VIEW TAB (3.6) */}
         {activeTab === 'SETTINGS' && (
-          <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#030407]">
+          <main className="flex-1 p-6 flex flex-col gap-6 bg-[#030407] scroll-reveal">
             {/* Header Title */}
             <div className="border-b border-[#1E2333] pb-3 select-none">
               <h2 className="text-lg font-extrabold text-[#E6EDF3] flex items-center gap-2 font-sans">
@@ -2340,7 +2384,7 @@ export default function DashboardPage() {
                         setCashBalance(10000000);
                         setBalanceChangePulse('gain');
                         setTimeout(() => setBalanceChangePulse(null), 1000);
-                        showToast('✅ Saldo kas di-reset menjadi Rp 10.000.000', 'success');
+                        showToast('Saldo kas di-reset menjadi Rp 10.000.000', 'success');
                       }}
                       className="bg-[#030407] hover:bg-[#0C0E18] border border-[#1E2333] hover:border-[#58A6FF] rounded-[3px] py-2 text-[10px] font-bold font-mono text-[#E6EDF3] transition cursor-pointer"
                     >
@@ -2352,7 +2396,7 @@ export default function DashboardPage() {
                         setCashBalance(50000000);
                         setBalanceChangePulse('gain');
                         setTimeout(() => setBalanceChangePulse(null), 1000);
-                        showToast('✅ Saldo kas ditambahkan menjadi Rp 50.000.000', 'success');
+                        showToast('Saldo kas ditambahkan menjadi Rp 50.000.000', 'success');
                       }}
                       className="bg-[#030407] hover:bg-[#0C0E18] border border-[#1E2333] hover:border-[#58A6FF] rounded-[3px] py-2 text-[10px] font-bold font-mono text-[#E6EDF3] transition cursor-pointer"
                     >
@@ -2364,7 +2408,7 @@ export default function DashboardPage() {
                         setCashBalance(100000000);
                         setBalanceChangePulse('gain');
                         setTimeout(() => setBalanceChangePulse(null), 1000);
-                        showToast('✅ Saldo kas ditambahkan menjadi Rp 100.000.000', 'success');
+                        showToast('Saldo kas ditambahkan menjadi Rp 100.000.000', 'success');
                       }}
                       className="bg-[#030407] hover:bg-[#0C0E18] border border-[#1E2333] hover:border-[#58A6FF] rounded-[3px] py-2 text-[10px] font-bold font-mono text-[#E6EDF3] transition cursor-pointer"
                     >
@@ -2435,7 +2479,7 @@ export default function DashboardPage() {
                       type="button"
                       onClick={() => {
                         setLeverageStrategy('DYNAMIC');
-                        showToast('🤖 AI Dynamic Probability Leverage diaktifkan!', 'info');
+                        showToast('AI Dynamic Probability Leverage diaktifkan.', 'info');
                       }}
                       className={`py-2 text-[10px] font-bold uppercase rounded-[2px] transition cursor-pointer ${
                         leverageStrategy === 'DYNAMIC' 
@@ -2443,13 +2487,13 @@ export default function DashboardPage() {
                           : 'text-[#8B949E] hover:text-[#E6EDF3]'
                       }`}
                     >
-                      🤖 AI Dynamic Strategy (b)
+                      AI Dynamic Strategy (b)
                     </button>
                     <button
                       type="button"
                       onClick={() => {
                         setLeverageStrategy('FIXED');
-                        showToast('⚙️ Fixed Leverage Strategy diaktifkan!', 'info');
+                        showToast('Fixed Leverage Strategy diaktifkan.', 'info');
                       }}
                       className={`py-2 text-[10px] font-bold uppercase rounded-[2px] transition cursor-pointer ${
                         leverageStrategy === 'FIXED' 
@@ -2457,7 +2501,7 @@ export default function DashboardPage() {
                           : 'text-[#8B949E] hover:text-[#E6EDF3]'
                       }`}
                     >
-                      ⚙️ Fixed Leverage Mode
+                      Fixed Leverage Mode
                     </button>
                   </div>
 
@@ -2536,7 +2580,7 @@ export default function DashboardPage() {
                         setBotLogs([]);
                         setActivePositions([]);
                         setFailedSignalCooldowns({});
-                        showToast('🔥 Seluruh riwayat simulasi berhasil dibersihkan!', 'error');
+                        showToast('Seluruh riwayat simulasi berhasil dibersihkan.', 'error');
                       }
                     }}
                     className="w-full mt-2 bg-[#F85149]/10 hover:bg-[#F85149]/20 border border-[#F85149]/35 hover:border-[#F85149] text-[#F85149] font-bold text-xs py-2.5 rounded-[3px] transition active:scale-[0.98] cursor-pointer"
@@ -2564,7 +2608,11 @@ export default function DashboardPage() {
       {/* TOAST UI NOTIFICATIONS (1.5) */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#0C0E18] border border-[#1E2333] text-[#E6EDF3] px-4 py-3.5 rounded-[3px] shadow-2xl flex items-center gap-2.5 animate-fadeIn select-none font-sans font-bold text-xs max-w-sm">
-          <div className="shrink-0 text-base">{toast.type === 'success' ? '✅' : '⚠️'}</div>
+          {toast.type === 'success' ? (
+            <CheckCircle className="h-4 w-4 text-[#3FB950] shrink-0" />
+          ) : (
+            <ShieldAlert className="h-4 w-4 text-[#D29922] shrink-0" />
+          )}
           <span className="leading-normal">{toast.message}</span>
         </div>
       )}

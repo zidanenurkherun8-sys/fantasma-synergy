@@ -388,10 +388,10 @@ export default function RiskLabConsole({
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">1. Gaya Trading (Timeframe Target)</span>
           <div className="grid grid-cols-4 gap-2">
             {[
-              { id: 'SCALPING', label: '⚡ SCALPING', desc: '< 15 Menit' },
-              { id: 'SHORT', label: '⏱️ INTRADAY', desc: '15m - 4 Jam' },
-              { id: 'MEDIUM', label: '📅 SWING', desc: '4 Jam - 1 Hari' },
-              { id: 'LONG', label: '🪐 POSITION', desc: '1 Hari - 1 Minggu' }
+              { id: 'SCALPING', label: 'SCALPING', desc: '< 15 Menit' },
+              { id: 'SHORT', label: 'INTRADAY', desc: '15m - 4 Jam' },
+              { id: 'MEDIUM', label: 'SWING', desc: '4 Jam - 1 Hari' },
+              { id: 'LONG', label: 'POSITION', desc: '1 Hari - 1 Minggu' }
             ].map(item => (
               <button
                 key={item.id}
@@ -415,10 +415,10 @@ export default function RiskLabConsole({
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">2. Rentang Profit</span>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { id: 'BESOK', label: '🌅 Besok Profit', desc: 'Max 24 Jam' },
-                { id: 'LUSA', label: '⛅ Lusa Profit', desc: 'Max 48 Jam' },
-                { id: '3HARI', label: '📅 3 Hari', desc: 'Max 72 Jam' },
-                { id: 'AKHIR_MINGGU', label: '🪐 Akhir Minggu', desc: '120 Jam+' }
+                { id: 'BESOK', label: 'Besok Profit', desc: 'Max 24 Jam' },
+                { id: 'LUSA', label: 'Lusa Profit', desc: 'Max 48 Jam' },
+                { id: '3HARI', label: '3 Hari', desc: 'Max 72 Jam' },
+                { id: 'AKHIR_MINGGU', label: 'Akhir Minggu', desc: '120 Jam+' }
               ].map(item => (
                 <button
                   key={item.id}
@@ -440,10 +440,10 @@ export default function RiskLabConsole({
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">3. Metode Penentuan TP/SL</span>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { id: 'ATR', label: '📊 ATR Multiplier', desc: 'Rata-rata True Range' },
-                { id: 'SR', label: '📈 Pivot Support/Res', desc: 'Level Pivot Kunci' },
-                { id: 'FIB', label: '📐 Fibonacci Level', desc: 'Golden Retracement' },
-                { id: 'STRUCTURE', label: '🕯️ Swing High/Low', desc: 'Struktur Market' }
+                { id: 'ATR', label: 'ATR Multiplier', desc: 'Rata-rata True Range' },
+                { id: 'SR', label: 'Pivot Support/Res', desc: 'Level Pivot Kunci' },
+                { id: 'FIB', label: 'Fibonacci Level', desc: 'Golden Retracement' },
+                { id: 'STRUCTURE', label: 'Swing High/Low', desc: 'Struktur Market' }
               ].map(item => (
                 <button
                   key={item.id}
@@ -549,7 +549,7 @@ export default function RiskLabConsole({
             />
             {dailyDrawdownBreached && (
               <span className="text-[8px] font-bold text-rose-400 uppercase tracking-wide block animate-pulse">
-                ⚠️ Batas Drawdown Tercapai! Eksekusi Bot ditahan.
+                Batas Drawdown Tercapai. Eksekusi bot ditahan.
               </span>
             )}
           </div>
@@ -724,7 +724,7 @@ export default function RiskLabConsole({
           <div className="flex flex-col gap-1.5 text-slate-400">
             {/* dynamic confirmations display */}
             <div className="flex items-start gap-1">
-              <span className="text-emerald-400 font-bold mr-0.5">📊</span>
+              <span className="text-emerald-400 font-bold mr-0.5">Data</span>
               <div>
                 <span className="font-bold text-slate-300">Konfirmasi Level:</span>
                 <span className="block text-[9px] text-slate-500 mt-0.5">{setup.confirmations.join(' | ')}</span>
@@ -732,12 +732,12 @@ export default function RiskLabConsole({
             </div>
 
             <div className="flex items-start gap-1">
-              <span className="text-purple-400 font-bold mr-0.5">🎯</span>
+              <span className="text-purple-400 font-bold mr-0.5">Target</span>
               <span>Win Prob ({targetTime}): **{setup.regressionConfidence}%** hit probability based on linear regression.</span>
             </div>
 
             <div className="flex items-start gap-1">
-              <span className="text-indigo-400 font-bold mr-0.5">⏱️</span>
+              <span className="text-indigo-400 font-bold mr-0.5">7D</span>
               <span>7D Backtest Win Rate: **{setup.backtestWinRate}%** on {method} mode.</span>
             </div>
 
@@ -753,14 +753,14 @@ export default function RiskLabConsole({
             {ticker?.change24h > 4.5 && (
               <div className="flex items-start gap-1 text-amber-400 font-bold">
                 <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                <span>⚠️ Risk factor: Koin jenuh beli (+{ticker.change24h.toFixed(1)}%). Bahaya Short Squeeze/Correction.</span>
+              <span>Risk factor: Koin jenuh beli (+{ticker.change24h.toFixed(1)}%). Bahaya short squeeze/correction.</span>
               </div>
             )}
 
             {simulatedFundingRateVal > 0.03 && (
               <div className="flex items-start gap-1 text-amber-400 font-bold mt-1">
                 <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-                <span>⚠️ Risk factor: Funding rate tinggi ({simulatedFundingRateStr})</span>
+                <span>Risk factor: Funding rate tinggi ({simulatedFundingRateStr})</span>
               </div>
             )}
           </div>
@@ -870,7 +870,7 @@ export default function RiskLabConsole({
           
           {activeEventNear && (
             <div className="mt-1 border border-rose-500/30 bg-rose-500/5 p-1 px-2 rounded text-[8px] text-rose-400 font-bold uppercase tracking-wider animate-pulse text-center">
-              ⚠️ Warning: CPI/FOMC release is imminent. Expect slippage & spread expansions.
+              Warning: CPI/FOMC release is imminent. Expect slippage & spread expansions.
             </div>
           )}
         </div>
@@ -956,7 +956,7 @@ export default function RiskLabConsole({
               </div>
 
               <div className="p-3 bg-purple-500/5 border border-purple-500/20 rounded-[3px] leading-relaxed text-[11px]">
-                💡 **Kesimpulan Backtest**: Metode **{method}** pada koin **{activeCoinSymbol}** menghasilkan tingkat stabilitas sebesar **{setup.backtestWinRate}%** di bawah rentang volatilitas sesi aktif. Pastikan filter berita besar diaktifkan untuk menghindari kegagalan eksekusi akibat anomali spread.
+                <strong>Kesimpulan Backtest:</strong> Metode <strong>{method}</strong> pada koin <strong>{activeCoinSymbol}</strong> menghasilkan tingkat stabilitas sebesar <strong>{setup.backtestWinRate}%</strong> di bawah rentang volatilitas sesi aktif. Pastikan filter berita besar diaktifkan untuk menghindari kegagalan eksekusi akibat anomali spread.
               </div>
             </div>
 

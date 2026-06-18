@@ -41,7 +41,7 @@ CHoCH menandakan perubahan karakter atau awal transisi tren. Terjadi ketika harg
 * **Bullish CHoCH**: Penutupan harga di atas Lower High (LH) terakhir setelah tren turun panjang.
 * **Bearish CHoCH**: Penutupan harga di bawah Higher Low (HL) terakhir setelah tren naik panjang.
 
-*💡 Tip Analitis*: Selalu konfirmasikan penembusan level dengan penutupan BODY candle di chart volume tinggi, bukan hanya sumbu (wick) candle saja. Sumbu candle sering kali merepresentasikan manipulasi likuiditas.
+*Tip Analitis*: Selalu konfirmasikan penembusan level dengan penutupan BODY candle di chart volume tinggi, bukan hanya sumbu (wick) candle saja. Sumbu candle sering kali merepresentasikan manipulasi likuiditas.
     `
   },
   {
@@ -60,7 +60,7 @@ Wyckoff mengidentifikasi bahwa pasar bergerak dalam siklus akumulasi (pengumpula
 5. **Spring (The Trap)**: **Momen krusial!** Harga menembus level support SC secara menipu untuk menyapu stop-loss retail, lalu dengan cepat ditarik kembali ke dalam rentang konsolidasi. Ini adalah titik entry dengan akurasi tertinggi.
 6. **LPS (Last Point of Support)**: Titik support terakhir sebelum ekspansi harga keluar dari akumulasi (breakout).
 
-*💡 Strategi Fantasma*: Selalu pasang alarm di bawah level SC untuk mendeteksi potensi Wyckoff Spring. Entry paling aman adalah setelah Spring dikonfirmasi dengan volume beli yang meningkat saat harga kembali masuk ke dalam trading range.
+*Strategi Fantasma*: Selalu pasang alarm di bawah level SC untuk mendeteksi potensi Wyckoff Spring. Entry paling aman adalah setelah Spring dikonfirmasi dengan volume beli yang meningkat saat harga kembali masuk ke dalam trading range.
     `
   },
   {
@@ -83,7 +83,7 @@ Dimana:
 Untuk meminimalkan volatilitas saldo (*portfolio drawdown*), sistem Fantasma Synergy menggunakan **Half-Kelly** (setengah dari nilai Kelly optimal) dengan formula penyesuaian volatilitas pasar:
 $$\text{Alokasi Disarankan} = \max\left(5\%, \min\left(25\%, \text{Kelly Size} \times (1 - \text{volatilityFactor})\right)\right)$$
 
-*💡 Aturan Manajemen Risiko*: Jangan pernah melampaui alokasi 25% modal per posisi terlepas dari tingginya probabilitas indikator AI. Disiplin Kelly adalah pelindung utama akun Anda dari kejatuhan fatal.
+*Aturan Manajemen Risiko*: Jangan pernah melampaui alokasi 25% modal per posisi terlepas dari tingginya probabilitas indikator AI. Disiplin Kelly adalah pelindung utama akun Anda dari kejatuhan fatal.
     `
   }
 ];
@@ -109,7 +109,7 @@ const INITIAL_SOCIALS: SocialPost[] = [
     id: 's3',
     handle: '@CryptoWhaleAlert',
     platform: 'X/Twitter',
-    content: '🚨 4.500 ETH (Rp 136 Miliar) ditransfer dari cold wallet ke exchange Binance. Kemungkinan distribusi jangka pendek. Risiko likuiditas meningkat.',
+    content: 'Peringatan: 4.500 ETH (Rp 136 Miliar) ditransfer dari cold wallet ke exchange Binance. Kemungkinan distribusi jangka pendek. Risiko likuiditas meningkat.',
     timestamp: '2 menit lalu',
     sentiment: 'BEARISH'
   },
@@ -219,7 +219,7 @@ export default function IntelligenceConsole() {
   };
 
   return (
-    <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#030407] h-full">
+    <main className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-[#030407] h-full scroll-premium scroll-reveal">
       {/* 1. Header Section */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#1E2333] pb-4 select-none">
         <div className="flex items-center gap-3">
@@ -285,7 +285,7 @@ export default function IntelligenceConsole() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-4 scroll-smooth [-webkit-overflow-scrolling:touch]">
+            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-4 [-webkit-overflow-scrolling:touch]">
               {newsLoading ? (
                 <div className="quantum-card rounded-[3px] border border-[#1E2333] bg-[#07090F] h-[350px] flex flex-col items-center justify-center text-center">
                   <div className="h-9 w-9 rounded-full border-t-2 border-[#58A6FF] animate-spin mb-3" />
@@ -346,7 +346,7 @@ export default function IntelligenceConsole() {
               <span className="h-2 w-2 rounded-full bg-[#3FB950] animate-ping" />
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 scroll-smooth [-webkit-overflow-scrolling:touch]">
+            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 [-webkit-overflow-scrolling:touch]">
               {socials.map((post) => (
                 <div key={post.id} className="bg-[#030407] border border-[#1E2333] p-3 rounded-[3px] flex flex-col gap-1.5 font-mono relative overflow-hidden select-none hover:border-purple-500/35 transition-colors">
                   <div className="flex items-center justify-between text-[9px] font-bold">
@@ -407,7 +407,7 @@ export default function IntelligenceConsole() {
           </div>
 
           {/* Right Panel (3/4 Width): Selected Module Content Reader */}
-          <div className="lg:col-span-3 flex flex-col gap-4 bg-[#07090F] border border-[#1E2333] rounded-[3px] p-6 overflow-y-auto select-none font-sans scroll-smooth [-webkit-overflow-scrolling:touch]">
+          <div className="lg:col-span-3 flex flex-col gap-4 bg-[#07090F] border border-[#1E2333] rounded-[3px] p-6 overflow-y-auto select-none font-sans [-webkit-overflow-scrolling:touch]">
             <div className="border-b border-[#1E2333] pb-3 mb-2">
               <span className="text-[9px] font-mono text-[#58A6FF] uppercase font-bold tracking-widest bg-[#58A6FF]/10 px-2.5 py-0.5 rounded border border-[#58A6FF]/20 mb-2 inline-block">
                 FANTASMA ACADEMY READOUT

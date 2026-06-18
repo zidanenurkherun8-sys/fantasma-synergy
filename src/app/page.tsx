@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import DashboardPage from './dashboard/page';
-import { Terminal, Lock, ShieldAlert, Cpu, Eye, HelpCircle, Volume2, VolumeX } from 'lucide-react';
+import { Activity, BarChart3, Cpu, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
 import { audio } from '@/lib/audio';
 
 export default function Home() {
@@ -17,13 +17,34 @@ export default function Home() {
       setMutedState(audio.isMuted());
     }
   }, []);
+
+
   
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
   const rotationRef = useRef({ x: 0, y: 0 });
   const zoomRef = useRef(1.0);
   const dragRef = useRef({ isDragging: false, lastX: 0, lastY: 0, velX: 0, velY: 0 });
-  const impactRef = useRef({ velocityY: 0, velocityX: 0, pulse: 1.0 });
+  const impactRef = useRef({ velocityY: 0, velocityX: 0 });
+
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>('.scroll-reveal'));
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      },
+      { threshold: 0.18, rootMargin: '0px 0px -8% 0px' }
+    );
+
+    elements.forEach(element => observer.observe(element));
+    return () => observer.disconnect();
+  }, [accessed]);
 
   // Load configuration and simulate console logging
   useEffect(() => {
@@ -62,14 +83,24 @@ export default function Home() {
     if (!ctx) return;
 
     let animFrameId: number;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    const setCanvasSize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    setCanvasSize();
 
     // Resize listener
     const handleResize = () => {
       if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      setCanvasSize();
     };
     window.addEventListener('resize', handleResize);
 
@@ -109,10 +140,10 @@ export default function Home() {
     };
 
     const handleWheel = (e: WheelEvent) => {
-      // Only zoom if welcome core is showing, prevent web-page scrolling
+      if (!e.ctrlKey && !e.metaKey) return;
       e.preventDefault();
       const zoomDelta = -e.deltaY * 0.0015;
-      zoomRef.current = Math.max(0.4, Math.min(3.0, zoomRef.current + zoomDelta));
+      zoomRef.current = Math.max(0.65, Math.min(2.25, zoomRef.current + zoomDelta));
     };
 
     // Touch support for mobile pinch/drag
@@ -330,9 +361,8 @@ export default function Home() {
     const spawnExplosion = (x: number, y: number, color: string) => {
       audio?.playExplosion();
       // Physical reaction on the globe
-      impactRef.current.velocityY = (Math.random() - 0.5) * 0.05;
-      impactRef.current.velocityX = (Math.random() - 0.5) * 0.05;
-      impactRef.current.pulse = 1.15; // pulse size scale
+      impactRef.current.velocityY = (Math.random() - 0.5) * 0.018;
+      impactRef.current.velocityX = (Math.random() - 0.5) * 0.018;
 
       const particleCount = 18 + Math.floor(Math.random() * 12);
       for (let i = 0; i < particleCount; i++) {
@@ -436,7 +466,7 @@ export default function Home() {
       mouse.x = width / 2;
       mouse.y = height / 2;
 
-      // Draw background spectral nebula glows
+      // Draw refined ambient background
       const glowGrad = ctx.createRadialGradient(
         width / 2 + (mouse.x - width / 2) * 0.15,
         height / 2 + (mouse.y - height / 2) * 0.15,
@@ -445,11 +475,30 @@ export default function Home() {
         height / 2,
         Math.max(width, height) * 0.6
       );
-      glowGrad.addColorStop(0, 'rgba(26, 11, 46, 0.55)');   // Deep spectral purple
-      glowGrad.addColorStop(0.5, 'rgba(5, 7, 13, 0.95)');   // Pitch black
+      glowGrad.addColorStop(0, 'rgba(12, 34, 54, 0.72)');
+      glowGrad.addColorStop(0.45, 'rgba(6, 8, 16, 0.96)');
       glowGrad.addColorStop(1, '#030407');
       ctx.fillStyle = glowGrad;
       ctx.fillRect(0, 0, width, height);
+
+      const gridGap = 44;
+      ctx.save();
+      ctx.globalAlpha = 0.18;
+      ctx.strokeStyle = 'rgba(88, 166, 255, 0.12)';
+      ctx.lineWidth = 0.6;
+      for (let x = (rotationRef.current.y * 24) % gridGap; x < width; x += gridGap) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x - width * 0.08, height);
+        ctx.stroke();
+      }
+      for (let y = (rotationRef.current.x * 24) % gridGap; y < height; y += gridGap) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y + height * 0.06);
+        ctx.stroke();
+      }
+      ctx.restore();
 
       // Draw floating space particles with cursor parallax shifting
       particles.forEach(p => {
@@ -538,12 +587,11 @@ export default function Home() {
         }
       }
 
-      // Apply physical impact rotations
+      // Apply gentle impact rotations
       rotationRef.current.y += impactRef.current.velocityY;
       rotationRef.current.x += impactRef.current.velocityX;
-      impactRef.current.velocityY *= 0.92;
-      impactRef.current.velocityX *= 0.92;
-      impactRef.current.pulse += (1.0 - impactRef.current.pulse) * 0.08;
+      impactRef.current.velocityY *= 0.9;
+      impactRef.current.velocityX *= 0.9;
 
       const angleY = rotationRef.current.y;
       const angleX = rotationRef.current.x;
@@ -558,7 +606,7 @@ export default function Home() {
       const centerY = height / 2 - 40;
       const dist = 400; // perspective camera depth
       const baseGlobeRadius = Math.min(width, height) * 0.16; // adaptive sizing
-      const currentRadius = baseGlobeRadius * zoomRef.current * impactRef.current.pulse;
+      const currentRadius = baseGlobeRadius * zoomRef.current;
 
       const projectedGlobe = globeGrid.map(row =>
         row.map(p => {
@@ -779,15 +827,17 @@ export default function Home() {
 
   return (
     <div 
-      className={`min-h-screen relative overflow-hidden bg-[#030407] text-[#F0F3F8] font-sans flex flex-col items-center justify-between select-none ${
+      className={`min-h-screen relative overflow-x-hidden bg-[#030407] text-[#F0F3F8] font-sans flex flex-col items-center justify-between select-none scroll-premium scroll-parallax-root ${
         glitching ? 'animate-[pulse_0.1s_infinite] saturate-[300%] contrast-[150%]' : ''
       }`}
     >
       {/* Dynamic Parallax Background Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
+      <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" />
 
-      {/* Spooky Scanning Glitch Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[length:100%_4px,6px_100%] pointer-events-none z-10 opacity-70" />
+      <div className="fixed inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.18)_50%),linear-gradient(90deg,rgba(88,166,255,0.018),rgba(157,78,221,0.012),rgba(0,229,255,0.018))] bg-[length:100%_4px,8px_100%] pointer-events-none z-10 opacity-55" />
+      <div className="fixed inset-0 z-10 pointer-events-none parallax-layer parallax-slow">
+        <div className="absolute inset-0 premium-grid-overlay" />
+      </div>
 
       {/* Top Banner Alert */}
       <header className="w-full max-w-6xl px-6 py-4 flex items-center justify-between z-20">
@@ -820,19 +870,19 @@ export default function Home() {
       </header>
 
       {/* Main Core Elements */}
-      <div className="flex flex-col items-center justify-center text-center z-20 flex-1 px-4 max-w-lg mt-[-20px]">
+      <div className="flex flex-col items-center justify-center text-center z-20 flex-1 px-4 max-w-2xl mt-[-20px] min-h-[calc(100vh-148px)] scroll-reveal">
         {/* Wireframe Area Placeholder for spacing (canvas draws over this) */}
         <div className="h-[260px] w-full pointer-events-none" />
 
         {/* Brand Names & Subtitle */}
         <h1 
-          className="text-4xl md:text-5xl font-extrabold tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] via-[#9D4EDD] to-[#00E5FF] drop-shadow-[0_0_20px_rgba(0,229,255,0.15)] font-sans uppercase cyber-glitch-text cursor-crosshair"
+          className="text-4xl md:text-5xl font-extrabold tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-r from-[#58A6FF] via-[#00E5FF] to-[#9D4EDD] drop-shadow-[0_0_20px_rgba(88,166,255,0.16)] font-sans uppercase cursor-crosshair"
           title="FANTASMA SYNERGY"
         >
           FANTASMA SYNERGY
         </h1>
         <p className="text-[10px] font-bold font-mono tracking-[0.4em] text-cyan-400/80 uppercase mt-2 select-none">
-          Quantum Oracle Investment Terminal v3.5
+          Quantitative Oracle Investment Terminal v3.5
         </p>
 
         {/* Cyber Logs Feed Console */}
@@ -850,14 +900,28 @@ export default function Home() {
           )}
         </div>
 
+        <div className="mt-6 grid grid-cols-3 gap-3 w-full text-left">
+          {[
+            { icon: Activity, label: 'Live Market Engine', value: '1s Ticks' },
+            { icon: BarChart3, label: 'Risk Layer', value: 'Kelly Aware' },
+            { icon: Cpu, label: 'AI Consensus', value: 'Multi Model' }
+          ].map(item => (
+            <div key={item.label} className="bg-[#07090F]/70 border border-[#1E2333] rounded-[6px] p-3 backdrop-blur-sm">
+              <item.icon className="h-4 w-4 text-[#58A6FF] mb-2" />
+              <div className="text-[9px] text-[#8B98A6] uppercase font-mono font-bold">{item.label}</div>
+              <div className="text-xs text-[#F0F3F8] font-extrabold mt-0.5">{item.value}</div>
+            </div>
+          ))}
+        </div>
+
         {/* Action Button & Bypass controls */}
         <div className="mt-8 flex flex-col items-center gap-3 w-full">
           <button
             onClick={handleAccessCore}
             disabled={glitching}
-            className="w-full md:w-64 bg-transparent border-2 border-cyan-400/70 hover:border-cyan-400 text-cyan-400 hover:text-[#030407] hover:bg-cyan-400 font-extrabold text-xs tracking-widest py-3.5 px-6 rounded-[3px] transition-all duration-300 transform active:scale-95 hover:shadow-[0_0_25px_rgba(0,229,255,0.35)] cursor-pointer"
+            className="w-full md:w-72 bg-[#58A6FF] hover:bg-[#79B8FF] border border-[#58A6FF] text-[#030407] font-extrabold text-xs tracking-widest py-3.5 px-6 rounded-[6px] transition-all duration-300 transform active:scale-95 hover:shadow-[0_0_25px_rgba(88,166,255,0.35)] cursor-pointer"
           >
-            {glitching ? 'DECRYPTING CORE...' : 'INISIALISASI QUANTUM CORE'}
+            {glitching ? 'MENYIAPKAN CORE...' : 'MASUK KE TERMINAL'}
           </button>
           
           <label className="flex items-center gap-2 cursor-pointer select-none py-1.5">
@@ -874,11 +938,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Spooky Footers */}
+      {/* Footer */}
       <footer className="w-full max-w-6xl px-6 py-6 border-t border-[#1E2333]/30 flex flex-col sm:flex-row items-center justify-between text-[8px] text-[#8B98A6]/60 font-mono tracking-widest gap-2 z-20">
         <div>COGNITIVE AUDIT BLOCK #0409A8F</div>
         <div className="text-center sm:text-right">
-          © 2026 FANTASMA SYNERGY INC. ALL PROTOCOLS ENCRYPTED.
+          (C) 2026 FANTASMA SYNERGY INC. ALL PROTOCOLS ENCRYPTED.
         </div>
       </footer>
     </div>

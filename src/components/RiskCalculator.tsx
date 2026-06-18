@@ -166,7 +166,7 @@ export default function RiskCalculator({
               Alokasi: {balance > 0 ? ((positionSizeIdr / balance) * 100).toFixed(1) : 0}% dari saldo
             </div>
             <div className="text-[9px] text-[#58A6FF] mt-1 border-t border-[#1E2333] pt-1 font-sans">
-              💡 Tip: Sesuaikan toleransi risiko atau jarak SL Anda berdasarkan probabilitas keberhasilan b dari setup koin.
+              Catatan: Sesuaikan toleransi risiko atau jarak SL berdasarkan probabilitas keberhasilan b dari setup koin.
             </div>
           </div>
         </div>

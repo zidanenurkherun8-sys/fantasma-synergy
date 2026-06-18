@@ -2,17 +2,18 @@
 
 @layer base {
   :root {
-    /* Eerie Dark Mode Theme - Fantasma Synergy */
-    --bg-primary: #030407;     /* Pitch Black */
-    --bg-secondary: #07090F;   /* Deep Dark Slate */
-    --bg-card: #0C0E18;        /* Eerie Slate-Blue Card */
-    --border-color: #1E2333;   /* Cold Grey Border */
+    /* Professional dark terminal theme - Fantasma Synergy */
+    --bg-primary: #030407;
+    --bg-secondary: #07090F;
+    --bg-card: #0C0E18;
+    --border-color: #1E2333;
     
-    --accent-blue: #00E5FF;    /* Fluorescent Ghost Teal Glow */
-    --accent-purple: #9D4EDD;  /* Spectral Violet Aura */
-    --accent-green: #39FF14;   /* Neon Matrix Green */
-    --accent-red: #FF3131;     /* Haunted Crimson Red */
-    --accent-yellow: #FFBD00;  /* Spectral Gold */
+    --accent-blue: #58A6FF;
+    --accent-cyan: #00E5FF;
+    --accent-purple: #9D4EDD;
+    --accent-green: #3FB950;
+    --accent-red: #F85149;
+    --accent-yellow: #D29922;
     
     --text-primary: #F0F3F8;
     --text-secondary: #8B98A6;
@@ -26,7 +27,6 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
-  /* Spectral gradient background light source */
   background-image: 
     radial-gradient(circle at 10% 20%, rgba(157, 78, 221, 0.03) 0%, transparent 40%),
     radial-gradient(circle at 90% 80%, rgba(0, 229, 255, 0.02) 0%, transparent 40%);
@@ -38,25 +38,96 @@ body {
   font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
 }
 
-/* Spooky Spectral Webkit scrollbars */
+/* Refined app scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: #05070d;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-card);
-  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(88,166,255,0.45), rgba(157,78,221,0.4));
+  border-radius: 999px;
   border: 1px solid var(--border-color);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-blue);
-  box-shadow: 0 0 10px var(--accent-blue);
+  background: linear-gradient(180deg, rgba(88,166,255,0.75), rgba(157,78,221,0.7));
+  box-shadow: 0 0 12px rgba(88, 166, 255, 0.28);
+}
+
+.scroll-premium {
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-parallax-root {
+  --scroll-offset: 0px;
+}
+
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
+  contain: paint;
+}
+
+.parallax-slow {
+  transform: translate3d(0, calc(var(--scroll-offset, 0px) * -0.03), 0);
+}
+
+.parallax-medium {
+  transform: translate3d(0, calc(var(--scroll-offset, 0px) * -0.06), 0);
+}
+
+.parallax-fast {
+  transform: translate3d(0, calc(var(--scroll-offset, 0px) * -0.09), 0);
+}
+
+.premium-grid-overlay {
+  background-image:
+    linear-gradient(rgba(88, 166, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(157, 78, 221, 0.08) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+  opacity: 0.35;
+}
+
+.scroll-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 280ms ease-out,
+    transform 280ms ease-out;
+}
+
+@supports (animation-timeline: view()) {
+  .scroll-reveal-native {
+    animation: view-rise both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 22%;
+  }
+
+  @keyframes view-rise {
+    from {
+      opacity: 0.15;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 }
 
 /* 3D Scene Utilities */
@@ -76,11 +147,12 @@ body {
 .quantum-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 3px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  border-radius: 6px;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.22s ease, transform 0.22s ease;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
   position: relative;
   overflow: hidden;
+  will-change: transform;
 }
 
 .quantum-card::before {
@@ -102,6 +174,7 @@ body {
 
 .quantum-card:hover {
   border-color: rgba(0, 229, 255, 0.3);
+  transform: translateY(-2px);
   box-shadow: 
     0 8px 30px rgba(0, 0, 0, 0.7),
     0 0 15px rgba(0, 229, 255, 0.05);
@@ -197,4 +270,21 @@ body {
 
 .cyber-glitch-text:hover {
   animation: glitch 0.3s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }

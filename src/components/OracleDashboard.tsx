@@ -105,7 +105,7 @@ export default function OracleDashboard({
                 ? 'bg-[#F85149]/15 text-[#F85149] border border-[#F85149]/30' 
                 : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
           }`}>
-            {isLong ? '📈' : isShort ? '📉' : '⚖️'}
+            {isLong ? <ArrowUpRight className="h-6 w-6" /> : isShort ? <ArrowDownRight className="h-6 w-6" /> : <Activity className="h-6 w-6" />}
           </div>
 
           <div>
@@ -114,7 +114,7 @@ export default function OracleDashboard({
                 className="text-xs font-black uppercase px-2.5 py-0.5 rounded tracking-widest animate-pulse font-mono flex items-center gap-1.5"
                 style={{ backgroundColor: `${signal.tierColor}20`, color: signal.tierColor, border: `1px solid ${signal.tierColor}35` }}
               >
-                {signal.tierColor === '#FFD700' ? '🔮' : '💎'} {signal.tierLabel}
+                {signal.tierLabel}
               </span>
               <span className="text-[10px] text-[#8B949E] font-mono">
                 {signal.timestampWib}
@@ -143,7 +143,7 @@ export default function OracleDashboard({
                   if (typeof window !== 'undefined') {
                     const toast = document.createElement('div');
                     toast.className = 'fixed bottom-6 right-6 z-50 bg-[#0C0E18] border border-[#1E2333] text-[#E6EDF3] px-4 py-3.5 rounded-[3px] shadow-2xl flex items-center gap-2 animate-fadeIn text-xs font-bold font-sans';
-                    toast.innerHTML = '✅ Kooridinat target Oracle berhasil di-import ke kalkulator!';
+                    toast.textContent = 'Koordinat target Oracle berhasil di-import ke kalkulator.';
                     document.body.appendChild(toast);
                     setTimeout(() => toast.remove(), 3000);
                   }
