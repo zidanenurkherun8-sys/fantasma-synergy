@@ -2111,14 +2111,14 @@ export default function DashboardPage() {
                                   <span className="text-[10px] text-[#8B949E] font-mono">/IDR</span>
                                 </div>
                                 <div className="block min-[480px]:hidden">
-                                  <span className={`px-1 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
+                                  <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider ${
                                     coin.signal === 'LONG' 
                                       ? 'bg-[#3FB950]/15 text-[#3FB950] border border-[#3FB950]/30' 
                                       : coin.signal === 'SHORT' 
                                         ? 'bg-[#F85149]/15 text-[#F85149] border border-[#F85149]/30' 
                                         : 'bg-[#8B949E]/10 text-[#8B949E]'
                                   }`}>
-                                    {coin.signal}
+                                    {coin.signal} • AI: {coin.score}%
                                   </span>
                                 </div>
                               </div>
@@ -2147,15 +2147,20 @@ export default function DashboardPage() {
                               </div>
                             </td>
                             <td className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center hidden min-[480px]:table-cell">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
-                                coin.signal === 'LONG' 
-                                  ? 'bg-[#3FB950]/15 text-[#3FB950] border border-[#3FB950]/30' 
-                                  : coin.signal === 'SHORT' 
-                                    ? 'bg-[#F85149]/15 text-[#F85149] border border-[#F85149]/30' 
-                                    : 'bg-[#8B949E]/10 text-[#8B949E]'
-                              }`}>
-                                {coin.signal}
-                              </span>
+                              <div className="flex flex-col items-center gap-1">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
+                                  coin.signal === 'LONG' 
+                                    ? 'bg-[#3FB950]/15 text-[#3FB950] border border-[#3FB950]/30' 
+                                    : coin.signal === 'SHORT' 
+                                      ? 'bg-[#F85149]/15 text-[#F85149] border border-[#F85149]/30' 
+                                      : 'bg-[#8B949E]/10 text-[#8B949E]'
+                                }`}>
+                                  {coin.signal}
+                                </span>
+                                <span className="text-[9px] font-mono text-[#8B949E] md:hidden">
+                                  AI: {coin.score}%
+                                </span>
+                              </div>
                             </td>
                             <td className="py-3 px-1 min-[360px]:px-2 md:px-4 text-center text-[10px] font-sans text-slate-300 italic font-bold hidden lg:table-cell">
                               {coin.pattern && coin.pattern !== 'None' ? coin.pattern : '-'}
