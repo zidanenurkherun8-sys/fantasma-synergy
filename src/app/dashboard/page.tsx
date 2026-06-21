@@ -147,6 +147,13 @@ export default function DashboardPage() {
     }
   };
 
+  const handleTabSelect = (e: React.MouseEvent | React.TouchEvent, tab: typeof activeTab) => {
+    e.preventDefault();
+    e.stopPropagation();
+    audio?.playClick();
+    _setActiveTab(tab);
+  };
+
   // Oracle Engine States (3.7)
   const [oracleSignal, setOracleSignal] = useState<OracleSignal | null>(null);
   const [oracleLoading, setOracleLoading] = useState(false);
@@ -2731,11 +2738,12 @@ export default function DashboardPage() {
       )}
 
       {/* Mobile Bottom Navigation Bar (Visible on mobile/tablet only) */}
-      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#07090F]/90 border-t border-[#1E2333] py-1 px-0.5 select-none shadow-2xl backdrop-blur-md">
+      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#07090F]/95 border-t border-[#1E2333] pt-2 pb-[calc(10px+env(safe-area-inset-bottom))] px-1 select-none shadow-2xl backdrop-blur-md">
         <button 
           type="button"
-          onClick={() => setActiveTab('DASHBOARD')}
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
+          onTouchStart={(e) => handleTabSelect(e, 'DASHBOARD')}
+          onClick={(e) => handleTabSelect(e, 'DASHBOARD')}
+          className={`flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'DASHBOARD' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
@@ -2744,8 +2752,9 @@ export default function DashboardPage() {
         </button>
         <button 
           type="button"
-          onClick={() => setActiveTab('SCANNER')}
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
+          onTouchStart={(e) => handleTabSelect(e, 'SCANNER')}
+          onClick={(e) => handleTabSelect(e, 'SCANNER')}
+          className={`flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'SCANNER' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
@@ -2754,8 +2763,9 @@ export default function DashboardPage() {
         </button>
         <button 
           type="button"
-          onClick={() => setActiveTab('INTELLIGENCE')}
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
+          onTouchStart={(e) => handleTabSelect(e, 'INTELLIGENCE')}
+          onClick={(e) => handleTabSelect(e, 'INTELLIGENCE')}
+          className={`flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'INTELLIGENCE' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
@@ -2764,8 +2774,9 @@ export default function DashboardPage() {
         </button>
         <button 
           type="button"
-          onClick={() => setActiveTab('AUDITOR')}
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
+          onTouchStart={(e) => handleTabSelect(e, 'AUDITOR')}
+          onClick={(e) => handleTabSelect(e, 'AUDITOR')}
+          className={`flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'AUDITOR' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
@@ -2774,8 +2785,9 @@ export default function DashboardPage() {
         </button>
         <button 
           type="button"
-          onClick={() => setActiveTab('RISK_LAB')}
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
+          onTouchStart={(e) => handleTabSelect(e, 'RISK_LAB')}
+          onClick={(e) => handleTabSelect(e, 'RISK_LAB')}
+          className={`flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'RISK_LAB' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
@@ -2784,8 +2796,9 @@ export default function DashboardPage() {
         </button>
         <button 
           type="button"
-          onClick={() => setActiveTab('SETTINGS')}
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
+          onTouchStart={(e) => handleTabSelect(e, 'SETTINGS')}
+          onClick={(e) => handleTabSelect(e, 'SETTINGS')}
+          className={`flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
             activeTab === 'SETTINGS' ? 'text-[#58A6FF]' : 'text-[#8B949E]'
           }`}
         >
