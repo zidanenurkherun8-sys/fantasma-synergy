@@ -502,7 +502,7 @@ export async function POST(request: NextRequest) {
 
       const [ticker, candles] = await Promise.all([
         getForexTicker(cleanPair),
-        getForexCandles(cleanPair, forexTf as any, 100),
+        getForexCandles(cleanPair, forexTf as any, 1000),
       ]);
 
       const tickerContext = {

@@ -469,7 +469,8 @@ export class RiskLabEngine {
     // Round targets appropriately
     if (isForex) {
       const isJpy = symbol.toUpperCase().includes('JPY');
-      const decimals = isJpy ? 3 : 5;
+      const isGoldOrOil = symbol.toUpperCase().includes('XAU') || symbol.toUpperCase().includes('USOIL') || symbol.toUpperCase().includes('XAG');
+      const decimals = isJpy ? 3 : isGoldOrOil ? (symbol.toUpperCase().includes('XAG') ? 3 : 2) : 5;
       sl = parseFloat(sl.toFixed(decimals));
       tp1 = parseFloat(tp1.toFixed(decimals));
       tp2 = parseFloat(tp2.toFixed(decimals));
@@ -497,6 +498,9 @@ export class RiskLabEngine {
     // e. Sizing position
     const size = this.calculatePositionSizing(capitalBalance, riskPercent, cleanPrice, sl, isForex);
 
+    const isGoldOrOil = symbol.toUpperCase().includes('XAU') || symbol.toUpperCase().includes('USOIL') || symbol.toUpperCase().includes('XAG');
+    const symbolDecimals = symbol.toUpperCase().includes('JPY') ? 3 : isGoldOrOil ? (symbol.toUpperCase().includes('XAG') ? 3 : 2) : 5;
+
     return {
       entryPrice: cleanPrice,
       stopLoss: sl,
@@ -508,7 +512,7 @@ export class RiskLabEngine {
       volatilityRegime: vol.regime,
       backtestWinRate,
       backtestWarning,
-      regressionTargetPrice: isForex ? parseFloat(reg.targetPrice.toFixed(symbol.toUpperCase().includes('JPY') ? 3 : 5)) : reg.targetPrice,
+      regressionTargetPrice: isForex ? parseFloat(reg.targetPrice.toFixed(symbolDecimals)) : reg.targetPrice,
       regressionConfidence: reg.confidence,
       positionMargin: size.margin,
       lotSize: size.lot,

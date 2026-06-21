@@ -28,12 +28,13 @@ export async function GET(request: NextRequest) {
 
       const [ticker, candles] = await Promise.all([
         getForexTicker(cleanPair),
-        getForexCandles(cleanPair, forexTf as any, 100),
+        getForexCandles(cleanPair, forexTf as any, 1000),
       ]);
 
       const isJpy = cleanPair.includes('JPY');
-      const step = isJpy ? 0.01 : 0.00005;
-      const decimals = isJpy ? 3 : 5;
+      const isGoldOrOil = cleanPair.includes('XAU') || cleanPair.includes('USOIL') || cleanPair.includes('XAG');
+      const step = isJpy ? 0.01 : isGoldOrOil ? 0.1 : 0.00005;
+      const decimals = isJpy ? 3 : isGoldOrOil ? (cleanPair.includes('XAG') ? 3 : 2) : 5;
 
       const bids: any[] = [];
       const asks: any[] = [];
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
       for (let i = 0; i < 20; i++) {
         const tradeTime = now - i * Math.floor(Math.random() * 4 + 1);
         const isBuy = Math.random() > 0.5;
-        const offset = (Math.random() - 0.5) * (isJpy ? 0.02 : 0.0001);
+        const offset = (Math.random() - 0.5) * (isJpy ? 0.02 : isGoldOrOil ? 0.5 : 0.0001);
         const tradePrice = parseFloat((ticker.mid + offset).toFixed(decimals));
         const tradeAmount = parseFloat((Math.random() * 2000000 + 100000).toFixed(0));
 

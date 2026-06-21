@@ -3,8 +3,18 @@ import { getMarketSummaries } from '@/lib/indodax';
 import { getForexTicker } from '@/lib/forex-client';
 
 const FOREX_DISPLAY_PAIRS = [
+  // Majors
   'EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD', 'NZDUSD', 'USDCHF',
-  'EURGBP', 'EURJPY', 'GBPJPY', 'AUDJPY', 'CHFJPY', 'CADJPY', 'GBPAUD', 'EURCAD'
+  // Euro Crosses
+  'EURGBP', 'EURJPY', 'EURCAD', 'EURAUD', 'EURCHF', 'EURNZD',
+  // Pound Crosses
+  'GBPJPY', 'GBPCAD', 'GBPAUD', 'GBPCHF', 'GBPNZD',
+  // Yen Crosses
+  'AUDJPY', 'CADJPY', 'CHFJPY', 'NZDJPY',
+  // Other Crosses
+  'AUDCAD', 'AUDCHF', 'AUDNZD', 'CADCHF', 'NZDCAD', 'NZDCHF',
+  // Commodities & Metals (exness / MIFX / TradingView standard)
+  'XAUUSD', 'XAGUSD', 'USOIL'
 ];
 
 export async function GET(request: NextRequest) {

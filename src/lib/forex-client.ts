@@ -180,6 +180,7 @@ const BASE_PRICES: Record<string, number> = {
   USDHKD: 7.8200, USDSEK: 10.40, USDNOK: 10.75, USDDKK: 6.9200, USDPLN: 3.9800,
   EURTRY: 35.60, EURMXN: 18.93, EURSEK: 11.28, EURNOK: 11.66,
   GBPSGD: 1.7180, GBPHKD: 9.9560,
+  XAUUSD: 2330.50, XAGUSD: 29.50, USOIL: 80.20,
 };
 
 function getBasePrice(pair: string): number {

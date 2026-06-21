@@ -11,6 +11,16 @@ import type { ForexSignal, MethodologyConfluence } from '@/lib/forex-oracle-engi
 import { FOREX_MAJORS, FOREX_MINORS, FOREX_EXOTICS } from '@/lib/forex-client';
 import { audio } from '@/lib/audio';
 
+const formatForexPrice = (value: number, pair: string): string => {
+  const symUpper = (pair || '').toUpperCase();
+  const isJpy = symUpper.includes('JPY');
+  const isGoldOrOil = symUpper.includes('XAU') || symUpper.includes('USOIL') || symUpper.includes('XAG');
+  if (isGoldOrOil) {
+    return value.toFixed(symUpper.includes('XAG') ? 3 : 2);
+  }
+  return value.toFixed(isJpy ? 3 : 5);
+};
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const ALL_DISPLAYABLE = [...FOREX_MAJORS, ...FOREX_MINORS.slice(0, 12), ...FOREX_EXOTICS.slice(0, 6)];
@@ -182,7 +192,7 @@ function RRVisualizer({ signal }: { signal: ForexSignal }) {
         {levels.map(l => (
           <div key={l.label} className="flex flex-col items-center gap-0.5 text-center">
             <span className="text-[8px] font-mono font-bold" style={{ color: l.color }}>{l.label}</span>
-            <span className="text-[8px] text-[#8B949E] font-mono">{l.price.toFixed(5)}</span>
+            <span className="text-[8px] text-[#8B949E] font-mono">{formatForexPrice(l.price, signal.symbol)}</span>
           </div>
         ))}
       </div>
@@ -190,11 +200,11 @@ function RRVisualizer({ signal }: { signal: ForexSignal }) {
   );
 }
 
-function IndicatorGrid({ ind }: { signal: ForexSignal; ind: ForexSignal['indicators'] }) {
+function IndicatorGrid({ signal, ind }: { signal: ForexSignal; ind: ForexSignal['indicators'] }) {
   const items = [
     { label: 'RSI(14)', value: ind.rsi.toFixed(1), color: ind.rsi > 70 ? '#EF4444' : ind.rsi < 30 ? '#10B981' : '#E6EDF3', note: ind.rsi > 70 ? 'OB' : ind.rsi < 30 ? 'OS' : '' },
     { label: 'ADX', value: ind.adx.toFixed(1), color: ind.adx > 25 ? '#FFD700' : '#8B949E', note: ind.adx > 25 ? 'TREND' : 'WEAK' },
-    { label: 'ATR', value: ind.atr.toFixed(5), color: '#9D4EDD', note: '' },
+    { label: 'ATR', value: formatForexPrice(ind.atr, signal.symbol), color: '#9D4EDD', note: '' },
     { label: 'BB Width', value: (ind.bbWidth * 100).toFixed(2) + '%', color: ind.bbWidth < 0.005 ? '#FFD700' : '#E6EDF3', note: ind.bbWidth < 0.005 ? 'SQZ' : '' },
     { label: 'Stoch %K', value: ind.stochK.toFixed(1), color: ind.stochK > 80 ? '#EF4444' : ind.stochK < 20 ? '#10B981' : '#E6EDF3', note: '' },
     { label: 'MACD Hist', value: ind.macd.histogram.toFixed(6), color: ind.macd.histogram > 0 ? '#10B981' : '#EF4444', note: '' },
@@ -463,7 +473,7 @@ export default function ForexOracleDashboard() {
                     </div>
                     <div className="text-right">
                       <div className="text-[9px] text-[#8B949E] font-mono">Entry Price</div>
-                      <div className="text-lg font-bold font-mono text-[#E6EDF3]">{signal.entry.price.toFixed(5)}</div>
+                      <div className="text-lg font-bold font-mono text-[#E6EDF3]">{formatForexPrice(signal.entry.price, signal.symbol)}</div>
                       <div className="text-[8px] text-[#8B949E] font-mono">Zone: {signal.entry.zone}</div>
                     </div>
                   </div>
@@ -512,7 +522,7 @@ export default function ForexOracleDashboard() {
                         {signal.takeProfits.map((tp, i) => (
                           <div key={i} className="bg-emerald-950/30 border border-emerald-500/20 rounded-[3px] p-2">
                             <div className="text-[8px] text-[#8B949E] font-mono">TP{i + 1} · {tp.portion}% pos</div>
-                            <div className="text-[10px] font-bold text-emerald-400 font-mono">{tp.level.toFixed(5)}</div>
+                            <div className="text-[10px] font-bold text-emerald-400 font-mono">{formatForexPrice(tp.level, signal.symbol)}</div>
                             <div className="text-[8px] text-emerald-300/70 font-mono">RR: 1:{tp.rr}</div>
                           </div>
                         ))}
@@ -671,9 +681,9 @@ export default function ForexOracleDashboard() {
                     </div>
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    <span className="text-[9px] font-mono text-[#8B949E]">Entry: <span className="text-[#E6EDF3]">{s.entry.price.toFixed(5)}</span></span>
-                    <span className="text-[9px] font-mono text-[#8B949E]">SL: <span className="text-rose-400">{s.stopLoss.toFixed(5)}</span></span>
-                    <span className="text-[9px] font-mono text-[#8B949E]">TP1: <span className="text-emerald-400">{s.takeProfits[0]?.level.toFixed(5)}</span></span>
+                    <span className="text-[9px] font-mono text-[#8B949E]">Entry: <span className="text-[#E6EDF3]">{formatForexPrice(s.entry.price, s.symbol)}</span></span>
+                    <span className="text-[9px] font-mono text-[#8B949E]">SL: <span className="text-rose-400">{formatForexPrice(s.stopLoss, s.symbol)}</span></span>
+                    <span className="text-[9px] font-mono text-[#8B949E]">TP1: <span className="text-emerald-400">{s.takeProfits[0] ? formatForexPrice(s.takeProfits[0].level, s.symbol) : '-'}</span></span>
                     <span className="text-[9px] font-mono text-[#8B949E]">Regime: <span className="text-[#00E5FF]">{s.marketRegime}</span></span>
                   </div>
                   <ConfidenceMeter value={s.estimatedWinProbability} />

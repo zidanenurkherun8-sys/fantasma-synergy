@@ -121,6 +121,8 @@ function TradingChart({ candles, timeframe, tickerName, currentPrice }: TradingC
       color: '#58A6FF', // Accent Blue
       lineWidth: 2,
       title: 'EMA 8',
+      lastValueVisible: false,
+      priceLineVisible: false,
     });
     ema8SeriesRef.current = ema8Series;
 
@@ -129,6 +131,8 @@ function TradingChart({ candles, timeframe, tickerName, currentPrice }: TradingC
       color: '#D29922', // Accent Yellow
       lineWidth: 2,
       title: 'EMA 21',
+      lastValueVisible: false,
+      priceLineVisible: false,
     });
     ema21SeriesRef.current = ema21Series;
 
@@ -139,6 +143,8 @@ function TradingChart({ candles, timeframe, tickerName, currentPrice }: TradingC
         type: 'volume',
       },
       priceScaleId: 'volume', // Set on custom volume scale
+      lastValueVisible: false,
+      priceLineVisible: false,
     });
     volumeSeriesRef.current = volumeSeries;
 

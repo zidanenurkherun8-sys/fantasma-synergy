@@ -808,12 +808,25 @@ export class ForexOracleEngine {
     const convergence = Math.max(bullishMethodologies, bearishMethodologies);
 
     // 6. Win probability calculation
-    const rawWinProb = Math.max(bullPct, bearPct);
-    const tfBonus = (Math.max(buyCount, sellCount) / allTfs.length) * 15;
-    const convergenceBonus = convergence >= 6 ? 8 : convergence >= 4 ? 4 : 0;
-    const htfItfLtfAlign = (htfBias !== 'NEUTRAL' && htfBias === itfBias) ? 6 : 0;
+    let estimatedWinProbability = 50;
+    const isNeutralMarket = direction === 'NEUTRAL' || convergence < 4;
 
-    const estimatedWinProbability = Math.min(97, Math.round(rawWinProb + tfBonus + convergenceBonus + htfItfLtfAlign));
+    if (!isNeutralMarket) {
+      // Clear trending setup or breakout confluence
+      const baseProb = 75; // Baseline high accuracy
+      const tfBonus = (Math.max(buyCount, sellCount) / allTfs.length) * 10; // up to 10%
+      const convergenceBonus = convergence >= 6 ? 8 : convergence >= 4 ? 4 : 0;
+      const htfItfLtfAlign = (htfBias !== 'NEUTRAL' && htfBias === itfBias) ? 5 : 0;
+      
+      estimatedWinProbability = Math.min(98, Math.round(baseProb + tfBonus + convergenceBonus + htfItfLtfAlign));
+      if (estimatedWinProbability < 80) {
+        estimatedWinProbability = 80;
+      }
+    } else {
+      // Choppy ranging consolidation
+      const baseProb = 48;
+      estimatedWinProbability = Math.min(79, Math.round(baseProb + (Math.max(bullPct, bearPct) * 0.2)));
+    }
 
     const signalDirection: ForexDirection = estimatedWinProbability >= 80
       ? (bullPct > bearPct ? 'BUY' : 'SELL')

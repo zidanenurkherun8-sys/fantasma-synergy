@@ -90,6 +90,15 @@ const FALLBACK_PAIRS: MarketPair[] = [
   { id: 'sol_idr', symbol: 'SOL', name: 'Solana', price: 2650000, change24h: 2.4, volumeIdr: 42000000000 }
 ];
 
+const FALLBACK_PAIRS_FOREX: MarketPair[] = [
+  { id: 'EURUSD', symbol: 'EURUSD', name: 'EUR / USD', price: 1.0850, change24h: 0.15, volumeIdr: 15 },
+  { id: 'GBPUSD', symbol: 'GBPUSD', name: 'GBP / USD', price: 1.2720, change24h: 0.22, volumeIdr: 12 },
+  { id: 'USDJPY', symbol: 'USDJPY', name: 'USD / JPY', price: 157.50, change24h: -0.35, volumeIdr: 25 },
+  { id: 'XAUUSD', symbol: 'XAUUSD', name: 'Gold / USD', price: 2330.50, change24h: 0.85, volumeIdr: 45 },
+  { id: 'XAGUSD', symbol: 'XAGUSD', name: 'Silver / USD', price: 29.50, change24h: 0.95, volumeIdr: 30 },
+  { id: 'USOIL', symbol: 'USOIL', name: 'Crude Oil', price: 80.20, change24h: -0.50, volumeIdr: 50 }
+];
+
 const SystemClock = React.memo(() => {
   const [time, setTime] = useState('');
   useEffect(() => {
@@ -231,7 +240,12 @@ export default function DashboardPage() {
 
   const formatPrice = (value: number, sym: string): string => {
     if (tradingMode === 'FOREX') {
-      const isJpy = sym.toUpperCase().includes('JPY');
+      const symUpper = sym.toUpperCase();
+      const isJpy = symUpper.includes('JPY');
+      const isGoldOrOil = symUpper.includes('XAU') || symUpper.includes('USOIL') || symUpper.includes('XAG');
+      if (isGoldOrOil) {
+        return value.toFixed(symUpper.includes('XAG') ? 3 : 2);
+      }
       return value.toFixed(isJpy ? 3 : 5);
     }
     return Math.round(value || 0).toLocaleString('id-ID');
@@ -470,12 +484,12 @@ export default function DashboardPage() {
         const response = await fetch(`/api/market/pairs?mode=${tradingMode}`);
         if (response.ok) {
           const data = await response.json();
-          setPairs(data.pairs?.length ? data.pairs : (tradingMode === 'CRYPTO' ? FALLBACK_PAIRS : []));
+          setPairs(data.pairs?.length ? data.pairs : (tradingMode === 'FOREX' ? FALLBACK_PAIRS_FOREX : FALLBACK_PAIRS));
         } else if (pairs.length === 0) {
-          setPairs(tradingMode === 'CRYPTO' ? FALLBACK_PAIRS : []);
+          setPairs(tradingMode === 'FOREX' ? FALLBACK_PAIRS_FOREX : FALLBACK_PAIRS);
         }
       } catch (err) {
-        if (pairs.length === 0) setPairs(tradingMode === 'CRYPTO' ? FALLBACK_PAIRS : []);
+        if (pairs.length === 0) setPairs(tradingMode === 'FOREX' ? FALLBACK_PAIRS_FOREX : FALLBACK_PAIRS);
         console.warn('Market pairs API unavailable, using fallback UI data.', err);
       }
     }
@@ -503,7 +517,8 @@ export default function DashboardPage() {
           setCandles(data.candles || []);
           setLoading(false);
         } else if (active && !ticker) {
-          const fallbackPair = FALLBACK_PAIRS.find(pair => pair.id === selectedPairId) || FALLBACK_PAIRS[0];
+          const fallbackSource = tradingMode === 'FOREX' ? FALLBACK_PAIRS_FOREX : FALLBACK_PAIRS;
+          const fallbackPair = fallbackSource.find(pair => pair.id === selectedPairId) || fallbackSource[0];
           setTicker({
             name: fallbackPair.name,
             last: fallbackPair.price,
@@ -517,7 +532,8 @@ export default function DashboardPage() {
         }
       } catch (err) {
         if (active && !ticker) {
-          const fallbackPair = FALLBACK_PAIRS.find(pair => pair.id === selectedPairId) || FALLBACK_PAIRS[0];
+          const fallbackSource = tradingMode === 'FOREX' ? FALLBACK_PAIRS_FOREX : FALLBACK_PAIRS;
+          const fallbackPair = fallbackSource.find(pair => pair.id === selectedPairId) || fallbackSource[0];
           setTicker({
             name: fallbackPair.name,
             last: fallbackPair.price,

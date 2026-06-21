@@ -97,7 +97,12 @@ function RiskLabConsole({
 
   const formatPrice = (value: number, sym: string): string => {
     if (isForex) {
-      const isJpy = sym.toUpperCase().includes('JPY');
+      const symUpper = sym.toUpperCase();
+      const isJpy = symUpper.includes('JPY');
+      const isGoldOrOil = symUpper.includes('XAU') || symUpper.includes('USOIL') || symUpper.includes('XAG');
+      if (isGoldOrOil) {
+        return value.toFixed(symUpper.includes('XAG') ? 3 : 2);
+      }
       return value.toFixed(isJpy ? 3 : 5);
     }
     return value >= 1000 
