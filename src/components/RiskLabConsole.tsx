@@ -733,12 +733,12 @@ function RiskLabConsole({
 
             <div className="flex items-start gap-1">
               <span className="text-purple-400 font-bold mr-0.5">Target</span>
-              <span>Win Prob ({targetTime}): **{setup.regressionConfidence}%** hit probability based on linear regression.</span>
+              <span>Win Prob ({targetTime}): <strong className="font-extrabold text-[#58A6FF]">{setup.regressionConfidence}%</strong> hit probability based on linear regression.</span>
             </div>
 
             <div className="flex items-start gap-1">
               <span className="text-indigo-400 font-bold mr-0.5">7D</span>
-              <span>7D Backtest Win Rate: **{setup.backtestWinRate}%** on {method} mode.</span>
+              <span>7D Backtest Win Rate: <strong className="font-extrabold text-[#58A6FF]">{setup.backtestWinRate}%</strong> on {method} mode.</span>
             </div>
 
             {/* Backtest win rate validator warning */}
