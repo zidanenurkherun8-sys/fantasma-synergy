@@ -176,7 +176,7 @@ $$\text{Alokasi Disarankan} = \max\left(5\%, \min\left(25\%, \text{Kelly Size} \
   }
 ];
 
-const INITIAL_SOCIALS: SocialPost[] = [
+const INITIAL_SOCIALS_CRYPTO: SocialPost[] = [
   {
     id: 's1',
     handle: '@WyckoffGurus',
@@ -211,7 +211,42 @@ const INITIAL_SOCIALS: SocialPost[] = [
   }
 ];
 
-const SOCIAL_POOL = [
+const INITIAL_SOCIALS_FOREX: SocialPost[] = [
+  {
+    id: 'sf1',
+    handle: '@GoldStandard',
+    platform: 'X/Twitter',
+    content: 'XAUUSD (Gold) testing key daily demand block at $2,325. Institutional buy orders building up. Looking for Wyckoff Spring pattern confirmation.',
+    timestamp: '15 detik lalu',
+    sentiment: 'BULLISH'
+  },
+  {
+    id: 'sf2',
+    handle: '@MifxObserver',
+    platform: 'IDX',
+    content: 'Analisis harian MIFX: Rupiah menguat terhadap USD seiring dengan rilis data inflasi domestik yang stabil dan naiknya cadangan devisa.',
+    timestamp: '1 menit lalu',
+    sentiment: 'BULLISH'
+  },
+  {
+    id: 'sf3',
+    handle: '@FxWhaleAlert',
+    platform: 'X/Twitter',
+    content: 'Large market orders executed on USDJPY near 157.80. Heavy supply presence. Potential long liquidation squeeze is active.',
+    timestamp: '2 menit lalu',
+    sentiment: 'BEARISH'
+  },
+  {
+    id: 'sf4',
+    handle: '@TikTokFXPro',
+    platform: 'TikTok',
+    content: 'Bullish BOS confirmed on EURUSD 1H chart. Target projection stands at 1.0910. Manage your risk with half-size Kelly allocation.',
+    timestamp: '3 menit lalu',
+    sentiment: 'BULLISH'
+  }
+];
+
+const SOCIAL_POOL_CRYPTO = [
   {
     handle: '@NakamotoObserver',
     platform: 'X/Twitter' as const,
@@ -250,11 +285,54 @@ const SOCIAL_POOL = [
   }
 ];
 
-function IntelligenceConsole() {
+const SOCIAL_POOL_FOREX = [
+  {
+    handle: '@FxGlobalTrader',
+    platform: 'X/Twitter' as const,
+    content: 'EURUSD breakout H4 resistance confirmed. Looking to add standard lot size on retest of 1.0845. Targets open up to 1.0920.',
+    sentiment: 'BULLISH' as const
+  },
+  {
+    handle: '@GoldStandard',
+    platform: 'X/Twitter' as const,
+    content: 'Spot Gold XAUUSD remains highly resilient near $2,330. Strong institutional demand noted in NY morning session. Higher targets expected.',
+    sentiment: 'BULLISH' as const
+  },
+  {
+    handle: '@DxyTracker',
+    platform: 'Instagram' as const,
+    content: 'DXY (US Dollar Index) breaking down below daily EMA 200. This could trigger major rallies across EURUSD, GBPUSD, and commodity pairs.',
+    sentiment: 'BEARISH' as const
+  },
+  {
+    handle: '@TikTokFXGuru',
+    platform: 'TikTok' as const,
+    content: 'Beware the JPY liquidity sweep! USDJPY rejected cleanly at 157.90 supply zone. Looking for drop to 156.40 support.',
+    sentiment: 'BEARISH' as const
+  },
+  {
+    handle: '@OilMarketNews',
+    platform: 'X/Twitter' as const,
+    content: 'OPEC+ meeting rumors suggest extended production cuts. Crude Oil USOIL spikes past $80.20, targeting $81.50 next.',
+    sentiment: 'BULLISH' as const
+  },
+  {
+    handle: '@KarenForexTips',
+    platform: 'Instagram' as const,
+    content: 'Forex majors consolidations are tight ahead of ECB rate decision. Highly recommend staying flat or keeping leverage under 5x.',
+    sentiment: 'NEUTRAL' as const
+  }
+];
+
+interface IntelligenceConsoleProps {
+  tradingMode?: 'CRYPTO' | 'FOREX';
+}
+
+function IntelligenceConsole({ tradingMode = 'CRYPTO' }: IntelligenceConsoleProps) {
   const [activeTab, setActiveTab] = useState<'news' | 'academy'>('news');
   const [selectedModule, setSelectedModule] = useState(ACADEMY_MODULES[0]);
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
-  const [socials, setSocials] = useState<SocialPost[]>(INITIAL_SOCIALS);
+  const [socials, setSocials] = useState<SocialPost[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const socialBottomRef = useRef<HTMLDivElement>(null);
@@ -263,7 +341,7 @@ function IntelligenceConsole() {
   const fetchNews = async () => {
     try {
       setNewsLoading(true);
-      const response = await fetch('/api/market/news');
+      const response = await fetch(`/api/market/news?mode=${tradingMode}`);
       if (response.ok) {
         const data = await response.json();
         setNewsList(data.news || []);
@@ -277,14 +355,17 @@ function IntelligenceConsole() {
 
   useEffect(() => {
     fetchNews();
-  }, []);
+    setSocials(tradingMode === 'FOREX' ? INITIAL_SOCIALS_FOREX : INITIAL_SOCIALS_CRYPTO);
+  }, [tradingMode]);
 
   // Live social stream tick (simulating continuous scraping every 12 seconds)
   useEffect(() => {
     if (activeTab !== 'news') return;
     
+    const pool = tradingMode === 'FOREX' ? SOCIAL_POOL_FOREX : SOCIAL_POOL_CRYPTO;
+    
     const interval = setInterval(() => {
-      const randomItem = SOCIAL_POOL[Math.floor(Math.random() * SOCIAL_POOL.length)];
+      const randomItem = pool[Math.floor(Math.random() * pool.length)];
       const newPost: SocialPost = {
         id: `s-${Date.now()}`,
         handle: randomItem.handle,
@@ -298,7 +379,7 @@ function IntelligenceConsole() {
     }, 12000);
 
     return () => clearInterval(interval);
-  }, [activeTab]);
+  }, [activeTab, tradingMode]);
 
   const handleManualRefresh = async () => {
     setRefreshing(true);

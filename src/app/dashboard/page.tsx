@@ -2584,7 +2584,7 @@ export default function DashboardPage() {
         {/* LIVE INTELLIGENCE VIEW TAB */}
         {activeTab === 'INTELLIGENCE' && (
           <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal w-full max-w-full min-w-0">
-            <IntelligenceConsole />
+            <IntelligenceConsole tradingMode={tradingMode} />
           </main>
         )}
 
