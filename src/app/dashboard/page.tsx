@@ -1712,7 +1712,7 @@ export default function DashboardPage() {
       {/* Main Content Workspace Layout */}
       <div 
         data-dashboard-scroll
-        className="flex-1 flex flex-col min-h-screen md:pl-[220px] pb-[60px] md:pb-0"
+        className="flex-1 flex flex-col min-h-screen md:pl-[220px] pb-[60px] md:pb-0 w-full max-w-full min-w-0 overflow-x-hidden"
       >
         {/* 1. Header Terminals */}
         <header className="border-b border-[#1E2333] bg-[#07090F] px-3 md:px-6 py-2.5 md:py-3.5 flex items-center justify-between sticky top-0 z-35 select-none">
@@ -1771,7 +1771,7 @@ export default function DashboardPage() {
 
         {/* 2. Main Dashboard Layout Grid (3.6) */}
         {activeTab === 'DASHBOARD' && (
-          <main className="flex-1 p-4 md:p-6 grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-4 md:p-6 grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6 bg-[#030407] scroll-reveal w-full max-w-full min-w-0">
             {/* SIDEBAR: Scanner (1 Column) */}
             <div className="xl:col-span-1 h-[380px] xl:h-full flex flex-col">
               <MarketScanner
@@ -1966,9 +1966,9 @@ export default function DashboardPage() {
 
         {/* SCANNER VIEW TAB (3.6) */}
         {activeTab === 'SCANNER' && (
-          <main className="flex-1 p-3 md:p-6 flex flex-col gap-3 md:gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-3 md:p-6 flex flex-col gap-3 md:gap-6 bg-[#030407] scroll-reveal w-full max-w-full min-w-0">
             {/* Header Cards with summary */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
+            <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
               <div className="quantum-card rounded-[3px] p-3 md:p-4 border border-[#1E2333] bg-[#07090F] flex items-center justify-between">
                 <div>
                   <span className="text-[9px] min-[360px]:text-[10px] text-[#8B949E] uppercase font-bold font-sans">Total Aset Dipantau</span>
@@ -2004,18 +2004,18 @@ export default function DashboardPage() {
             </div>
 
             {/* Filter and Search Controls */}
-            <div className="quantum-card rounded-[3px] p-3 md:p-4 border border-[#1E2333] bg-[#07090F] flex flex-col xl:flex-row xl:items-center justify-between gap-3">
-              <div className="flex items-center gap-3 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-[3px] w-full xl:max-w-xs">
+            <div className="quantum-card rounded-[3px] p-3 md:p-4 border border-[#1E2333] bg-[#07090F] flex flex-col xl:flex-row xl:items-center justify-between gap-3 w-full max-w-full min-w-0">
+              <div className="flex items-center gap-3 bg-[#030407] border border-[#1E2333] px-3 py-1.5 rounded-[3px] w-full xl:max-w-xs min-w-0">
                 <Search className="h-4 w-4 text-[#8B949E]" />
                 <input
                   id="scanner-search-input"
                   type="text"
-                  placeholder="Cari simbol koin... (misal: btc, eth)"
+                  placeholder="Cari simbol koin..."
                   title="Cari simbol koin"
                   aria-label="Cari simbol koin"
                   value={scannerSearch}
                   onChange={(e) => setScannerSearch(e.target.value)}
-                  className="bg-transparent border-none text-[#E6EDF3] text-base md:text-xs focus:outline-none w-full font-mono placeholder-[#8B949E]"
+                  className="bg-transparent border-none text-[#E6EDF3] text-base md:text-xs focus:outline-none w-full min-w-0 font-mono placeholder-[#8B949E]"
                 />
               </div>
 
@@ -2055,7 +2055,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Grid Table of Aset */}
-            <div className="quantum-card rounded-[3px] border border-[#1E2333] bg-[#07090F] overflow-hidden">
+            <div className="quantum-card rounded-[3px] border border-[#1E2333] bg-[#07090F] overflow-hidden w-full max-w-full min-w-0">
               <div className="overflow-x-auto scrollbar-thin">
                 <table className="w-full text-left border-collapse font-sans min-w-0">
                   <thead>
@@ -2218,7 +2218,7 @@ export default function DashboardPage() {
 
         {/* AI AUDITOR VIEW TAB (3.6 & 3.7 & 3.10) */}
         {activeTab === 'AUDITOR' && (
-          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal w-full max-w-full min-w-0">
             {/* Top Section: Full Oracle Cockpit Ratios, Coordinates, and Consensus */}
             <OracleDashboard 
               signal={oracleSignal}
@@ -2346,7 +2346,7 @@ export default function DashboardPage() {
 
         {/* RISK LAB VIEW TAB (v3.1) */}
         {activeTab === 'RISK_LAB' && (
-          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal w-full max-w-full min-w-0">
             {/* Header Title */}
             <div className="border-b border-[#1E2333] pb-3 select-none">
               <h2 className="text-lg font-extrabold text-[#E6EDF3] flex items-center gap-2 font-sans">
@@ -2380,12 +2380,14 @@ export default function DashboardPage() {
 
         {/* LIVE INTELLIGENCE VIEW TAB */}
         {activeTab === 'INTELLIGENCE' && (
-          <IntelligenceConsole />
+          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal w-full max-w-full min-w-0">
+            <IntelligenceConsole />
+          </main>
         )}
 
         {/* SETTINGS VIEW TAB (3.6) */}
         {activeTab === 'SETTINGS' && (
-          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal">
+          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal w-full max-w-full min-w-0">
             {/* Header Title */}
             <div className="border-b border-[#1E2333] pb-3 select-none">
               <h2 className="text-lg font-extrabold text-[#E6EDF3] flex items-center gap-2 font-sans">

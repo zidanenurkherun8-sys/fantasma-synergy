@@ -15,7 +15,7 @@ function OracleGauge({ signal, loading }: OracleGaugeProps) {
       <div className="quantum-card rounded-[3px] p-6 border border-[#1E2333] bg-[#07090F] flex flex-col items-center justify-center h-48 select-none">
         <div className="relative h-16 w-16 flex items-center justify-center">
           <div className="absolute inset-0 rounded-full border-t-2 border-[#58A6FF] animate-spin" />
-          <div className="absolute inset-2 rounded-full border-b-2 border-indigo-400 animate-spin" style={{ animationDirection: 'reverse' }} />
+          <div className="absolute inset-2 rounded-full border-b-2 border-indigo-400 animate-[spin_1s_linear_infinite_reverse]" />
         </div>
         <span className="text-[10px] text-[#8B949E] font-mono uppercase tracking-widest mt-4 animate-pulse">Running Ensemble Network...</span>
       </div>
@@ -105,31 +105,34 @@ function OracleGauge({ signal, loading }: OracleGaugeProps) {
 
         {/* Outer Ring segmented model indicators (9 dots) */}
         <div className="absolute inset-0 rounded-full pointer-events-none">
-          {models.map((m, idx) => {
-            const angle = idx * (360 / 9) - 90; // distribute evenly
-            const radius = 51; // slightly outside the confidence circle
-            const radians = (angle * Math.PI) / 180;
-            const x = 56 + radius * Math.cos(radians);
-            const y = 56 + radius * Math.sin(radians);
-            
-            // LED Colors: Green for LONG, Red for SHORT, Orange/Gray for NEUTRAL
-            const ledColor = m.vote === 'LONG' 
-              ? 'bg-[#3FB950] shadow-[0_0_6px_rgba(63,185,80,0.8)]' 
-              : m.vote === 'SHORT' 
-                ? 'bg-[#F85149] shadow-[0_0_6px_rgba(248,81,73,0.8)]' 
-                : 'bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]';
+          {(() => {
+            const LED_POSITIONS = [
+              'left-[52px] top-[1px]',
+              'left-[85px] top-[13px]',
+              'left-[102px] top-[43px]',
+              'left-[96px] top-[78px]',
+              'left-[69px] top-[100px]',
+              'left-[35px] top-[100px]',
+              'left-[8px] top-[78px]',
+              'left-[2px] top-[43px]',
+              'left-[19px] top-[13px]',
+            ];
+            return models.map((m, idx) => {
+              // LED Colors: Green for LONG, Red for SHORT, Orange/Gray for NEUTRAL
+              const ledColor = m.vote === 'LONG' 
+                ? 'bg-[#3FB950] shadow-[0_0_6px_rgba(63,185,80,0.8)]' 
+                : m.vote === 'SHORT' 
+                  ? 'bg-[#F85149] shadow-[0_0_6px_rgba(248,81,73,0.8)]' 
+                  : 'bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]';
 
-            return (
-              <div 
-                key={`led-${m.key}`}
-                className={`absolute w-2 h-2 rounded-full border border-[#0D1117] ${ledColor}`}
-                style={{ 
-                  left: `${x - 4}px`, 
-                  top: `${y - 4}px`,
-                }}
-              />
-            );
-          })}
+              return (
+                <div 
+                  key={`led-${m.key}`}
+                  className={`absolute w-2 h-2 rounded-full border border-[#0D1117] ${ledColor} ${LED_POSITIONS[idx] || ''}`}
+                />
+              );
+            });
+          })()}
         </div>
 
         {/* Center Text representation */}
