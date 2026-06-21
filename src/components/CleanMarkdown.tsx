@@ -6,8 +6,8 @@ import React from 'react';
 export function stripMarkdown(text: string): string {
   if (!text) return '';
   return text
-    // Remove headers
-    .replace(/^#{1,6}\s+/gm, '')
+    // Remove headers with or without spaces
+    .replace(/^#{1,6}\s*/gm, '')
     // Remove bold asterisks
     .replace(/\*\*/g, '')
     // Remove italics
@@ -15,7 +15,7 @@ export function stripMarkdown(text: string): string {
     .replace(/_/g, '')
     // Remove divider characters
     .replace(/[-*_]{3,}/g, '')
-    // Remove bullet indicators
+    // Remove bullet indicators and any following spaces
     .replace(/^\s*[-*+•]\s+/gm, '')
     .trim();
 }
@@ -62,11 +62,11 @@ export function CleanMarkdown({ text }: CleanMarkdownProps) {
           return null;
         }
 
-        // Header parsing: e.g. ### Header or #### Header
-        const headerMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
-        if (headerMatch) {
+        // Header parsing: e.g. ### Header or ####Header
+        const headerMatch = trimmed.match(/^(#{1,6})\s*(.*)$/);
+        if (headerMatch && headerMatch[2]) {
           const level = headerMatch[1].length;
-          const content = headerMatch[2];
+          const content = headerMatch[2].trim();
           if (level <= 3) {
             return (
               <h3 key={idx} className="text-sm font-bold text-[#58A6FF] border-b border-[#1E2333] pb-1 pt-3 tracking-wide mt-3 mb-1 font-sans">
@@ -82,9 +82,10 @@ export function CleanMarkdown({ text }: CleanMarkdownProps) {
           }
         }
 
-        // Bullet point parsing: e.g. * Item or - Item
-        if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-          const content = trimmed.substring(2);
+        // Bullet point parsing: e.g. *   Item or - Item
+        const listMatch = trimmed.match(/^([-*+•])\s+(.*)$/);
+        if (listMatch) {
+          const content = listMatch[2].trim();
           return (
             <div key={idx} className="pl-4 relative py-1 text-[#E6EDF3] font-sans text-[11px] flex items-start">
               <span className="inline-block h-1.5 w-1.5 bg-[#58A6FF] rounded-full shrink-0 mr-2 mt-1.5" />
@@ -108,3 +109,4 @@ export function CleanMarkdown({ text }: CleanMarkdownProps) {
     </>
   );
 }
+

@@ -337,50 +337,57 @@ function FantasmaSynergyReport({
               if (trimmed.match(/^[*=-]{3,}$/)) {
                 return null;
               }
-              if (line.startsWith('**FANTASMA') || line.startsWith('**🪐') || line.startsWith('**ðŸª ')) {
+              if (trimmed.startsWith('**FANTASMA') || trimmed.startsWith('**🪐') || trimmed.startsWith('**ðŸª ')) {
                 return (
                   <h3 key={index} className="text-sm font-bold text-[#58A6FF] border-b border-[#1E2333] pb-1 pt-3 tracking-wide flex items-center gap-1">
-                    {parseReportInline(line.replace('🪐 ', '').replace('ðŸª  ', ''))}
+                    {parseReportInline(trimmed.replace('🪐 ', '').replace('ðŸª  ', ''))}
                   </h3>
                 );
               }
-              if (line.startsWith('**Waktu Analisis:**')) {
+              if (trimmed.startsWith('**Waktu Analisis:**')) {
                 return (
                   <div key={index} className="text-[10px] text-[#8B949E] font-mono mb-4">
-                    {parseReportInline(line)}
+                    {parseReportInline(trimmed)}
                   </div>
                 );
               }
-              if (line.startsWith('**') && line.endsWith('**')) {
+              if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
                 return (
                   <h4 key={index} className="text-xs font-bold text-[#E6EDF3] mt-4 mb-2 tracking-wide font-sans">
-                    {parseReportInline(line)}
+                    {parseReportInline(trimmed)}
                   </h4>
                 );
               }
-              if (line.startsWith('- ')) {
-                const parts = line.substring(2).split(':');
+              
+              // Handle lists starting with dash: e.g. - Key: Value
+              const listMatchDash = trimmed.match(/^-\s+(.*)$/);
+              if (listMatchDash) {
+                const parts = listMatchDash[1].split(':');
                 if (parts.length > 1) {
                   return (
                     <div key={index} className="flex justify-between items-center py-1 border-b border-[#1E2333]/40 px-1 font-mono text-[11px]">
-                      <span className="text-[#8B949E] font-sans">{parseReportInline(parts[0])}</span>
-                      <span className="font-semibold text-[#E6EDF3]">{parseReportInline(parts.slice(1).join(':'))}</span>
+                      <span className="text-[#8B949E] font-sans">{parseReportInline(parts[0].trim())}</span>
+                      <span className="font-semibold text-[#E6EDF3]">{parseReportInline(parts.slice(1).join(':').trim())}</span>
                     </div>
                   );
                 }
               }
-              if (line.startsWith('* ')) {
+
+              // Handle list items starting with asterisk: e.g. * Item
+              const listMatchStar = trimmed.match(/^\*\s+(.*)$/);
+              if (listMatchStar) {
                 return (
                   <div key={index} className="pl-4 relative py-1 text-[#E6EDF3] font-sans text-[11px]">
                     <span className="absolute left-1.5 top-2.5 h-1 w-1 bg-[#58A6FF] rounded-full" />
-                    {parseReportInline(line.substring(2))}
+                    {parseReportInline(listMatchStar[1].trim())}
                   </div>
                 );
               }
-              if (line.startsWith('---') || line.includes('Disclaimer:')) {
+
+              if (trimmed.startsWith('---') || trimmed.includes('Disclaimer:')) {
                 return (
                   <div key={index} className="bg-[#07090F] border border-[#1E2333] rounded-[3px] p-3 text-[10px] text-[#8B949E] flex gap-2 items-start mt-4 italic font-sans leading-normal font-bold">
-                    <span>{parseReportInline(line)}</span>
+                    <span>{parseReportInline(trimmed)}</span>
                   </div>
                 );
               }
