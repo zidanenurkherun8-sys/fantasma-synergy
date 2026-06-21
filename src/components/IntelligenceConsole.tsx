@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Newspaper, BookOpen, Clock, Globe, ArrowUpRight, TrendingUp, Sparkles, Shield, Cpu, RefreshCw, Send } from 'lucide-react';
 import TiltCard from './TiltCard';
 import { audio } from '@/lib/audio';
+import { CleanMarkdown } from './CleanMarkdown';
 
 interface NewsItem {
   id: string;
@@ -417,8 +418,8 @@ function IntelligenceConsole() {
               </h3>
             </div>
             
-            <div className="text-[#E6EDF3] text-xs leading-relaxed font-sans space-y-4 whitespace-pre-line text-left">
-              {selectedModule.content}
+            <div className="text-[#E6EDF3] text-xs leading-relaxed font-sans space-y-4 text-left">
+              <CleanMarkdown text={selectedModule.content} />
             </div>
 
             {/* Warning Risk Note */}

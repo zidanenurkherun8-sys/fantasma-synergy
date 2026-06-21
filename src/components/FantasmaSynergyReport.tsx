@@ -27,6 +27,7 @@ interface PredictionData {
   modelConsensus: ModelConsensus;
 }
 
+
 interface FantasmaSynergyReportProps {
   report: string;
   prediction?: PredictionData | null;
@@ -42,6 +43,27 @@ interface FantasmaSynergyReportProps {
     confidence: number;
   }) => void;
 }
+
+const parseReportInline = (text: string): React.ReactNode[] => {
+  if (!text) return [];
+  const boldParts = text.split('**');
+  return boldParts.flatMap((part, bIdx) => {
+    const isBold = bIdx % 2 !== 0;
+    const italicParts = part.split('*');
+    const nodes = italicParts.map((subPart, iIdx) => {
+      const isItalic = iIdx % 2 !== 0;
+      if (isItalic) {
+        return <em key={`em-${bIdx}-${iIdx}`} className="italic text-[#58A6FF] font-semibold not-italic">{subPart}</em>;
+      }
+      return subPart;
+    });
+
+    if (isBold) {
+      return <strong key={`strong-${bIdx}`} className="font-extrabold text-[#58A6FF]">{nodes}</strong>;
+    }
+    return nodes;
+  });
+};
 
 function FantasmaSynergyReport({ 
   report, 
@@ -311,24 +333,28 @@ function FantasmaSynergyReport({
           {/* Actual Markdown report output pane */}
           <div className="flex-1 overflow-y-auto pr-1 text-[#E6EDF3] font-sans text-xs leading-relaxed space-y-4 max-h-[360px]">
             {report.split('\n').map((line, index) => {
-              if (line.startsWith('**FANTASMA') || line.startsWith('**🪐') || line.startsWith('**ðŸª')) {
+              const trimmed = line.trim();
+              if (trimmed.match(/^[*=-]{3,}$/)) {
+                return null;
+              }
+              if (line.startsWith('**FANTASMA') || line.startsWith('**🪐') || line.startsWith('**ðŸª ')) {
                 return (
                   <h3 key={index} className="text-sm font-bold text-[#58A6FF] border-b border-[#1E2333] pb-1 pt-3 tracking-wide flex items-center gap-1">
-                    {line.replace(/\*\*/g, '').replace('🪐 ', '').replace('ðŸª ', '')}
+                    {parseReportInline(line.replace('🪐 ', '').replace('ðŸª  ', ''))}
                   </h3>
                 );
               }
               if (line.startsWith('**Waktu Analisis:**')) {
                 return (
                   <div key={index} className="text-[10px] text-[#8B949E] font-mono mb-4">
-                    {line.replace(/\*\*/g, '')}
+                    {parseReportInline(line)}
                   </div>
                 );
               }
               if (line.startsWith('**') && line.endsWith('**')) {
                 return (
-                  <h4 key={index} className="text-xs font-bold text-[#E6EDF3] mt-4 mb-2 tracking-wide">
-                    {line.replace(/\*\*/g, '')}
+                  <h4 key={index} className="text-xs font-bold text-[#E6EDF3] mt-4 mb-2 tracking-wide font-sans">
+                    {parseReportInline(line)}
                   </h4>
                 );
               }
@@ -337,8 +363,8 @@ function FantasmaSynergyReport({
                 if (parts.length > 1) {
                   return (
                     <div key={index} className="flex justify-between items-center py-1 border-b border-[#1E2333]/40 px-1 font-mono text-[11px]">
-                      <span className="text-[#8B949E] font-sans">{parts[0]}</span>
-                      <span className="font-semibold text-[#E6EDF3]">{parts.slice(1).join(':')}</span>
+                      <span className="text-[#8B949E] font-sans">{parseReportInline(parts[0])}</span>
+                      <span className="font-semibold text-[#E6EDF3]">{parseReportInline(parts.slice(1).join(':'))}</span>
                     </div>
                   );
                 }
@@ -347,18 +373,18 @@ function FantasmaSynergyReport({
                 return (
                   <div key={index} className="pl-4 relative py-1 text-[#E6EDF3] font-sans text-[11px]">
                     <span className="absolute left-1.5 top-2.5 h-1 w-1 bg-[#58A6FF] rounded-full" />
-                    {line.substring(2)}
+                    {parseReportInline(line.substring(2))}
                   </div>
                 );
               }
               if (line.startsWith('---') || line.includes('Disclaimer:')) {
                 return (
                   <div key={index} className="bg-[#07090F] border border-[#1E2333] rounded-[3px] p-3 text-[10px] text-[#8B949E] flex gap-2 items-start mt-4 italic font-sans leading-normal font-bold">
-                    <span>{line.replace(/[\*_-]/g, '')}</span>
+                    <span>{parseReportInline(line)}</span>
                   </div>
                 );
               }
-              return <p key={index} className="font-sans text-[11px] text-[#8B949E] leading-normal">{line}</p>;
+              return <p key={index} className="font-sans text-[11px] text-[#8B949E] leading-normal">{parseReportInline(line)}</p>;
             })}
           </div>
 

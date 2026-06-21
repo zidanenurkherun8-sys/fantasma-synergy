@@ -15,6 +15,7 @@ import { OracleSignal } from '@/lib/oracle-engine';
 import RiskLabConsole from '@/components/RiskLabConsole';
 import EliteAuditorsPanel from '@/components/EliteAuditorsPanel';
 import IntelligenceConsole from '@/components/IntelligenceConsole';
+import { CleanMarkdown } from '@/components/CleanMarkdown';
 
 const getProgressWidthClass = (score: number): string => {
   if (score >= 95) return 'w-full';
@@ -2265,12 +2266,12 @@ export default function DashboardPage() {
                         <span>•</span>
                         <span>{msg.timestamp}</span>
                       </div>
-                      <div className={`p-3 rounded-[3px] border font-normal leading-relaxed whitespace-pre-line ${
+                      <div className={`p-3 rounded-[3px] border font-normal leading-relaxed ${
                         msg.role === 'USER' 
-                          ? 'bg-[#0C0E18] border-[#1E2333] text-[#E6EDF3] rounded-tr-none' 
-                          : 'bg-[#030407] border-[#1E2333] text-slate-100 rounded-tl-none font-sans'
+                          ? 'bg-[#0C0E18] border-[#1E2333] text-[#E6EDF3] rounded-tr-none whitespace-pre-line' 
+                          : 'bg-[#030407] border-[#1E2333] text-slate-100 rounded-tl-none'
                       }`}>
-                        {msg.text}
+                        <CleanMarkdown text={msg.text} />
                       </div>
                     </div>
                   ))}
