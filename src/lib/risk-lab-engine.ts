@@ -355,15 +355,32 @@ export class RiskLabEngine {
     const cleanPrice = Math.round(currentPrice);
     const isLong = signal === 'LONG';
     
+    // Safety check: if candles are from another asset (price difference > 30%), scale candles if possible
+    let scaledCandles = candles;
+    if (candles.length > 0) {
+      const lastClose = candles[candles.length - 1].close;
+      const pctDiff = Math.abs(lastClose - cleanPrice) / (cleanPrice || 1);
+      if (pctDiff >= 0.3) {
+        const ratio = cleanPrice / (lastClose || 1);
+        scaledCandles = candles.map(c => ({
+          ...c,
+          open: c.open * ratio,
+          high: c.high * ratio,
+          low: c.low * ratio,
+          close: c.close * ratio
+        }));
+      }
+    }
+
     // a. Detect volatility and scaling
-    const vol = this.detectVolatilityRegime(candles);
+    const vol = this.detectVolatilityRegime(scaledCandles);
     const baseMultiplier = style === 'SCALPING' ? 1.0 : style === 'SHORT' ? 1.8 : style === 'MEDIUM' ? 3.0 : 5.0;
     const scaledMultiplier = baseMultiplier * vol.multiplier;
     
     // Compute basic ATR
     let atr = cleanPrice * 0.015; // default 1.5%
-    if (candles.length >= 15) {
-      const recent = candles.slice(-15);
+    if (scaledCandles.length >= 15) {
+      const recent = scaledCandles.slice(-15);
       const sumTr = recent.slice(1).reduce((acc, c, idx) => {
         const tr = Math.max(c.high - c.low, Math.abs(c.high - recent[idx].close), Math.abs(c.low - recent[idx].close));
         return acc + tr;
@@ -384,7 +401,7 @@ export class RiskLabEngine {
       tp3 = isLong ? cleanPrice + dist * (riskReward * 1.5) : cleanPrice - dist * (riskReward * 1.5);
       confirmations.push(`SL dipasang berdasarkan ATR Multiplier (${scaledMultiplier.toFixed(1)}x ATR).`);
     } else if (method === 'SR') {
-      const pv = this.getPivotLevels(candles, cleanPrice);
+      const pv = this.getPivotLevels(scaledCandles, cleanPrice);
       const buffer = atr * 0.5;
       
       if (isLong) {
@@ -400,7 +417,7 @@ export class RiskLabEngine {
       tp3 = isLong ? cleanPrice + slDist * (riskReward * 1.5) : cleanPrice - slDist * (riskReward * 1.5);
       confirmations.push(`SL diletakkan di luar S/R terdekat + buffer ATR (${buffer.toFixed(0)} IDR).`);
     } else if (method === 'FIB') {
-      const fibs = this.getFibonacciLevels(candles, cleanPrice, isLong);
+      const fibs = this.getFibonacciLevels(scaledCandles, cleanPrice, isLong);
       sl = isLong ? fibs.fib618 : fibs.fib618; // SL at Golden ratio
       tp2 = isLong ? fibs.ext1272 : fibs.ext1272; // TP at 1.272 extension
       
@@ -410,7 +427,7 @@ export class RiskLabEngine {
       confirmations.push('Level koordinat tervalidasi menggunakan Fibonacci Retracement 0.618 & Extension 1.272.');
     } else {
       // Market Structure Swing High/Low
-      const recent = candles.slice(-30);
+      const recent = scaledCandles.slice(-30);
       const swingLow = Math.min(...recent.map(c => c.low));
       const swingHigh = Math.max(...recent.map(c => c.high));
       
@@ -451,7 +468,7 @@ export class RiskLabEngine {
     const riskRewardRatio = parseFloat((Math.abs(tp2 - cleanPrice) / (slDist || 1)).toFixed(2)) || riskReward;
 
     // c. 7-Day Backtest Win Rate
-    const backtestWinRate = this.run7DayBacktest(candles, style, method, signal, cleanPrice, sl, tp1);
+    const backtestWinRate = this.run7DayBacktest(scaledCandles, style, method, signal, cleanPrice, sl, tp1);
     let backtestWarning: string | undefined;
     if (backtestWinRate < 55) {
       backtestWarning = `Metode ${method} kurang efektif untuk ${symbol}/IDR dalam 7 hari terakhir (Win Rate: ${backtestWinRate}%).`;
@@ -459,7 +476,7 @@ export class RiskLabEngine {
 
     // d. Linear Regression Target
     const targetHours = style === 'SCALPING' ? 0.25 : style === 'SHORT' ? 3 : style === 'MEDIUM' ? 12 : 48;
-    const reg = this.calculateRegression(candles, style, targetHours);
+    const reg = this.calculateRegression(scaledCandles, style, targetHours);
 
     // e. Sizing position
     const size = this.calculatePositionSizing(capitalBalance, riskPercent, cleanPrice, sl);
