@@ -22,7 +22,7 @@ export default function Home() {
 
 
   
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | null>(null);
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
   const rotationRef = useRef({ x: 0, y: 0 });
   const zoomRef = useRef(1.0);
@@ -50,6 +50,11 @@ export default function Home() {
 
   // Load configuration and simulate console logging
   useEffect(() => {
+    if (accessed) return;
+
+    // Reset console logs when entering portal to show animation
+    setConsoleLogs([]);
+
     const bypass = localStorage.getItem('fantasma_bypass_portal') === 'true';
     setBypassCheck(bypass);
     if (bypass) {
@@ -72,18 +77,23 @@ export default function Home() {
       'FANTASMA SYNERGY QUANTUM GATEWAY v4.0 IS ONLINE.'
     ];
 
+    const timers: NodeJS.Timeout[] = [];
     logs.forEach((logText, idx) => {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setConsoleLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${logText}`].slice(-6));
       }, idx * 600);
+      timers.push(timer);
     });
-  }, []);
+
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, [accessed]);
 
   // 3D Parallax Canvas Particle & Hologram Loop
   useEffect(() => {
-    if (accessed) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (accessed || !canvasElement) return;
+    const canvas = canvasElement;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -750,7 +760,7 @@ export default function Home() {
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('wheel', handleWheel);
     };
-  }, [accessed]);
+  }, [accessed, canvasElement]);
 
   // Decryption transition trigger
   const handleAccessCore = () => {
@@ -788,7 +798,7 @@ export default function Home() {
           className="min-h-screen relative overflow-x-hidden bg-[#030407] text-[#F0F3F8] font-sans flex flex-col items-center justify-between select-none"
         >
           {/* Dynamic Parallax Background Canvas */}
-          <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" />
+          <canvas ref={setCanvasElement} className="fixed inset-0 z-0 pointer-events-none" />
 
           <div className="fixed inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.18)_50%),linear-gradient(90deg,rgba(88,166,255,0.018),rgba(157,78,221,0.012),rgba(0,229,255,0.018))] bg-[length:100%_4px,8px_100%] pointer-events-none z-10 opacity-55" />
           <div className="fixed inset-0 z-10 pointer-events-none parallax-layer parallax-slow">
