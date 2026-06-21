@@ -114,3 +114,134 @@ Based on this structured raw context, generate your **Fantasma Synergy Instituti
 Ensure you calculate the exact trade sizing (Sizing = Balance * Risk% / RiskDistance%) in rupiah to show on the setup cards.
 `;
 }
+
+// ─── FOREX INTELLIGENCE ENGINE PROMPT ─────────────────────────────────────
+
+export const FOREX_INTELLIGENCE_SYSTEM_PROMPT = `
+You are the Ultimate Forex Trading Intelligence Engine, an institutional-grade multi-timeframe Forex analysis system with over 20 years of combined expertise as a proprietary trader, quantitative analyst, systematic developer, risk manager, and market microstructure specialist from top-tier global hedge funds.
+
+### COVERAGE
+You cover ALL Forex pairs: Majors (EURUSD, GBPUSD, USDJPY, AUDUSD, USDCAD, NZDUSD, USDCHF), Minors & Crosses (EURGBP, EURJPY, GBPAUD, AUDJPY, EURAUD, EURCAD, GBPJPY, NZDJPY, GBPCAD, AUDCAD, EURCHF, GBPCHF, AUDNZD, and all combinations), Exotics (USDMXN, USDTRY, USDZAR, USDSGD, USDHKD, USDSEK, USDNOK, USDDKK, USDPLN, EURTRY, and more).
+
+### MULTI-TIMEFRAME ANALYSIS
+Analyze simultaneously across: M1, M5, M15, M30, H1, H4, D1, W1, MN with emphasis on Higher Timeframe Alignment.
+
+### METHODOLOGY INTEGRATION (Use ALL applicable)
+1. Pure Price Action & Candlestick Patterns (pin bar, engulfing, doji, inside bars, outside bars, rejection candles)
+2. Market Structure (BOS, CHoCH, liquidity sweeps, equal highs/lows, displacement, MSS)
+3. Smart Money Concepts — ICT/SMC (Order Blocks, FVG, Breaker Blocks, Mitigation Blocks, OTE, Judas swing)
+4. Wyckoff Method (Accumulation/Distribution phases, springs, upthrusts, SOS, SOW)
+5. Elliott Wave Theory (impulse/corrective waves, Fibonacci relationships, alternation rule)
+6. Supply & Demand Zones (RBR, DBD, stacked zones, proximal/distal lines)
+7. Volume Profile (VPVR, VPOC, HVN, LVN, Value Area, volume delta)
+8. Harmonic Patterns (Gartley, Bat, Crab, Butterfly, Shark, Cypher with Fibonacci validation)
+9. Classical TA (trendlines, channels, Andrews Pitchfork, Fibonacci retracement/extension, Gann, Pivots)
+10. Indicators (EMA ribbon, RSI with divergence, MACD, BB squeeze, ATR, ADX/DI, Ichimoku, Stochastic, CCI)
+11. Session & Intermarket Analysis (Asian/London/NY overlaps, DXY, US10Y, SPX, XAUUSD correlations)
+12. Quantitative Models (mean reversion, breakout probability, volatility clustering, z-score, Bayesian)
+
+### RISK MANAGEMENT (NON-NEGOTIABLE)
+- Maximum risk: 0.5–1% of total account equity per trade
+- Minimum R:R: 1:2.5, target 1:3.5 or higher
+- Partial profit: 40% at TP1 (1:2.5), 30% at TP2 (1:3.5), 30% runner with trailing stop
+- Move to breakeven after 1:1.5 R:R
+- Position sizing: ATR-based with volatility adjustment
+
+### OUTPUT FORMAT — STRICT JSON
+Output a single valid JSON object matching this exact structure:
+{
+  "timestamp": "ISO8601",
+  "market": "FOREX",
+  "symbol": "EURUSD",
+  "timeframe": "H1",
+  "bias": "bullish",
+  "setup": "Detailed confluence summary...",
+  "entry": { "price": 1.0852, "zone": "1.0848 - 1.0856", "confidence": 92 },
+  "stopLoss": 1.0821,
+  "takeProfits": [
+    { "level": 1.0895, "portion": 40, "rr": 2.1 },
+    { "level": 1.0940, "portion": 30, "rr": 3.6 },
+    { "level": 1.0995, "portion": 30, "rr": "trailing" }
+  ],
+  "rrRatio": "1:3.5",
+  "positionSize": "0.75% of equity (ATR-based)",
+  "confidence": 91,
+  "estimatedWinProbability": 84,
+  "reasoning": "Extremely detailed explanation...",
+  "riskManagement": "0.75% risk per trade, partial scaling, ATR trailing stop...",
+  "alternativeScenarios": { "bullCase": "...", "bearCase": "..." },
+  "dataSource": "Exness / MIFX"
+}
+
+### CRITICAL RULES
+1. ONLY generate a signal if estimated win probability ≥ 80% based on multi-layer confluences.
+2. If win probability < 80%, return { "setup": "NO_CLEAR_SETUP", "estimatedWinProbability": X, "reasoning": "..." }
+3. Never FOMO. Capital preservation is the absolute priority.
+4. Every level must be mathematically anchored to current market data.
+`;
+
+export function constructForexAnalysisPrompt(
+  pair: string,
+  accountSize: number,
+  riskPct: number,
+  marketData: {
+    price: number;
+    bid: number;
+    ask: number;
+    spread: number;
+    change24h: number;
+    high24h: number;
+    low24h: number;
+    session: string;
+    candles_h1: any[];
+    candles_h4: any[];
+    candles_d1: any[];
+    atr: number;
+    rsi: number;
+    macd_histogram: number;
+    adx: number;
+    ema21: number;
+    ema50: number;
+    ema200: number;
+    htfBias: string;
+    itfBias: string;
+    pivot: number;
+    support1: number;
+    resistance1: number;
+    fib618: number;
+  }
+): string {
+  return `
+Perform a complete institutional analysis for **${pair}** in the Global Forex market.
+
+Account configuration:
+- Account Size: $${accountSize.toLocaleString()}
+- Risk Per Trade: ${riskPct}% ($${(accountSize * riskPct / 100).toFixed(2)})
+
+### REAL-TIME MARKET DATA:
+- Current Price: ${marketData.price.toFixed(5)} | Bid: ${marketData.bid.toFixed(5)} | Ask: ${marketData.ask.toFixed(5)}
+- Spread: ${(marketData.spread * 10000).toFixed(1)} pips
+- 24h Change: ${marketData.change24h.toFixed(3)}% | High: ${marketData.high24h.toFixed(5)} | Low: ${marketData.low24h.toFixed(5)}
+- Active Session: ${marketData.session}
+
+### PRE-COMPUTED TECHNICAL INDICATORS:
+- ATR(14): ${marketData.atr.toFixed(5)}
+- RSI(14): ${marketData.rsi.toFixed(2)}
+- MACD Histogram: ${marketData.macd_histogram.toFixed(6)} (${marketData.macd_histogram > 0 ? 'POSITIVE' : 'NEGATIVE'})
+- ADX: ${marketData.adx.toFixed(2)} (${marketData.adx > 25 ? 'TRENDING' : 'RANGING'})
+- EMA21: ${marketData.ema21.toFixed(5)} | EMA50: ${marketData.ema50.toFixed(5)} | EMA200: ${marketData.ema200.toFixed(5)}
+- HTF Bias (D1): ${marketData.htfBias} | ITF Bias (H4): ${marketData.itfBias}
+
+### KEY TECHNICAL LEVELS:
+- Pivot: ${marketData.pivot.toFixed(5)}
+- Support 1: ${marketData.support1.toFixed(5)} | Resistance 1: ${marketData.resistance1.toFixed(5)}
+- Fibonacci 0.618: ${marketData.fib618.toFixed(5)}
+
+### RECENT H1 CANDLES (Last 8):
+${marketData.candles_h1.slice(-8).map((c: any) =>
+  `  O:${c.open?.toFixed(5)} H:${c.high?.toFixed(5)} L:${c.low?.toFixed(5)} C:${c.close?.toFixed(5)}`
+).join('\n')}
+
+Apply ALL applicable methodologies from your system prompt. Return the strict JSON signal output. Minimum 80% win probability to generate a directional signal.
+`;
+}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Clock, Shield, ShieldAlert, Activity, Cpu, Coins, ExternalLink, LayoutDashboard, TrendingUp, Settings, User, Search, BarChart2, Zap, Brain, Sliders, CheckCircle, Database, HelpCircle, Terminal, Globe, Award, Sparkles, Filter, ChevronRight, Lock, Volume2, VolumeX } from 'lucide-react';
+import { Clock, Shield, ShieldAlert, Activity, Cpu, Coins, ExternalLink, LayoutDashboard, TrendingUp, Settings, User, Search, BarChart2, Zap, Brain, Sliders, CheckCircle, Database, HelpCircle, Terminal, Globe, Award, Sparkles, Filter, ChevronRight, Lock, Volume2, VolumeX, DollarSign } from 'lucide-react';
 import { audio } from '@/lib/audio';
 import MarketScanner, { MarketPair } from '@/components/MarketScanner';
 import TradingChart from '@/components/TradingChart';
@@ -16,6 +16,7 @@ import RiskLabConsole from '@/components/RiskLabConsole';
 import EliteAuditorsPanel from '@/components/EliteAuditorsPanel';
 import IntelligenceConsole from '@/components/IntelligenceConsole';
 import { CleanMarkdown } from '@/components/CleanMarkdown';
+import ForexOracleDashboard from '@/components/ForexOracleDashboard';
 
 const getProgressWidthClass = (score: number): string => {
   if (score >= 95) return 'w-full';
@@ -111,7 +112,7 @@ export default function DashboardPage() {
   const [timeframe, setTimeframe] = useState<'1' | '5' | '15' | '30' | '60' | '240' | '720' | '1D' | '1W' | '1M'>('60');
 
   // Active navigation tab
-  const [activeTab, _setActiveTab] = useState<'DASHBOARD' | 'SCANNER' | 'AUDITOR' | 'SETTINGS' | 'RISK_LAB' | 'INTELLIGENCE'>('DASHBOARD');
+  const [activeTab, _setActiveTab] = useState<'DASHBOARD' | 'SCANNER' | 'AUDITOR' | 'SETTINGS' | 'RISK_LAB' | 'INTELLIGENCE' | 'FOREX'>('DASHBOARD');
   const [mutedState, setMutedState] = useState(false);
 
   useEffect(() => {
@@ -1687,6 +1688,18 @@ export default function DashboardPage() {
             </button>
             <button 
               type="button"
+              onClick={() => setActiveTab('FOREX')}
+              className={`flex items-center gap-3.5 px-3 py-2.5 rounded-[3px] text-xs font-bold uppercase transition-all cursor-pointer font-sans w-full text-left border-l-2 ${
+                activeTab === 'FOREX'
+                  ? 'text-[#00E5FF] bg-[#0C0E18] border-[#00E5FF]'
+                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#0C0E18]/50 border-transparent'
+              }`}
+            >
+              <DollarSign className="h-4.5 w-4.5" />
+              {sidebarExpanded && <span className="animate-fadeIn">FX Oracle</span>}
+            </button>
+            <button 
+              type="button"
               onClick={() => setActiveTab('AUDITOR')}
               className={`flex items-center gap-3.5 px-3 py-2.5 rounded-[3px] text-xs font-bold uppercase transition-all cursor-pointer font-sans w-full text-left border-l-2 ${
                 activeTab === 'AUDITOR'
@@ -2414,6 +2427,13 @@ export default function DashboardPage() {
           </main>
         )}
 
+        {/* FOREX ORACLE INTELLIGENCE TAB */}
+        {activeTab === 'FOREX' && (
+          <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal w-full max-w-full min-w-0">
+            <ForexOracleDashboard />
+          </main>
+        )}
+
         {/* SETTINGS VIEW TAB (3.6) */}
         {activeTab === 'SETTINGS' && (
           <main className="flex-1 p-4 md:p-6 flex flex-col gap-4 md:gap-6 bg-[#030407] scroll-reveal w-full max-w-full min-w-0">
@@ -2789,6 +2809,16 @@ export default function DashboardPage() {
         >
           <Globe className="h-4.5 w-4.5" />
           <span className="truncate w-full text-center">Intel</span>
+        </button>
+        <button 
+          type="button"
+          onClick={(e) => handleTabSelect(e, 'FOREX')}
+          className={`flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-[3px] text-[8px] min-[360px]:text-[9px] font-bold uppercase transition-all cursor-pointer font-sans flex-1 min-w-0 ${
+            activeTab === 'FOREX' ? 'text-[#00E5FF]' : 'text-[#8B949E]'
+          }`}
+        >
+          <DollarSign className="h-4.5 w-4.5" />
+          <span className="truncate w-full text-center">FX</span>
         </button>
         <button 
           type="button"

@@ -60,11 +60,13 @@ export default function Home() {
       'SYSTEM: INITIALIZING QUANTUM ORACLE ENGINE PROTOCOLS...',
       'SYSTEM: PULLING INDODAX TICKER INDEX & ORDERBOOK PRESSURES...',
       'SYSTEM: CONNECTED TO INDODAX REST COGNITIVE TUNNEL (OK)',
-      'SYSTEM: 12 ELITE MARKET GUARDIANS LOADED INTO PERSISTENT CACHE...',
+      'SYSTEM: LOADING FOREX INTELLIGENCE ENGINE — 28 PAIRS UNIVERSE...',
+      'SYSTEM: 10 METHODOLOGY ANALYZERS INITIALIZED (SMC, WYCKOFF, HARMONIC...)',
+      'SYSTEM: MULTI-TIMEFRAME CONFLUENCE ENGINE ARMED (M1→MN)',
       'SYSTEM: HALF-KELLY CAPITAL PRESERVATION STRATEGY: STAGED',
       'SYSTEM: WARNING: TIME REGIME VOLATILITY DETECTED: HIGH',
       'SYSTEM: COGNITIVE DECRYPTION COMPLETED.',
-      'FANTASMA SYNERGY QUANTUM GATEWAY IS ONLINE.'
+      'FANTASMA SYNERGY QUANTUM GATEWAY v4.0 IS ONLINE.'
     ];
 
     logs.forEach((logText, idx) => {
@@ -825,7 +827,7 @@ export default function Home() {
           FANTASMA SYNERGY
         </h1>
         <p className="text-[10px] font-bold font-mono tracking-[0.4em] text-cyan-400/80 uppercase mt-2 select-none">
-          Quantitative Oracle Investment Terminal v3.5
+          Quantitative Oracle Investment Terminal v4.0 | FOREX + CRYPTO
         </p>
 
         {/* Cyber Logs Feed Console */}
