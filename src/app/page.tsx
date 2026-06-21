@@ -146,46 +146,10 @@ export default function Home() {
       zoomRef.current = Math.max(0.65, Math.min(2.25, zoomRef.current + zoomDelta));
     };
 
-    // Touch support for mobile pinch/drag
-    let touchStartDist = 0;
-    const getTouchDist = (touches: TouchList) => {
-      if (touches.length < 2) return 0;
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if ((e.target as HTMLElement).closest('button, input, label, a')) return;
-      if (e.touches.length === 2) {
-        dragRef.current.isDragging = false;
-        touchStartDist = getTouchDist(e.touches);
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        const dist = getTouchDist(e.touches);
-        if (touchStartDist > 0 && dist > 0) {
-          const ratio = dist / touchStartDist;
-          zoomRef.current = Math.max(0.4, Math.min(3.0, zoomRef.current * ratio));
-          touchStartDist = dist;
-        }
-      }
-    };
-
-    const handleTouchEnd = () => {
-      dragRef.current.isDragging = false;
-      touchStartDist = 0;
-    };
-
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMoveDrag);
     window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('touchstart', handleTouchStart);
-    window.addEventListener('touchmove', handleTouchMove);
-    window.addEventListener('touchend', handleTouchEnd);
 
     // Define 80 floating parallax dust particles
     const particles: Array<{
@@ -780,9 +744,6 @@ export default function Home() {
       window.removeEventListener('mousemove', handleMouseMoveDrag);
       window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, [accessed]);
 
@@ -809,7 +770,7 @@ export default function Home() {
 
   return (
     <div 
-      className={`min-h-screen relative overflow-x-hidden bg-[#030407] text-[#F0F3F8] font-sans flex flex-col items-center justify-between select-none scroll-premium scroll-parallax-root ${
+      className={`min-h-screen relative overflow-x-hidden bg-[#030407] text-[#F0F3F8] font-sans flex flex-col items-center justify-between select-none ${
         glitching ? 'animate-[pulse_0.1s_infinite] saturate-[300%] contrast-[150%]' : ''
       }`}
     >
