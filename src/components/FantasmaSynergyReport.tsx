@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Send, AlertTriangle, ShieldCheck, ArrowUpRight, BarChart2, Cpu } from 'lucide-react';
+import { Send, ShieldCheck, ArrowUpRight, BarChart2, Cpu } from 'lucide-react';
 import TiltCard from './TiltCard';
+import { CleanMarkdown } from './CleanMarkdown';
 
 interface ModelConsensus {
   lstm_vote: 'LONG' | 'SHORT' | 'NEUTRAL';
@@ -44,27 +45,6 @@ interface FantasmaSynergyReportProps {
   }) => void;
 }
 
-const parseReportInline = (text: string): React.ReactNode[] => {
-  if (!text) return [];
-  const boldParts = text.split('**');
-  return boldParts.flatMap((part, bIdx) => {
-    const isBold = bIdx % 2 !== 0;
-    const italicParts = part.split('*');
-    const nodes = italicParts.map((subPart, iIdx) => {
-      const isItalic = iIdx % 2 !== 0;
-      if (isItalic) {
-        return <em key={`em-${bIdx}-${iIdx}`} className="italic text-[#58A6FF] font-semibold not-italic">{subPart}</em>;
-      }
-      return subPart;
-    });
-
-    if (isBold) {
-      return <strong key={`strong-${bIdx}`} className="font-extrabold text-[#58A6FF]">{nodes}</strong>;
-    }
-    return nodes;
-  });
-};
-
 function FantasmaSynergyReport({ 
   report, 
   prediction,
@@ -84,7 +64,6 @@ function FantasmaSynergyReport({
       const slRegex = /Stop Loss:\s*Rp\s*([0-9.,]+)/i;
       const tp1Regex = /TP1:\s*Rp\s*([0-9.,]+)/i;
       const tp2Regex = /TP2:\s*Rp\s*([0-9.,]+)/i;
-      const tp3Regex = /TP3:\s*Rp\s*([0-9.,]+)/i;
       const directionRegex = /Direction:\s*(LONG|SHORT|NEUTRAL)/i;
       const confidenceRegex = /Confidence Score:\s*([0-9]+)/i;
 
@@ -92,7 +71,6 @@ function FantasmaSynergyReport({
       const slMatch = report.match(slRegex);
       const tp1Match = report.match(tp1Regex);
       const tp2Match = report.match(tp2Regex);
-      const tp3Match = report.match(tp3Regex);
       const directionMatch = report.match(directionRegex);
       const confidenceMatch = report.match(confidenceRegex);
 
@@ -201,7 +179,7 @@ function FantasmaSynergyReport({
           <Send className="h-10 w-10 text-[#8B949E] mb-3 opacity-60" />
           <h4 className="font-bold text-xs text-[#E6EDF3] mb-1">Belum Ada Analisis yang Berjalan</h4>
           <p className="text-[10px] text-[#8B949E] max-w-xs leading-normal">
-            Pilih pasangan koin di scanner, atur balance Anda, lalu klik "COGNITIVE RUN" untuk memicu audit multi-model ensemble kuantitatif.
+            Pilih pasangan koin di scanner, atur balance Anda, lalu klik &quot;COGNITIVE RUN&quot; untuk memicu audit multi-model ensemble kuantitatif.
           </p>
         </div>
       ) : (
@@ -330,72 +308,12 @@ function FantasmaSynergyReport({
             </div>
           )}
 
-          {/* Actual Markdown report output pane */}
-          <div className="flex-1 overflow-y-auto pr-1 text-[#E6EDF3] font-sans text-xs leading-relaxed space-y-4 max-h-[360px]">
-            {report.split('\n').map((line, index) => {
-              const trimmed = line.trim();
-              if (trimmed.match(/^[*=-]{3,}$/)) {
-                return null;
-              }
-              if (trimmed.startsWith('**FANTASMA') || trimmed.startsWith('**🪐') || trimmed.startsWith('**ðŸª ')) {
-                return (
-                  <h3 key={index} className="text-sm font-bold text-[#58A6FF] border-b border-[#1E2333] pb-1 pt-3 tracking-wide flex items-center gap-1">
-                    {parseReportInline(trimmed.replace('🪐 ', '').replace('ðŸª  ', ''))}
-                  </h3>
-                );
-              }
-              if (trimmed.startsWith('**Waktu Analisis:**')) {
-                return (
-                  <div key={index} className="text-[10px] text-[#8B949E] font-mono mb-4">
-                    {parseReportInline(trimmed)}
-                  </div>
-                );
-              }
-              if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
-                return (
-                  <h4 key={index} className="text-xs font-bold text-[#E6EDF3] mt-4 mb-2 tracking-wide font-sans">
-                    {parseReportInline(trimmed)}
-                  </h4>
-                );
-              }
-              
-              // Handle lists starting with dash: e.g. - Key: Value
-              const listMatchDash = trimmed.match(/^-\s+(.*)$/);
-              if (listMatchDash) {
-                const parts = listMatchDash[1].split(':');
-                if (parts.length > 1) {
-                  return (
-                    <div key={index} className="flex justify-between items-center py-1 border-b border-[#1E2333]/40 px-1 font-mono text-[11px]">
-                      <span className="text-[#8B949E] font-sans">{parseReportInline(parts[0].trim())}</span>
-                      <span className="font-semibold text-[#E6EDF3]">{parseReportInline(parts.slice(1).join(':').trim())}</span>
-                    </div>
-                  );
-                }
-              }
-
-              // Handle list items starting with asterisk: e.g. * Item
-              const listMatchStar = trimmed.match(/^\*\s+(.*)$/);
-              if (listMatchStar) {
-                return (
-                  <div key={index} className="pl-4 relative py-1 text-[#E6EDF3] font-sans text-[11px]">
-                    <span className="absolute left-1.5 top-2.5 h-1 w-1 bg-[#58A6FF] rounded-full" />
-                    {parseReportInline(listMatchStar[1].trim())}
-                  </div>
-                );
-              }
-
-              if (trimmed.startsWith('---') || trimmed.includes('Disclaimer:')) {
-                return (
-                  <div key={index} className="bg-[#07090F] border border-[#1E2333] rounded-[3px] p-3 text-[10px] text-[#8B949E] flex gap-2 items-start mt-4 italic font-sans leading-normal font-bold">
-                    <span>{parseReportInline(trimmed)}</span>
-                  </div>
-                );
-              }
-              return <p key={index} className="font-sans text-[11px] text-[#8B949E] leading-normal">{parseReportInline(line)}</p>;
-            })}
+          {/* Actual report output pane — rendered cleanly via CleanMarkdown (no raw # or * symbols) */}
+          <div className="flex-1 overflow-y-auto pr-1 text-[#E6EDF3] font-sans text-xs leading-relaxed space-y-1 max-h-[360px]">
+            <CleanMarkdown text={report} />
           </div>
 
-          {/* Model Backtesting Performance Dashboard (4.7) */}
+          {/* Model Backtesting Performance Dashboard */}
           <div className="bg-[#07090F] border border-[#1E2333] rounded-[3px] p-3.5 mt-auto select-none">
             <div className="flex justify-between items-center border-b border-[#1E2333] pb-1.5 mb-2 font-sans">
               <span className="text-[10px] font-bold text-[#E6EDF3] uppercase tracking-wider flex items-center gap-1.5">
