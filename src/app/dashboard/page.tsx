@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Clock, Shield, ShieldAlert, Activity, Cpu, Coins, ExternalLink, LayoutDashboard, TrendingUp, Settings, User, Search, BarChart2, Zap, Brain, Sliders, CheckCircle, Database, HelpCircle, Terminal, Globe, Award, Sparkles, Filter, ChevronRight, Lock, Volume2, VolumeX, DollarSign } from 'lucide-react';
+import { Clock, Shield, ShieldAlert, Activity, Cpu, Coins, ExternalLink, LayoutDashboard, TrendingUp, Settings, User, Search, BarChart2, Zap, Brain, Sliders, CheckCircle, Database, HelpCircle, Terminal, Globe, Award, Sparkles, Filter, ChevronRight, Lock, Volume2, VolumeX, DollarSign, LogOut } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { audio } from '@/lib/audio';
 import MarketScanner, { MarketPair } from '@/components/MarketScanner';
 import TradingChart from '@/components/TradingChart';
@@ -112,8 +113,22 @@ const SystemClock = React.memo(() => {
 });
 SystemClock.displayName = 'SystemClock';
 
-export default function DashboardPage() {
+export default function DashboardPage({ onExit }: { onExit?: () => void }) {
   const [isMounted, setIsMounted] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleExitClick = () => {
+    if (audio) {
+      audio.playWarning();
+    }
+    setIsExiting(true);
+    setTimeout(() => {
+      if (onExit) {
+        onExit();
+      }
+    }, 850);
+  };
+
   const closedPositionsRef = React.useRef<Set<string>>(new Set());
 
   const [pairs, setPairs] = useState<MarketPair[]>([]);
@@ -1758,7 +1773,10 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#030407] text-[#E6EDF3] flex font-sans antialiased overflow-x-hidden select-none relative">
       {/* Left Sidebar Navigation (3.6) */}
-      <aside 
+      <motion.aside 
+        initial={{ x: 0, opacity: 1 }}
+        animate={isExiting ? { x: -240, opacity: 0 } : { x: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
         className="fixed left-0 top-0 bottom-0 z-40 bg-[#07090F] border-r border-[#1E2333] hidden md:flex flex-col justify-between w-[220px] select-none"
       >
         <div className="flex flex-col gap-6 py-5">
@@ -1858,6 +1876,16 @@ export default function DashboardPage() {
               <Settings className="h-4.5 w-4.5" />
               {sidebarExpanded && <span className="animate-fadeIn">Settings</span>}
             </button>
+            
+            {/* Exit Terminal Button in Sidebar */}
+            <button 
+              type="button"
+              onClick={handleExitClick}
+              className="flex items-center gap-3.5 px-3 py-2.5 rounded-[3px] text-xs font-bold uppercase transition-all cursor-pointer font-sans w-full text-left border-l-2 text-rose-500 hover:text-rose-450 hover:bg-rose-950/20 border-transparent"
+            >
+              <LogOut className="h-4.5 w-4.5 text-rose-500" />
+              {sidebarExpanded && <span className="animate-fadeIn">Exit Terminal</span>}
+            </button>
           </nav>
         </div>
 
@@ -1873,7 +1901,7 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Main Content Workspace Layout */}
       <div 
@@ -1881,7 +1909,12 @@ export default function DashboardPage() {
         className="flex-1 flex flex-col min-h-screen md:pl-[220px] pb-[60px] md:pb-0 w-full max-w-full min-w-0 overflow-x-hidden"
       >
         {/* 1. Header Terminals */}
-        <header className="border-b border-[#1E2333] bg-[#07090F] px-3 md:px-6 py-2.5 md:py-3.5 flex items-center justify-between sticky top-0 z-35 select-none">
+        <motion.header 
+          initial={{ y: 0, opacity: 1 }}
+          animate={isExiting ? { y: -80, opacity: 0 } : { y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: 'easeInOut', delay: 0.1 }}
+          className="border-b border-[#1E2333] bg-[#07090F] px-3 md:px-6 py-2.5 md:py-3.5 flex items-center justify-between sticky top-0 z-35 select-none"
+        >
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-[3px] bg-gradient-to-tr from-[#58A6FF] to-indigo-650 flex items-center justify-center font-bold text-[#0D1117] shadow-[0_0_12px_rgba(88,166,255,0.2)]"><Shield className="h-4.5 w-4.5" /></div>
             <div>
@@ -1940,6 +1973,15 @@ export default function DashboardPage() {
 
           {/* Diagnostics & Time */}
           <div className="flex items-center gap-2 md:gap-4 text-xs font-mono text-[#8B949E]">
+            {/* Exit Terminal Button in Header */}
+            <button
+              onClick={handleExitClick}
+              className="text-rose-500 hover:text-rose-450 hover:bg-rose-950/20 border border-rose-950/50 bg-[#030407] rounded-[3px] px-3 py-1.5 cursor-pointer flex items-center gap-1.5 h-[30px] font-sans font-bold text-[10px] tracking-wider uppercase transition-all duration-300 shadow-sm"
+              title="Keluar ke Portal 3D"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden xs:inline">Exit</span>
+            </button>
             <button
               onClick={() => {
                 if (audio) {
@@ -1964,7 +2006,15 @@ export default function DashboardPage() {
               <span className="text-[#3FB950] font-bold text-[10px] uppercase">Online</span>
             </div>
           </div>
-        </header>
+        </motion.header>
+
+        {/* Main Content Areas with staggered exit animation */}
+        <motion.div
+          initial={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          animate={isExiting ? { opacity: 0, scale: 0.95, filter: 'blur(8px)' } : { opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          transition={{ duration: 0.5, ease: 'easeInOut', delay: 0.2 }}
+          className="flex-1 flex flex-col min-w-0 w-full"
+        >
 
         {/* 2. Main Dashboard Layout Grid (3.6) */}
         {activeTab === 'DASHBOARD' && (
@@ -2926,6 +2976,7 @@ export default function DashboardPage() {
             Disclaimer: Ini bukan saran keuangan. Perdagangan aset kripto dan forex memiliki risiko sangat tinggi. Keputusan akhir sepenuhnya di tangan pengguna.
           </span>
         </footer>
+        </motion.div>
       </div>
 
       {/* TOAST UI NOTIFICATIONS (1.5) */}
@@ -2940,7 +2991,12 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <nav className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#07090F]/95 border-t border-[#1E2333] pt-2 pb-[calc(10px+env(safe-area-inset-bottom))] px-1 select-none shadow-2xl backdrop-blur-md">
+      <motion.nav 
+        initial={{ y: 0, opacity: 1 }}
+        animate={isExiting ? { y: 80, opacity: 0 } : { y: 0, opacity: 1 }}
+        transition={{ duration: 0.4, ease: 'easeInOut', delay: 0.05 }}
+        className="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#07090F]/95 border-t border-[#1E2333] pt-2 pb-[calc(10px+env(safe-area-inset-bottom))] px-1 select-none shadow-2xl backdrop-blur-md"
+      >
         <button 
           type="button"
           onClick={(e) => handleTabSelect(e, 'DASHBOARD')}
@@ -3011,7 +3067,7 @@ export default function DashboardPage() {
           <Settings className="h-4.5 w-4.5" />
           <span className="truncate w-full text-center">Settings</span>
         </button>
-      </nav>
+      </motion.nav>
     </div>
   );
 }

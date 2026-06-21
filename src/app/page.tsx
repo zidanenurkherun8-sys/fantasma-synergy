@@ -770,7 +770,7 @@ export default function Home() {
   };
 
   if (isBypassed && accessed) {
-    return <DashboardPage />;
+    return <DashboardPage onExit={() => { setAccessed(false); setIsBypassed(false); }} />;
   }
 
   return (
@@ -907,10 +907,16 @@ export default function Home() {
           key="dashboard"
           initial={{ opacity: 0, scale: 0.96, filter: 'blur(6px)' }}
           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          exit={{ 
+            opacity: 0, 
+            scale: 0.96, 
+            filter: 'blur(6px)',
+            transition: { duration: 0.8, ease: 'easeIn' } 
+          }}
           transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
           className="min-h-screen w-full bg-[#030407]"
         >
-          <DashboardPage />
+          <DashboardPage onExit={() => { setAccessed(false); setIsBypassed(false); }} />
         </motion.div>
       )}
     </AnimatePresence>
