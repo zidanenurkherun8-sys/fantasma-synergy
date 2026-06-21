@@ -157,32 +157,14 @@ export default function Home() {
 
     const handleTouchStart = (e: TouchEvent) => {
       if ((e.target as HTMLElement).closest('button, input, label, a')) return;
-      if (e.touches.length === 1) {
-        dragRef.current.isDragging = true;
-        dragRef.current.lastX = e.touches[0].clientX;
-        dragRef.current.lastY = e.touches[0].clientY;
-        dragRef.current.velX = 0;
-        dragRef.current.velY = 0;
-      } else if (e.touches.length === 2) {
+      if (e.touches.length === 2) {
         dragRef.current.isDragging = false;
         touchStartDist = getTouchDist(e.touches);
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 1 && dragRef.current.isDragging) {
-        const dx = e.touches[0].clientX - dragRef.current.lastX;
-        const dy = e.touches[0].clientY - dragRef.current.lastY;
-
-        rotationRef.current.y += dx * 0.007;
-        rotationRef.current.x += dy * 0.007;
-
-        dragRef.current.velX = dx * 0.007;
-        dragRef.current.velY = dy * 0.007;
-
-        dragRef.current.lastX = e.touches[0].clientX;
-        dragRef.current.lastY = e.touches[0].clientY;
-      } else if (e.touches.length === 2) {
+      if (e.touches.length === 2) {
         const dist = getTouchDist(e.touches);
         if (touchStartDist > 0 && dist > 0) {
           const ratio = dist / touchStartDist;
