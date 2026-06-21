@@ -46,6 +46,27 @@ CHoCH menandakan perubahan karakter atau awal transisi tren. Terjadi ketika harg
     `
   },
   {
+    id: 'smc',
+    title: 'Smart Money Concepts (Order Blocks & FVG)',
+    description: 'Membaca jejak institusi besar dengan mengidentifikasi blok pesanan (Order Blocks) dan celah nilai wajar (Fair Value Gaps/Imbalance) untuk entry presisi tinggi.',
+    content: `
+### Smart Money Concepts (SMC): Struktur Institusional
+Smart Money Concepts mengajarkan cara melacak pergerakan uang institusi besar (market maker/banks) di pasar dengan mengamati area manipulasi dan ketidakseimbangan harga.
+
+#### 1. Order Blocks (OB)
+Order Block adalah lilin terakhir (candle) sebelum ekspansi harga yang agresif berlawanan arah. Ini menandakan area di mana institusi besar menyisakan pesanan tertunda (pending order) dalam volume masif.
+* **Bullish Order Block**: Candle turun (Bearish) terakhir sebelum ekspansi naik yang memicu BOS atau CHoCH. Area ini menjadi target entry beli ketika harga kembali (retrace).
+* **Bearish Order Block**: Candle naik (Bullish) terakhir sebelum ekspansi turun yang memicu BOS atau CHoCH. Area ini menjadi target entry jual ketika harga kembali retrace.
+
+#### 2. Fair Value Gaps (FVG) / Imbalance
+FVG terjadi ketika ada pergerakan harga satu arah yang sangat impulsif sehingga menciptakan celah ketidakseimbangan (imbalance) pada struktur chart.
+* FVG dibatasi oleh High dari candle ke-1 dan Low dari candle ke-3 dalam formasi 3 candle berturut-turut.
+* Pasar memiliki kecenderungan alami untuk kembali mengisi celah FVG ini sebelum melanjutkan tren utamanya. Pengisian FVG di atas 50% (Equilibrium / Discount Zone) adalah konfluensi entry terbaik.
+
+*Kunci Probabilitas >80%*: Gabungkan Bullish Order Block harian (HTF) dengan pengisian FVG di chart 15 menit (LTF) serta adanya konfirmasi CHoCH.
+    `
+  },
+  {
     id: 'wyckoff',
     title: 'Wyckoff Accumulation & Springs',
     description: 'Memahami siklus akumulasi bandar (Smart Money) untuk membeli aset di harga termurah saat publik panik.',
@@ -62,6 +83,72 @@ Wyckoff mengidentifikasi bahwa pasar bergerak dalam siklus akumulasi (pengumpula
 6. **LPS (Last Point of Support)**: Titik support terakhir sebelum ekspansi harga keluar dari akumulasi (breakout).
 
 *Strategi Fantasma*: Selalu pasang alarm di bawah level SC untuk mendeteksi potensi Wyckoff Spring. Entry paling aman adalah setelah Spring dikonfirmasi dengan volume beli yang meningkat saat harga kembali masuk ke dalam trading range.
+    `
+  },
+  {
+    id: 'vsa',
+    title: 'Volume Spread Analysis & Tape Reading',
+    description: 'Analisis korelasi antara volume transaksi dan sebaran rentang harga (spread) candle untuk memvalidasi kekuatan tren asli vs manipulasi pasar.',
+    content: `
+### Volume Spread Analysis (VSA): Membaca Volume & Spread
+Volume Spread Analysis (VSA) berfokus pada hubungan tiga dimensi: Volume transaksi, Spread (rentang tinggi-rendah candle), dan Harga Penutupan (Close). Metode ini dipopulerkan oleh Tom Williams berdasarkan prinsip Wyckoff.
+
+#### Hukum Kunci VSA:
+1. **Hukum Penawaran & Permintaan**: Ketika volume transaksi beli melebihi volume jual, harga akan naik. Sebaliknya jika volume jual masif, harga akan jatuh.
+2. **Hukum Sebab & Akibat**: Sebab diwakili oleh akumulasi volume transaksi konsolidasi jangka panjang, dan akibatnya adalah tren ekspansi harga yang besar.
+3. **Usaha vs Hasil (Effort vs Result)**: Usaha ditunjukkan oleh Volume, sedangkan Hasil ditunjukkan oleh Spread candle. Jika volume sangat besar (usaha tinggi) tetapi spread candle sangat kecil (hasil rendah), ini menandakan adanya perlawanan arah (distribusi/akumulasi rahasia).
+
+#### Sinyal Penting VSA:
+* **No Demand Bar**: Candle bullish dengan spread sempit and volume lebih kecil dari dua candle sebelumnya. Ini menandakan tidak ada minat beli dari institusi besar (tren naik akan segera berakhir).
+* **Selling Climax (SC)**: Candle bearish sangat panjang dengan volume raksasa, biasanya diikuti dengan sumbu bawah panjang. Menandakan penyerapan panik retail oleh Smart Money.
+
+*Kunci Probabilitas >80%*: Hanya ambil posisi beli (LONG) ketika ekspansi naik diiringi volume tinggi (valid breakout), dan pullback turun ke support diiringi volume yang menurun drastis (no selling pressure).
+    `
+  },
+  {
+    id: 'harmonic',
+    title: 'Harmonic Patterns & Fibonacci Cluster',
+    description: 'Menggunakan konfluensi rasio Fibonacci retracement, extension, dan projection untuk memetakan pola perputaran harga harmonik (Gartley, Bat, Butterfly) dengan tingkat akurasi tinggi.',
+    content: `
+### Harmonic Patterns & Klaster Fibonacci
+Pola Harmonik menggabungkan geometri chart dengan rasio Fibonacci untuk mengidentifikasi titik balik balik arah tren (Potential Reversal Zone / PRZ) dengan presisi ekstrim.
+
+#### Pola Harmonik Utama:
+1. **Gartley Pattern**:
+   * Koreksi B harus berada tepat di 61.8% dari tarikan XA.
+   * Titik entry D berada di 78.6% retracement dari XA.
+2. **Bat Pattern**:
+   * Koreksi B berada di kisaran 38.2% - 50.0% dari XA.
+   * Titik balik D berada di 88.6% retracement dari XA.
+3. **Butterfly Pattern**:
+   * Koreksi B berada di 78.6% dari XA.
+   * Titik balik D meluas melebihi X (extension) ke level 127.2% - 161.8% dari XA.
+
+#### Klaster Fibonacci (Fibonacci Clusters):
+Klaster Fibonacci terjadi ketika beberapa tarikan Fibonacci berbeda (retracement dari swing berbeda, extension dari swing sebelumnya, dan projection gelombang) berpotongan pada area harga yang sama. Area tumpang tindih (overlap) ini menciptakan support/resistance psikologis yang sangat kuat.
+
+*Kunci Probabilitas >80%*: Ketika titik D dari pola Harmonik (misalnya Bullish Bat) bertepatan tepat dengan klaster Fibonacci level 61.8% / 161.8% dan level support horizontal historis.
+    `
+  },
+  {
+    id: 'mtf_confluence',
+    title: 'Multi-Timeframe & RSI Divergence',
+    description: 'Menghubungkan tren grafik besar (HTF) dengan grafik kecil (LTF) serta mendeteksi divergensi RSI untuk konfirmasi pembalikan tren berprobabilitas di atas 80%.',
+    content: `
+### Multi-Timeframe (MTF) & Divergensi RSI
+Strategi Multi-Timeframe memisahkan analisis arah pasar (bias) dari eksekusi taktis entry untuk memfilter sinyal palsu.
+
+#### Strategi 3-Timeframe Confluence:
+1. **Higher Timeframe (HTF - Harian/4 Jam)**: Digunakan untuk menentukan bias tren jangka panjang. Jangan pernah trading melawan arah tren HTF!
+2. **Medium Timeframe (MTF - 1 Jam)**: Digunakan untuk memetakan area kerja (support, resistance, FVG, dan Order Blocks).
+3. **Lower Timeframe (LTF - 15 Menit/5 Menit)**: Digunakan khusus untuk mengeksekusi posisi entry dengan mengamati kemunculan pola konfirmasi (CHoCH, double bottom, atau momentum breakout).
+
+#### Divergensi RSI (RSI Divergence):
+Divergensi terjadi ketika pergerakan harga tidak searah dengan indikator momentum (RSI), menandakan pelemahan tren yang kuat.
+* **Regular Bullish Divergence**: Harga membuat Lower Low (LL), tetapi RSI membuat Higher Low (HL). Sinyal pembalikan arah naik.
+* **Hidden Bullish Divergence**: Harga membuat Higher Low (HL) dalam tren naik, tetapi RSI membuat Lower Low (LL). Sinyal kelanjutan tren naik yang sangat kuat.
+
+*Kunci Probabilitas >80%*: Ketika harga menyentuh Bullish Order Block harian (HTF), lalu pada chart 15 menit (LTF) terbentuk pola Regular Bullish Divergence pada RSI di area oversold (<30) yang diikuti dengan struktur CHoCH.
     `
   },
   {
