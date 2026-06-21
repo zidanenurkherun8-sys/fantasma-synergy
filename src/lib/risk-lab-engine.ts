@@ -127,7 +127,7 @@ export class RiskLabEngine {
   /**
    * 4. Linear Regression Trend estimation with adaptive candle lookbacks
    */
-  static calculateRegression(candles: CandleData[], style: 'SCALPING' | 'SHORT' | 'MEDIUM' | 'LONG', targetHours: number): { targetPrice: number; confidence: number } {
+  static calculateRegression(candles: CandleData[], style: 'SCALPING' | 'SHORT' | 'MEDIUM' | 'LONG', targetHours: number, isForex = false): { targetPrice: number; confidence: number } {
     const lookback = style === 'SCALPING' ? 50 : style === 'SHORT' ? 100 : style === 'MEDIUM' ? 150 : 200;
     const subset = candles.slice(-lookback);
     if (subset.length < 10) return { targetPrice: subset[subset.length - 1]?.close || 1000, confidence: 50 };
@@ -164,7 +164,7 @@ export class RiskLabEngine {
     const errRatio = stdError / currentPrice;
     const confidence = Math.max(35, Math.min(96, Math.round(95 - errRatio * 800)));
     
-    return { targetPrice: Math.round(projectedPrice), confidence };
+    return { targetPrice: isForex ? projectedPrice : Math.round(projectedPrice), confidence };
   }
 
   /**
@@ -321,7 +321,7 @@ export class RiskLabEngine {
   /**
    * 8. Position Sizer
    */
-  static calculatePositionSizing(capital: number, riskPercent: number, entry: number, sl: number): { margin: number; lot: number } {
+  static calculatePositionSizing(capital: number, riskPercent: number, entry: number, sl: number, isForex = false): { margin: number; lot: number } {
     const slDistancePct = Math.abs(entry - sl) / entry;
     if (slDistancePct <= 0) return { margin: 0, lot: 0 };
     
@@ -329,13 +329,19 @@ export class RiskLabEngine {
     // To make it straightforward: riskAmount = margin * slDistancePct.
     // So margin = riskAmount / slDistancePct.
     const riskAmount = capital * (riskPercent / 100);
-    const margin = Math.round(riskAmount / slDistancePct);
+    const margin = riskAmount / slDistancePct;
     
     // Capping margin at capital maximum
-    const safeMargin = Math.min(capital, Math.max(50000, margin));
-    const lot = parseFloat((safeMargin / entry).toFixed(4));
+    const minMargin = isForex ? 10 : 50000;
+    const safeMargin = Math.min(capital, Math.max(minMargin, margin));
     
-    return { margin: safeMargin, lot };
+    // In Forex, lots can be smaller (e.g. 0.01 standard lots). Let's use 2 decimals for Forex, 4 for Crypto
+    const lot = parseFloat((safeMargin / entry).toFixed(isForex ? 2 : 4));
+    
+    return { 
+      margin: isForex ? parseFloat(safeMargin.toFixed(2)) : Math.round(safeMargin), 
+      lot 
+    };
   }
 
   /**
@@ -350,9 +356,10 @@ export class RiskLabEngine {
     candles: CandleData[],
     riskReward = 3.0,
     capitalBalance = 10000000,
-    riskPercent = 1.0
+    riskPercent = 1.0,
+    isForex = false
   ): RiskLabSetup {
-    const cleanPrice = Math.round(currentPrice);
+    const cleanPrice = isForex ? currentPrice : Math.round(currentPrice);
     const isLong = signal === 'LONG';
     
     // Safety check: if candles are from another asset (price difference > 30%), scale candles if possible
@@ -415,7 +422,7 @@ export class RiskLabEngine {
       const slDist = Math.abs(cleanPrice - sl);
       tp1 = isLong ? cleanPrice + slDist * (riskReward * 0.5) : cleanPrice - slDist * (riskReward * 0.5);
       tp3 = isLong ? cleanPrice + slDist * (riskReward * 1.5) : cleanPrice - slDist * (riskReward * 1.5);
-      confirmations.push(`SL diletakkan di luar S/R terdekat + buffer ATR (${buffer.toFixed(0)} IDR).`);
+      confirmations.push(`SL diletakkan di luar S/R terdekat + buffer ATR (${isForex ? `$${buffer.toFixed(5)}` : `${buffer.toFixed(0)} IDR`}).`);
     } else if (method === 'FIB') {
       const fibs = this.getFibonacciLevels(scaledCandles, cleanPrice, isLong);
       sl = isLong ? fibs.fib618 : fibs.fib618; // SL at Golden ratio
@@ -459,11 +466,20 @@ export class RiskLabEngine {
       tp3 = cleanPrice - slDist * (riskReward * 1.5);
     }
 
-    // Round targets
-    sl = Math.round(sl);
-    tp1 = Math.round(tp1);
-    tp2 = Math.round(tp2);
-    tp3 = Math.round(tp3);
+    // Round targets appropriately
+    if (isForex) {
+      const isJpy = symbol.toUpperCase().includes('JPY');
+      const decimals = isJpy ? 3 : 5;
+      sl = parseFloat(sl.toFixed(decimals));
+      tp1 = parseFloat(tp1.toFixed(decimals));
+      tp2 = parseFloat(tp2.toFixed(decimals));
+      tp3 = parseFloat(tp3.toFixed(decimals));
+    } else {
+      sl = Math.round(sl);
+      tp1 = Math.round(tp1);
+      tp2 = Math.round(tp2);
+      tp3 = Math.round(tp3);
+    }
     
     const riskRewardRatio = parseFloat((Math.abs(tp2 - cleanPrice) / (slDist || 1)).toFixed(2)) || riskReward;
 
@@ -471,15 +487,15 @@ export class RiskLabEngine {
     const backtestWinRate = this.run7DayBacktest(scaledCandles, style, method, signal, cleanPrice, sl, tp1);
     let backtestWarning: string | undefined;
     if (backtestWinRate < 55) {
-      backtestWarning = `Metode ${method} kurang efektif untuk ${symbol}/IDR dalam 7 hari terakhir (Win Rate: ${backtestWinRate}%).`;
+      backtestWarning = `Metode ${method} kurang efektif untuk ${symbol}${isForex ? '' : '/IDR'} dalam 7 hari terakhir (Win Rate: ${backtestWinRate}%).`;
     }
 
     // d. Linear Regression Target
     const targetHours = style === 'SCALPING' ? 0.25 : style === 'SHORT' ? 3 : style === 'MEDIUM' ? 12 : 48;
-    const reg = this.calculateRegression(scaledCandles, style, targetHours);
+    const reg = this.calculateRegression(scaledCandles, style, targetHours, isForex);
 
     // e. Sizing position
-    const size = this.calculatePositionSizing(capitalBalance, riskPercent, cleanPrice, sl);
+    const size = this.calculatePositionSizing(capitalBalance, riskPercent, cleanPrice, sl, isForex);
 
     return {
       entryPrice: cleanPrice,
@@ -492,7 +508,7 @@ export class RiskLabEngine {
       volatilityRegime: vol.regime,
       backtestWinRate,
       backtestWarning,
-      regressionTargetPrice: reg.targetPrice,
+      regressionTargetPrice: isForex ? parseFloat(reg.targetPrice.toFixed(symbol.toUpperCase().includes('JPY') ? 3 : 5)) : reg.targetPrice,
       regressionConfidence: reg.confidence,
       positionMargin: size.margin,
       lotSize: size.lot,

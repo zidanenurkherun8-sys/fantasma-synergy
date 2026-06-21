@@ -13,6 +13,7 @@ interface RiskCalculatorProps {
   symbol: string;
   onBalanceChange: (val: number) => void;
   onRiskChange: (val: number) => void;
+  isForex?: boolean;
 }
 
 function RiskCalculator({
@@ -24,12 +25,13 @@ function RiskCalculator({
   symbol,
   onBalanceChange,
   onRiskChange,
+  isForex = false,
 }: RiskCalculatorProps) {
   const [entryPrice, setEntryPrice] = useState(initialEntry);
   const [slPrice, setSlPrice] = useState(initialSl);
   const [tpPrice, setTpPrice] = useState(initialTp);
 
-  // Sync state with parent props if they change externally (e.g. when report widget is clicked!)
+  // Sync state with parent props if they change externally
   useEffect(() => {
     setEntryPrice(initialEntry);
   }, [initialEntry]);
@@ -42,19 +44,23 @@ function RiskCalculator({
     setTpPrice(initialTp);
   }, [initialTp]);
 
+  const isJpy = isForex && symbol.includes('JPY');
+  const decimals = isForex ? (isJpy ? 3 : 5) : 0;
+  const inputStep = isForex ? (isJpy ? '0.001' : '0.00001') : '1';
+
   // Calculations
-  const riskAmountIdr = balance * (riskPercent / 100);
+  const riskAmountVal = balance * (riskPercent / 100);
   const slDistancePercent = entryPrice > 0 ? (Math.abs(entryPrice - slPrice) / entryPrice) * 100 : 0;
   
   // Sizing Formula: PositionSize = RiskAmount / SlDistancePercent
-  const positionSizeIdr = slDistancePercent > 0 
-    ? (riskAmountIdr / (slDistancePercent / 100))
+  const positionSizeVal = slDistancePercent > 0 
+    ? (riskAmountVal / (slDistancePercent / 100))
     : 0;
 
-  const positionSizeCoin = entryPrice > 0 ? positionSizeIdr / entryPrice : 0;
+  const positionSizeCoin = entryPrice > 0 ? positionSizeVal / entryPrice : 0;
 
   const tpDistancePercent = entryPrice > 0 ? (Math.abs(tpPrice - entryPrice) / entryPrice) * 100 : 0;
-  const rewardAmountIdr = positionSizeCoin * Math.abs(tpPrice - entryPrice);
+  const rewardAmountVal = positionSizeCoin * Math.abs(tpPrice - entryPrice);
 
   const riskRewardRatio = slDistancePercent > 0 ? tpDistancePercent / slDistancePercent : 0;
 
@@ -69,7 +75,7 @@ function RiskCalculator({
         {/* Wallet Balance Input */}
         <div>
           <label className="text-[10px] text-[#8B949E] font-bold uppercase tracking-wide mb-1 block font-sans">
-            Saldo Akun Simulasi (IDR)
+            Saldo Akun Simulasi ({isForex ? 'USD' : 'IDR'})
           </label>
           <input
             type="number"
@@ -104,27 +110,30 @@ function RiskCalculator({
         {/* Trade Parameter Inputs */}
         <div className="grid grid-cols-1 min-[400px]:grid-cols-3 gap-2 font-sans">
           <div>
-            <label className="text-[9px] text-[#8B949E] font-semibold uppercase mb-1 block">Entry (Rp)</label>
+            <label className="text-[9px] text-[#8B949E] font-semibold uppercase mb-1 block">Entry ({isForex ? '$' : 'Rp'})</label>
             <input
               type="number"
+              step={inputStep}
               value={entryPrice}
               onChange={(e) => setEntryPrice(parseFloat(e.target.value) || 0)}
               className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-base md:text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
             />
           </div>
           <div>
-            <label className="text-[9px] text-[#8B949E] font-semibold uppercase mb-1 block">Stop Loss (Rp)</label>
+            <label className="text-[9px] text-[#8B949E] font-semibold uppercase mb-1 block">Stop Loss ({isForex ? '$' : 'Rp'})</label>
             <input
               type="number"
+              step={inputStep}
               value={slPrice}
               onChange={(e) => setSlPrice(parseFloat(e.target.value) || 0)}
               className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-base md:text-xs font-mono focus:outline-none focus:border-[#F85149]"
             />
           </div>
           <div>
-            <label className="text-[9px] text-[#8B949E] font-semibold uppercase mb-1 block">Take Profit (Rp)</label>
+            <label className="text-[9px] text-[#8B949E] font-semibold uppercase mb-1 block">Take Profit ({isForex ? '$' : 'Rp'})</label>
             <input
               type="number"
+              step={inputStep}
               value={tpPrice}
               onChange={(e) => setTpPrice(parseFloat(e.target.value) || 0)}
               className="w-full bg-[#030407] border border-[#1E2333] text-[#E6EDF3] rounded-[3px] px-2 py-1.5 text-base md:text-xs font-mono focus:outline-none focus:border-[#58A6FF]"
@@ -135,13 +144,21 @@ function RiskCalculator({
         {/* Calculator Output Grid */}
         <div className="mt-2 bg-[#030407] border border-[#1E2333] rounded-[3px] p-3 flex flex-col gap-3 font-mono">
           <div className="flex justify-between items-center text-xs">
-            <span className="text-[#8B949E] flex items-center gap-1.5 font-sans"><ShieldAlert className="h-3.5 w-3.5 text-[#F85149]" /> Risiko Maks (IDR)</span>
-            <span className="font-bold text-[#F85149]">Rp {Math.round(riskAmountIdr).toLocaleString('id-ID')}</span>
+            <span className="text-[#8B949E] flex items-center gap-1.5 font-sans"><ShieldAlert className="h-3.5 w-3.5 text-[#F85149]" /> Risiko Maks ({isForex ? 'USD' : 'IDR'})</span>
+            <span className="font-bold text-[#F85149]">
+              {isForex 
+                ? `$${riskAmountVal.toFixed(2)}`
+                : `Rp ${Math.round(riskAmountVal).toLocaleString('id-ID')}`}
+            </span>
           </div>
 
           <div className="flex justify-between items-center text-xs">
             <span className="text-[#8B949E] flex items-center gap-1.5 font-sans"><Award className="h-3.5 w-3.5 text-[#3FB950]" /> Target Reward</span>
-            <span className="font-bold text-[#3FB950]">Rp {Math.round(rewardAmountIdr).toLocaleString('id-ID')}</span>
+            <span className="font-bold text-[#3FB950]">
+              {isForex 
+                ? `$${rewardAmountVal.toFixed(2)}`
+                : `Rp ${Math.round(rewardAmountVal).toLocaleString('id-ID')}`}
+            </span>
           </div>
 
           <div className="flex justify-between items-center text-xs">
@@ -157,13 +174,15 @@ function RiskCalculator({
           <div className="flex flex-col gap-1.5 bg-[#07090F] border border-[#1E2333]/60 rounded-[3px] p-2.5">
             <div className="text-[10px] text-[#8B949E] font-bold uppercase tracking-wider font-sans">Ukuran Posisi Disarankan</div>
             <div className="text-sm font-bold text-[#3FB950]">
-              Rp {Math.round(positionSizeIdr).toLocaleString('id-ID')}
+              {isForex 
+                ? `$${positionSizeVal.toFixed(2)}`
+                : `Rp ${Math.round(positionSizeVal).toLocaleString('id-ID')}`}
             </div>
             <div className="text-[10px] text-[#8B949E]">
-              ~ {positionSizeCoin.toFixed(5)} {symbol}
+              ~ {isForex ? (positionSizeCoin / 100000).toFixed(3) : positionSizeCoin.toFixed(5)} {isForex ? 'lots' : symbol}
             </div>
             <div className="text-[9px] text-[#8B949E] font-sans">
-              Alokasi: {balance > 0 ? ((positionSizeIdr / balance) * 100).toFixed(1) : 0}% dari saldo
+              Alokasi: {balance > 0 ? ((positionSizeVal / balance) * 100).toFixed(1) : 0}% dari saldo
             </div>
             <div className="text-[9px] text-[#58A6FF] mt-1 border-t border-[#1E2333] pt-1 font-sans">
               Catatan: Sesuaikan toleransi risiko atau jarak SL berdasarkan probabilitas keberhasilan b dari setup koin.

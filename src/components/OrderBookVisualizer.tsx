@@ -9,10 +9,12 @@ interface OrderBookVisualizerProps {
   asks: DepthItem[];
   trades: TradeItem[];
   currentPrice: number;
+  isForex?: boolean;
 }
 
-function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisualizerProps) {
+function OrderBookVisualizer({ bids, asks, trades, currentPrice, isForex = false }: OrderBookVisualizerProps) {
   const [activeTab, setActiveTab] = useState<'depth' | 'trades'>('depth');
+  const decimals = isForex ? (currentPrice > 20 ? 3 : 5) : 0;
 
   // Take top 15 depth layers for clean visual display
   const displayBids = bids.slice(0, 15);
@@ -65,7 +67,7 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
         
         {activeTab === 'depth' && (
           <div className="text-right text-[10px] text-slate-500 font-mono">
-            Spread: <span className="text-slate-300 font-bold">Rp {Math.round(spread).toLocaleString('id-ID')}</span> ({spreadPercent.toFixed(3)}%)
+            Spread: <span className="text-slate-300 font-bold">{isForex ? `${(spread * 10000).toFixed(1)} pips` : `Rp ${Math.round(spread).toLocaleString('id-ID')}`}</span> ({spreadPercent.toFixed(3)}%)
           </div>
         )}
       </div>
@@ -90,10 +92,10 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
           <div className="grid grid-cols-2 gap-2 md:gap-4 text-[8.5px] min-[400px]:text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">
             <div className="grid grid-cols-2">
               <span>Amount</span>
-              <span className="text-right">Bid (IDR)</span>
+              <span className="text-right">{isForex ? 'Bid (USD)' : 'Bid (IDR)'}</span>
             </div>
             <div className="grid grid-cols-2">
-              <span>Ask (IDR)</span>
+              <span>{isForex ? 'Ask (USD)' : 'Ask (IDR)'}</span>
               <span className="text-right">Amount</span>
             </div>
           </div>
@@ -118,7 +120,7 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
                     </svg>
                     <span className="text-slate-400 truncate">{bid.amount.toFixed(bid.amount >= 10 ? 2 : 4)}</span>
                     <span className="text-right text-emerald-400 font-bold">
-                      {Math.round(bid.price).toLocaleString('id-ID')}
+                      {isForex ? bid.price.toFixed(decimals) : Math.round(bid.price).toLocaleString('id-ID')}
                     </span>
                   </div>
                 );
@@ -145,7 +147,7 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
                       />
                     </svg>
                     <span className="text-rose-400 font-bold">
-                      {Math.round(ask.price).toLocaleString('id-ID')}
+                      {isForex ? ask.price.toFixed(decimals) : Math.round(ask.price).toLocaleString('id-ID')}
                     </span>
                     <span className="text-right text-slate-400 truncate">{ask.amount.toFixed(ask.amount >= 10 ? 2 : 4)}</span>
                   </div>
@@ -164,7 +166,7 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
         <div className="flex-1 flex flex-col min-h-0">
           <div className="grid grid-cols-3 text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-2 pb-1 border-b border-slate-800/40">
             <span>Time</span>
-            <span>Price (IDR)</span>
+            <span>{isForex ? 'Price (USD)' : 'Price (IDR)'}</span>
             <span className="text-right">Amount</span>
           </div>
 
@@ -185,7 +187,7 @@ function OrderBookVisualizer({ bids, asks, trades, currentPrice }: OrderBookVisu
                     <span className="text-slate-500">{timeStr}</span>
                     <span className={`font-bold flex items-center gap-0.5 ${isBuy ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {isBuy ? <ArrowUpRight className="h-3.5 w-3.5 shrink-0" /> : <ArrowDownRight className="h-3.5 w-3.5 shrink-0" />}
-                      {Math.round(parseFloat(t.price)).toLocaleString('id-ID')}
+                      {isForex ? parseFloat(t.price).toFixed(decimals) : Math.round(parseFloat(t.price)).toLocaleString('id-ID')}
                     </span>
                     <span className="text-right text-slate-300">{parseFloat(t.amount).toFixed(4)}</span>
                   </div>

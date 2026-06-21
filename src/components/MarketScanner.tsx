@@ -17,11 +17,12 @@ interface MarketScannerProps {
   pairs: MarketPair[];
   selectedPairId: string;
   onSelectPair: (pairId: string) => void;
+  isForex?: boolean;
 }
 
 
 
-function MarketScanner({ pairs, selectedPairId, onSelectPair }: MarketScannerProps) {
+function MarketScanner({ pairs, selectedPairId, onSelectPair, isForex = false }: MarketScannerProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'ALL' | 'GAINERS' | 'VOLUME'>('ALL');
   const radarCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -346,12 +347,18 @@ function MarketScanner({ pairs, selectedPairId, onSelectPair }: MarketScannerPro
               </div>
               <div className="text-right flex flex-col gap-0.5 font-mono select-none">
                 <span className="text-xs font-semibold text-[#E6EDF3]">
-                  {pair.price >= 1000 
-                    ? Math.round(pair.price).toLocaleString('id-ID') 
-                    : pair.price.toFixed(2)}
+                  {isForex 
+                    ? pair.price.toFixed(pair.symbol.includes('JPY') ? 3 : 5)
+                    : pair.price >= 1000 
+                      ? Math.round(pair.price).toLocaleString('id-ID') 
+                      : pair.price.toFixed(2)}
                 </span>
                 <div className="flex items-center gap-1.5 justify-end text-[9px]">
-                  <span className="text-[#8B949E]">Vol: {volIdrB >= 1 ? `${volIdrB.toFixed(1)}M` : `${(pair.volumeIdr / 1e6).toFixed(0)}Jt`}</span>
+                  <span className="text-[#8B949E]">
+                    {isForex 
+                      ? `Spread: ${(pair.volumeIdr / 1000000).toFixed(1)} pips` 
+                      : `Vol: ${volIdrB >= 1 ? `${volIdrB.toFixed(1)}M` : `${(pair.volumeIdr / 1e6).toFixed(0)}Jt`}`}
+                  </span>
                   <span className={`font-bold ${pair.change24h >= 0 ? 'text-[#3FB950]' : 'text-[#F85149]'}`}>
                     {pair.change24h >= 0 ? '+' : ''}{pair.change24h.toFixed(2)}%
                   </span>

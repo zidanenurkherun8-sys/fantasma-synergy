@@ -69,6 +69,7 @@ interface PaperTradingConsoleProps {
   onFixedLeverageChange: (lev: number) => void;
   onSetCashBalance: (balance: number) => void;
   balanceChangePulse?: 'gain' | 'loss' | null;
+  isForex?: boolean;
 }
 
 function PaperTradingConsole({
@@ -100,8 +101,18 @@ function PaperTradingConsole({
   fixedLeverage,
   onFixedLeverageChange,
   onSetCashBalance,
-  balanceChangePulse
+  balanceChangePulse,
+  isForex = false,
 }: PaperTradingConsoleProps) {
+  const formatMoney = (val: number) => {
+    if (isForex) return `$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `Rp ${Math.round(val).toLocaleString('id-ID')}`;
+  };
+
+  const formatPrice = (val: number) => {
+    if (isForex) return `$${val.toFixed(symbol.includes('JPY') ? 3 : 5)}`;
+    return `Rp ${Math.round(val).toLocaleString('id-ID')}`;
+  };
   const [activeTab, _setActiveTab] = useState<'positions' | 'scanner' | 'order' | 'history' | 'bot'>('positions');
   const setActiveTab = (tab: typeof activeTab) => {
     audio?.playClick();
@@ -111,29 +122,36 @@ function PaperTradingConsole({
   const [showCloseAllModal, setShowCloseAllModal] = useState(false);
   const [orderType, setOrderType] = useState<'LONG' | 'SHORT'>('LONG');
   const [leverage, setLeverage] = useState<number>(10); // Default 10x as per spec
-  const [marginInput, setMarginInput] = useState<number>(1000000); // Default 1 Million IDR
+  const [marginInput, setMarginInput] = useState<number>(isForex ? 100 : 1000000);
   const [useSlTp, setUseSlTp] = useState(false);
   const [slPrice, setSlPrice] = useState<number>(0);
   const [tpPrice, setTpPrice] = useState<number>(0);
   const [validationError, setValidationError] = useState('');
 
+  // Reset default margin input when mode shifts
+  useEffect(() => {
+    setMarginInput(isForex ? 100 : 1000000);
+  }, [isForex]);
+
   // Sync SL/TP initial suggestions when currentPrice changes and SL/TP toggle is enabled
   useEffect(() => {
     if (currentPrice > 0 && !useSlTp) {
+      const isJpy = isForex && symbol.includes('JPY');
+      const offset = isForex ? (isJpy ? 0.50 : 0.003) : (currentPrice * 0.05);
       if (orderType === 'LONG') {
-        setSlPrice(Math.round(currentPrice * 0.95));
-        setTpPrice(Math.round(currentPrice * 1.10));
+        setSlPrice(isForex ? parseFloat((currentPrice - offset).toFixed(isJpy ? 3 : 5)) : Math.round(currentPrice * 0.95));
+        setTpPrice(isForex ? parseFloat((currentPrice + offset * 2.5).toFixed(isJpy ? 3 : 5)) : Math.round(currentPrice * 1.10));
       } else {
-        setSlPrice(Math.round(currentPrice * 1.05));
-        setTpPrice(Math.round(currentPrice * 0.90));
+        setSlPrice(isForex ? parseFloat((currentPrice + offset).toFixed(isJpy ? 3 : 5)) : Math.round(currentPrice * 1.05));
+        setTpPrice(isForex ? parseFloat((currentPrice - offset * 2.5).toFixed(isJpy ? 3 : 5)) : Math.round(currentPrice * 0.90));
       }
     }
-  }, [currentPrice, orderType, useSlTp]);
+  }, [currentPrice, orderType, useSlTp, isForex]);
 
   // Handle preset balance allocation
   const handleSetPresetMargin = (percent: number) => {
     const allocated = Math.round(cashBalance * percent);
-    setMarginInput(Math.max(50000, allocated)); // Min Rp 50.000
+    setMarginInput(Math.max(isForex ? 10 : 50000, allocated));
     setValidationError('');
   };
 
@@ -145,8 +163,8 @@ function PaperTradingConsole({
       setValidationError('Saldo kas simulasi tidak mencukupi.');
       return;
     }
-    if (marginInput < 50000) {
-      setValidationError('Minimal margin simulasi adalah Rp 50.000.');
+    if (marginInput < (isForex ? 10 : 50000)) {
+      setValidationError(isForex ? 'Minimal margin simulasi adalah $10.' : 'Minimal margin simulasi adalah Rp 50.000.');
       return;
     }
     if (useSlTp) {
@@ -344,11 +362,11 @@ function PaperTradingConsole({
               <div>
                 <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Total Trading Capital (Wallet Balance)</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-slate-500 font-bold font-sans">Rp</span>
+                  <span className="absolute left-3 top-2.5 text-slate-500 font-bold font-sans">{isForex ? '$' : 'Rp'}</span>
                   <input
                     type="number"
                     value={cashBalance}
-                    onChange={(e) => onSetCashBalance(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                    onChange={(e) => onSetCashBalance(Math.max(0, isForex ? parseFloat(e.target.value) : parseInt(e.target.value, 10) || 0))}
                     className="w-full bg-slate-950 border border-slate-800 rounded-[3px] pl-8 pr-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-base md:text-xs"
                     placeholder="Total Capital"
                   />
@@ -357,17 +375,17 @@ function PaperTradingConsole({
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => onSetCashBalance(10000000)}
+                  onClick={() => onSetCashBalance(isForex ? 10000 : 10000000)}
                   className="flex-1 bg-purple-950/40 hover:bg-purple-900/40 text-purple-400 border border-purple-500/20 hover:border-purple-500/40 rounded-[3px] py-1.5 text-[10px] font-mono font-bold transition uppercase"
                 >
-                  Reset Rp 10M
+                  {isForex ? 'Reset $10K' : 'Reset Rp 10M'}
                 </button>
                 <button
                   type="button"
-                  onClick={() => onSetCashBalance(50000000)}
+                  onClick={() => onSetCashBalance(isForex ? 50000 : 50000000)}
                   className="flex-1 bg-slate-900 hover:bg-slate-850 text-slate-400 border border-slate-800 hover:border-slate-700 rounded-[3px] py-1.5 text-[10px] font-mono font-bold transition uppercase"
                 >
-                  Rp 50M
+                  {isForex ? '$50K' : 'Rp 50M'}
                 </button>
               </div>
             </div>
@@ -377,11 +395,11 @@ function PaperTradingConsole({
               <div>
                 <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Allocated Margin per Trade</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-slate-500 font-bold font-sans">Rp</span>
+                  <span className="absolute left-3 top-2.5 text-slate-500 font-bold font-sans">{isForex ? '$' : 'Rp'}</span>
                   <input
                     type="number"
                     value={botTradeMargin}
-                    onChange={(e) => onBotTradeMarginChange(Math.max(50000, parseInt(e.target.value, 10) || 0))}
+                    onChange={(e) => onBotTradeMarginChange(Math.max(isForex ? 10 : 50000, isForex ? parseFloat(e.target.value) : parseInt(e.target.value, 10) || 0))}
                     className="w-full bg-slate-950 border border-slate-800 rounded-[3px] pl-8 pr-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-base md:text-xs"
                   />
                 </div>
@@ -496,24 +514,24 @@ function PaperTradingConsole({
           balanceChangePulse === 'loss' ? 'pulse-loss bg-[#F85149]/5 border-[#F85149]/30' : ''
         }`}>
           <span className="text-[9px] text-[#8B949E] font-bold uppercase tracking-wider block mb-1">Portfolio Equity</span>
-          <span className="text-sm font-extrabold text-[#E6EDF3] font-mono">Rp {Math.round(accountEquity).toLocaleString('id-ID')}</span>
+          <span className="text-sm font-extrabold text-[#E6EDF3] font-mono">{formatMoney(accountEquity)}</span>
         </div>
         <div className={`bg-[#07090F]/60 border border-[#1E2333] rounded-[3px] p-3 flex flex-col justify-center transition-all duration-300 ${
           balanceChangePulse === 'gain' ? 'pulse-gain bg-[#3FB950]/5 border-[#3FB950]/30' :
           balanceChangePulse === 'loss' ? 'pulse-loss bg-[#F85149]/5 border-[#F85149]/30' : ''
         }`}>
           <span className="text-[9px] text-[#8B949E] font-bold uppercase tracking-wider block mb-1">Cash Balance</span>
-          <span className="text-sm font-extrabold text-[#8B949E] font-mono">Rp {Math.round(cashBalance).toLocaleString('id-ID')}</span>
+          <span className="text-sm font-extrabold text-[#8B949E] font-mono">{formatMoney(cashBalance)}</span>
         </div>
         <div className="bg-[#07090F]/60 border border-[#1E2333] rounded-[3px] p-3 flex flex-col justify-center">
           <span className="text-[9px] text-[#8B949E] font-bold uppercase tracking-wider block mb-1">Active Margin</span>
-          <span className="text-sm font-extrabold text-[#58A6FF] font-mono">Rp {Math.round(activeMargin).toLocaleString('id-ID')}</span>
+          <span className="text-sm font-extrabold text-[#58A6FF] font-mono">{formatMoney(activeMargin)}</span>
         </div>
         <div className="bg-[#07090F]/60 border border-[#1E2333] rounded-[3px] p-3 flex flex-col justify-center">
           <span className="text-[9px] text-[#8B949E] font-bold uppercase tracking-wider block mb-1">Unrealized P&L</span>
           <span className={`text-sm font-extrabold font-mono flex items-center gap-1 ${totalUnrealizedPnl >= 0 ? 'text-[#3FB950]' : 'text-[#F85149]'}`}>
             {totalUnrealizedPnl >= 0 ? <ArrowUpRight className="h-4.5 w-4.5 shrink-0" /> : <ArrowDownRight className="h-4.5 w-4.5 shrink-0" />}
-            Rp {Math.abs(Math.round(totalUnrealizedPnl)).toLocaleString('id-ID')}
+            {formatMoney(totalUnrealizedPnl)}
           </span>
         </div>
         <div className="bg-[#07090F]/60 border border-[#1E2333] rounded-[3px] p-3 flex flex-col justify-center col-span-2 md:col-span-1">
@@ -631,13 +649,13 @@ function PaperTradingConsole({
                     <tr key={pos.id} className="hover:bg-slate-900/20 transition-colors">
                       <td className="py-3">
                         <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-slate-200">{pos.symbol}/IDR</span>
+                          <span className="font-bold text-slate-200">{isForex ? `${pos.symbol.slice(0, 3)}/${pos.symbol.slice(3)}` : `${pos.symbol}/IDR`}</span>
                           <a 
-                            href={`https://indodax.com/market/${pos.symbol}IDR`} 
+                            href={isForex ? `https://www.tradingview.com/symbols/${pos.symbol}` : `https://indodax.com/market/${pos.symbol}IDR`} 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="text-slate-600 hover:text-purple-400 transition-colors"
-                            title="Lihat di Indodax"
+                            title={isForex ? "Lihat di TradingView" : "Lihat di Indodax"}
                           >
                             <ExternalLink className="h-3 w-3" />
                           </a>
@@ -653,22 +671,22 @@ function PaperTradingConsole({
                         <span className="font-bold text-slate-300 font-mono">
                           {pos.leverage}x{pos.probability !== undefined && <span className="text-[9px] text-slate-500 font-normal"> (b: {pos.probability.toFixed(2)})</span>}
                         </span>
-                        <span className="text-[10px] text-slate-500 block">Rp {pos.margin.toLocaleString('id-ID')}</span>
+                        <span className="text-[10px] text-slate-500 block">{formatMoney(pos.margin)}</span>
                       </td>
-                      <td className="text-slate-300">Rp {Math.round(pos.entryPrice).toLocaleString('id-ID')}</td>
-                      <td className="text-slate-300">Rp {Math.round(specificCurrentPrice).toLocaleString('id-ID')}</td>
+                      <td className="text-slate-300">{formatPrice(pos.entryPrice)}</td>
+                      <td className="text-slate-300">{formatPrice(specificCurrentPrice)}</td>
                       <td>
                         <div className="flex flex-col gap-0.5 text-[10px]">
                           <span className={pos.sl ? 'text-rose-400' : 'text-slate-600 font-sans'}>
-                            SL: {pos.sl ? `Rp ${pos.sl.toLocaleString('id-ID')}` : 'None'}
+                            SL: {pos.sl ? formatPrice(pos.sl) : 'None'}
                           </span>
                           <span className={pos.tp ? 'text-emerald-400' : 'text-slate-600 font-sans'}>
-                            TP: {pos.tp ? `Rp ${pos.tp.toLocaleString('id-ID')}` : 'None'}
+                            TP: {pos.tp ? formatPrice(pos.tp) : 'None'}
                           </span>
                         </div>
                       </td>
                       <td className={`text-right font-bold ${pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        <span className="block">Rp {pnl >= 0 ? '+' : ''}{Math.round(pnl).toLocaleString('id-ID')}</span>
+                        <span className="block">{pnl >= 0 ? '+' : ''}{formatMoney(pnl)}</span>
                         <span className="text-[9px] block mt-0.5">{pnl >= 0 ? '+' : ''}{pnlPercent.toFixed(1)}%</span>
                       </td>
                       <td className="text-right py-3 pr-2">
@@ -791,7 +809,7 @@ function PaperTradingConsole({
                           )}
                         </td>
                         <td className="text-slate-300">
-                          Rp {coin.price >= 1000 ? Math.round(coin.price).toLocaleString('id-ID') : coin.price.toFixed(2)}
+                          {formatPrice(coin.price)}
                         </td>
                         <td className={`font-bold ${coin.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                           {coin.change24h >= 0 ? '+' : ''}{coin.change24h.toFixed(2)}%
@@ -893,12 +911,12 @@ function PaperTradingConsole({
               <label className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2">Position Sizing Margin</label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-2.5 text-slate-500 font-bold font-sans">Rp</span>
+                  <span className="absolute left-3 top-2.5 text-slate-500 font-bold font-sans">{isForex ? '$' : 'Rp'}</span>
                   <input
                     type="number"
                     value={marginInput}
                     onChange={(e) => {
-                      setMarginInput(parseInt(e.target.value, 10) || 0);
+                      setMarginInput(isForex ? parseFloat(e.target.value) : parseInt(e.target.value, 10) || 0);
                       setValidationError('');
                     }}
                     className="w-full bg-[#070a13] border border-slate-800 rounded-[3px] pl-8 pr-3 py-2 text-slate-200 font-mono font-bold focus:outline-none focus:border-purple-500 text-base md:text-xs"
@@ -992,7 +1010,7 @@ function PaperTradingConsole({
               <div className="flex justify-between text-[10px] text-[#8B949E]">
                 <span>Estimasi Likuidasi:</span>
                 <span className="font-mono font-bold text-[#F85149]">
-                  {estLiqPrice > 0 ? `Rp ${Math.round(estLiqPrice).toLocaleString('id-ID')}` : 'Spot (Tanpa Likuidasi)'}
+                  {estLiqPrice > 0 ? formatPrice(estLiqPrice) : 'Spot (Tanpa Likuidasi)'}
                 </span>
               </div>
               {leverage > 100 && (
@@ -1015,27 +1033,29 @@ function PaperTradingConsole({
                 />
                 Atur Stop Loss & Take Profit Simulasi
               </label>
-              <span className="text-[9px] font-mono text-slate-500">Harga Spot: Rp {Math.round(currentPrice).toLocaleString('id-ID')}</span>
+              <span className="text-[9px] font-mono text-slate-500">Harga Spot: {formatPrice(currentPrice)}</span>
             </div>
 
             {useSlTp && (
               <div className="grid grid-cols-1 min-[480px]:grid-cols-2 gap-4 animate-slideDown">
                 <div>
-                  <label className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Stop Loss Price (Rp)</label>
+                  <label className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Stop Loss Price ({isForex ? '$' : 'Rp'})</label>
                   <input
                     type="number"
+                    step={isForex ? (symbol.includes('JPY') ? '0.001' : '0.00001') : '1'}
                     value={slPrice}
-                    onChange={(e) => setSlPrice(parseInt(e.target.value, 10) || 0)}
+                    onChange={(e) => setSlPrice(isForex ? parseFloat(e.target.value) : parseInt(e.target.value, 10) || 0)}
                     className="w-full bg-[#070a13] border border-slate-800 rounded-[3px] px-3 py-1.5 text-slate-300 font-mono font-bold focus:outline-none focus:border-rose-500 text-base md:text-xs"
                   />
                   <span className="text-[9px] text-slate-500 block mt-1">Membatasi kerugian maksimal.</span>
                 </div>
                 <div>
-                  <label className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Take Profit Price (Rp)</label>
+                  <label className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Take Profit Price ({isForex ? '$' : 'Rp'})</label>
                   <input
                     type="number"
+                    step={isForex ? (symbol.includes('JPY') ? '0.001' : '0.00001') : '1'}
                     value={tpPrice}
-                    onChange={(e) => setTpPrice(parseInt(e.target.value, 10) || 0)}
+                    onChange={(e) => setTpPrice(isForex ? parseFloat(e.target.value) : parseInt(e.target.value, 10) || 0)}
                     className="w-full bg-[#070a13] border border-slate-800 rounded-[3px] px-3 py-1.5 text-slate-300 font-mono font-bold focus:outline-none focus:border-emerald-500 text-base md:text-xs"
                   />
                   <span className="text-[9px] text-slate-500 block mt-1">Mengunci profit target secara otomatis.</span>
@@ -1133,7 +1153,7 @@ function PaperTradingConsole({
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="text-slate-600 hover:text-purple-400 transition-colors"
-                            title="Lihat di Indodax"
+                            title={isForex ? "Lihat di TradingView" : "Lihat di Indodax"}
                           >
                             <ExternalLink className="h-3 w-3" />
                           </a>
@@ -1150,8 +1170,8 @@ function PaperTradingConsole({
                       </td>
                       <td>
                         <div className="flex flex-col text-[10px]">
-                          <span className="text-slate-400">In: Rp {Math.round(trade.entryPrice).toLocaleString('id-ID')}</span>
-                          <span className="text-slate-300">Out: Rp {Math.round(trade.exitPrice).toLocaleString('id-ID')}</span>
+                          <span className="text-slate-400">In: {formatPrice(trade.entryPrice)}</span>
+                          <span className="text-slate-300">Out: {formatPrice(trade.exitPrice)}</span>
                         </div>
                       </td>
                       <td>
@@ -1166,7 +1186,7 @@ function PaperTradingConsole({
                       </td>
                       <td className="text-slate-400">{durationStr}</td>
                       <td className={`text-right font-bold py-3 pr-2 ${trade.realizedPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        <span className="block">{trade.realizedPnl >= 0 ? '+' : ''}{Math.round(trade.realizedPnl).toLocaleString('id-ID')}</span>
+                        <span className="block">{trade.realizedPnl >= 0 ? '+' : ''}{formatMoney(trade.realizedPnl)}</span>
                         <span className="text-[9px] block mt-0.5">{trade.realizedPnl >= 0 ? '+' : ''}{trade.realizedPnlPercent.toFixed(1)}%</span>
                       </td>
                     </tr>
@@ -1188,7 +1208,7 @@ function PaperTradingConsole({
             <p className="text-xs text-[#8B949E] mb-5 leading-relaxed font-sans">
               Anda akan menutup <strong className="text-[#E6EDF3] font-mono">{activePositions.length}</strong> posisi aktif secara serentak di harga pasar saat ini. <br /><br />
               Estimasi Total P/L: <strong className={`font-mono text-xs ${totalUnrealizedPnl >= 0 ? 'text-[#3FB950]' : 'text-[#F85149]'}`}>
-                {totalUnrealizedPnl >= 0 ? '+' : ''}Rp {Math.round(totalUnrealizedPnl).toLocaleString('id-ID')}
+                {totalUnrealizedPnl >= 0 ? '+' : ''}{formatMoney(totalUnrealizedPnl)}
               </strong>
             </p>
             <div className="flex justify-end gap-3 text-xs font-bold font-sans">

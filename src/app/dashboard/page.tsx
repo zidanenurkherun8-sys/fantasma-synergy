@@ -178,25 +178,82 @@ export default function DashboardPage() {
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   // Dashboard state
+  const [tradingMode, setTradingMode] = useState<'CRYPTO' | 'FOREX'>('CRYPTO');
   const [riskPercent, setRiskPercent] = useState(1); // Default 1%
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [balanceChangePulse, setBalanceChangePulse] = useState<'gain' | 'loss' | null>(null);
   const [aiPrediction, setAiPrediction] = useState<any>(null);
 
-  // Paper Trading Account States
-  const [cashBalance, setCashBalance] = useState(10000000); // Default Rp 10 Million
-  const [activePositions, setActivePositions] = useState<Position[]>([]);
-  const [closedTrades, setClosedTrades] = useState<ClosedTrade[]>([]);
-  const [botLogs, setBotLogs] = useState<BotLog[]>([]);
+  // Paper Trading Account States (Isolated)
+  const [cryptoBalance, setCryptoBalance] = useState(10000000); // Default Rp 10 Million
+  const [forexBalance, setForexBalance] = useState(10000); // Default $10,000 USD
+  const [cryptoPositions, setCryptoPositions] = useState<Position[]>([]);
+  const [forexPositions, setForexPositions] = useState<Position[]>([]);
+  const [cryptoClosedTrades, setCryptoClosedTrades] = useState<ClosedTrade[]>([]);
+  const [forexClosedTrades, setForexClosedTrades] = useState<ClosedTrade[]>([]);
+  const [cryptoBotLogs, setCryptoBotLogs] = useState<BotLog[]>([]);
+  const [forexBotLogs, setForexBotLogs] = useState<BotLog[]>([]);
+
+  // Pointers that swap dynamically at render time
+  const cashBalance = tradingMode === 'CRYPTO' ? cryptoBalance : forexBalance;
+  const setCashBalance = tradingMode === 'CRYPTO' ? setCryptoBalance : setForexBalance;
+  
+  const activePositions = tradingMode === 'CRYPTO' ? cryptoPositions : forexPositions;
+  const setActivePositions = tradingMode === 'CRYPTO' ? setCryptoPositions : setForexPositions;
+
+  const closedTrades = tradingMode === 'CRYPTO' ? cryptoClosedTrades : forexClosedTrades;
+  const setClosedTrades = tradingMode === 'CRYPTO' ? setCryptoClosedTrades : setForexClosedTrades;
+
+  const botLogs = tradingMode === 'CRYPTO' ? cryptoBotLogs : forexBotLogs;
+  const setBotLogs = tradingMode === 'CRYPTO' ? setCryptoBotLogs : setForexBotLogs;
+
   const [autoTrading, setAutoTrading] = useState(false);
   const [pendingPairs, setPendingPairs] = useState<Set<string>>(new Set());
   const [failedSignalCooldowns, setFailedSignalCooldowns] = useState<Record<string, number>>({});
   const [recentSlPairs, setRecentSlPairs] = useState<Record<string, number>>({});
 
-  // AI Multi-Scanner Background Bot Configuration States
-  const [botTradeMargin, setBotTradeMargin] = useState<number>(1000000); // Default Rp 1.000.000 per trade
+  // AI Multi-Scanner Background Bot Configuration States (Isolated)
+  const [cryptoBotTradeMargin, setCryptoBotTradeMargin] = useState(1000000); // Default Rp 1.000.000 per trade
+  const [forexBotTradeMargin, setForexBotTradeMargin] = useState(1000); // Default $1,000 per trade
+  const botTradeMargin = tradingMode === 'CRYPTO' ? cryptoBotTradeMargin : forexBotTradeMargin;
+  const setBotTradeMargin = tradingMode === 'CRYPTO' ? setCryptoBotTradeMargin : setForexBotTradeMargin;
+
   const [botMaxPositions, setBotMaxPositions] = useState<number>(10); // Default max 10 concurrent trades
+
+  // Dynamic formatting helpers
+  const formatMoney = (value: number): string => {
+    if (tradingMode === 'FOREX') {
+      return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `Rp ${Math.round(value || 0).toLocaleString('id-ID')}`;
+  };
+
+  const formatPrice = (value: number, sym: string): string => {
+    if (tradingMode === 'FOREX') {
+      const isJpy = sym.toUpperCase().includes('JPY');
+      return value.toFixed(isJpy ? 3 : 5);
+    }
+    return Math.round(value || 0).toLocaleString('id-ID');
+  };
+
+  const formatPairName = (sym: string): string => {
+    const symbolStr = sym.replace('_idr', '').toUpperCase();
+    if (tradingMode === 'FOREX') {
+      return symbolStr;
+    }
+    return `${symbolStr}/IDR`;
+  };
+
+  const handleToggleMode = (mode: 'CRYPTO' | 'FOREX') => {
+    audio?.playClick();
+    setTradingMode(mode);
+    if (mode === 'CRYPTO') {
+      setSelectedPairId('btc_idr');
+    } else {
+      setSelectedPairId('EURUSD');
+    }
+  };
 
   // Leverage Strategy States
   const [leverageStrategy, setLeverageStrategy] = useState<'FIXED' | 'DYNAMIC'>('DYNAMIC');
@@ -219,26 +276,44 @@ export default function DashboardPage() {
         const bypass = localStorage.getItem('fantasma_bypass_portal') === 'true';
         setShow3DAnimation(!bypass);
 
-        const savedBalance = localStorage.getItem('ag_cashBalance');
-        if (savedBalance) setCashBalance(parseFloat(savedBalance));
+        const savedMode = localStorage.getItem('ag_tradingMode') as 'CRYPTO' | 'FOREX';
+        if (savedMode) setTradingMode(savedMode);
+
+        const savedCryptoBalance = localStorage.getItem('ag_cryptoBalance');
+        if (savedCryptoBalance) setCryptoBalance(parseFloat(savedCryptoBalance));
+
+        const savedForexBalance = localStorage.getItem('ag_forexBalance');
+        if (savedForexBalance) setForexBalance(parseFloat(savedForexBalance));
 
         const savedRisk = localStorage.getItem('ag_riskPercent');
         if (savedRisk) setRiskPercent(parseFloat(savedRisk));
 
-        const savedBotMargin = localStorage.getItem('ag_botTradeMargin');
-        if (savedBotMargin) setBotTradeMargin(parseFloat(savedBotMargin));
+        const savedCryptoBotMargin = localStorage.getItem('ag_cryptoBotTradeMargin');
+        if (savedCryptoBotMargin) setCryptoBotTradeMargin(parseFloat(savedCryptoBotMargin));
+
+        const savedForexBotMargin = localStorage.getItem('ag_forexBotTradeMargin');
+        if (savedForexBotMargin) setForexBotTradeMargin(parseFloat(savedForexBotMargin));
 
         const savedBotMax = localStorage.getItem('ag_botMaxPositions');
         if (savedBotMax) setBotMaxPositions(parseInt(savedBotMax, 10));
 
-        const savedActive = localStorage.getItem('ag_activePositions');
-        if (savedActive) setActivePositions(JSON.parse(savedActive));
+        const savedCryptoActive = localStorage.getItem('ag_cryptoActivePositions');
+        if (savedCryptoActive) setCryptoPositions(JSON.parse(savedCryptoActive));
 
-        const savedClosed = localStorage.getItem('ag_closedTrades');
-        if (savedClosed) setClosedTrades(JSON.parse(savedClosed));
+        const savedForexActive = localStorage.getItem('ag_forexActivePositions');
+        if (savedForexActive) setForexPositions(JSON.parse(savedForexActive));
 
-        const savedLogs = localStorage.getItem('ag_botLogs');
-        if (savedLogs) setBotLogs(JSON.parse(savedLogs));
+        const savedCryptoClosed = localStorage.getItem('ag_cryptoClosedTrades');
+        if (savedCryptoClosed) setCryptoClosedTrades(JSON.parse(savedCryptoClosed));
+
+        const savedForexClosed = localStorage.getItem('ag_forexClosedTrades');
+        if (savedForexClosed) setForexClosedTrades(JSON.parse(savedForexClosed));
+
+        const savedCryptoLogs = localStorage.getItem('ag_cryptoBotLogs');
+        if (savedCryptoLogs) setCryptoBotLogs(JSON.parse(savedCryptoLogs));
+
+        const savedForexLogs = localStorage.getItem('ag_forexBotLogs');
+        if (savedForexLogs) setForexBotLogs(JSON.parse(savedForexLogs));
 
         const savedCooldowns = localStorage.getItem('ag_failedSignalCooldowns');
         if (savedCooldowns) setFailedSignalCooldowns(JSON.parse(savedCooldowns));
@@ -262,32 +337,56 @@ export default function DashboardPage() {
 
   // Save states to LocalStorage on changes
   useEffect(() => {
-    if (isMounted) localStorage.setItem('ag_cashBalance', cashBalance.toString());
-  }, [cashBalance, isMounted]);
+    if (isMounted) localStorage.setItem('ag_tradingMode', tradingMode);
+  }, [tradingMode, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) localStorage.setItem('ag_cryptoBalance', cryptoBalance.toString());
+  }, [cryptoBalance, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) localStorage.setItem('ag_forexBalance', forexBalance.toString());
+  }, [forexBalance, isMounted]);
 
   useEffect(() => {
     if (isMounted) localStorage.setItem('ag_riskPercent', riskPercent.toString());
   }, [riskPercent, isMounted]);
 
   useEffect(() => {
-    if (isMounted) localStorage.setItem('ag_botTradeMargin', botTradeMargin.toString());
-  }, [botTradeMargin, isMounted]);
+    if (isMounted) localStorage.setItem('ag_cryptoBotTradeMargin', cryptoBotTradeMargin.toString());
+  }, [cryptoBotTradeMargin, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) localStorage.setItem('ag_forexBotTradeMargin', forexBotTradeMargin.toString());
+  }, [forexBotTradeMargin, isMounted]);
 
   useEffect(() => {
     if (isMounted) localStorage.setItem('ag_botMaxPositions', botMaxPositions.toString());
   }, [botMaxPositions, isMounted]);
 
   useEffect(() => {
-    if (isMounted) localStorage.setItem('ag_activePositions', JSON.stringify(activePositions));
-  }, [activePositions, isMounted]);
+    if (isMounted) localStorage.setItem('ag_cryptoActivePositions', JSON.stringify(cryptoPositions));
+  }, [cryptoPositions, isMounted]);
 
   useEffect(() => {
-    if (isMounted) localStorage.setItem('ag_closedTrades', JSON.stringify(closedTrades));
-  }, [closedTrades, isMounted]);
+    if (isMounted) localStorage.setItem('ag_forexActivePositions', JSON.stringify(forexPositions));
+  }, [forexPositions, isMounted]);
 
   useEffect(() => {
-    if (isMounted) localStorage.setItem('ag_botLogs', JSON.stringify(botLogs));
-  }, [botLogs, isMounted]);
+    if (isMounted) localStorage.setItem('ag_cryptoClosedTrades', JSON.stringify(cryptoClosedTrades));
+  }, [cryptoClosedTrades, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) localStorage.setItem('ag_forexClosedTrades', JSON.stringify(forexClosedTrades));
+  }, [forexClosedTrades, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) localStorage.setItem('ag_cryptoBotLogs', JSON.stringify(cryptoBotLogs));
+  }, [cryptoBotLogs, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) localStorage.setItem('ag_forexBotLogs', JSON.stringify(forexBotLogs));
+  }, [forexBotLogs, isMounted]);
 
   useEffect(() => {
     if (isMounted) localStorage.setItem('ag_failedSignalCooldowns', JSON.stringify(failedSignalCooldowns));
@@ -357,29 +456,33 @@ export default function DashboardPage() {
   // Add a bot audit log helper
   const addBotLog = (message: string, type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' = 'INFO') => {
     const timestamp = new Date().toLocaleTimeString('id-ID');
-    setBotLogs(prev => [...prev.slice(-99), { timestamp, message, type }]); // Keep last 100 logs
+    if (tradingMode === 'CRYPTO') {
+      setCryptoBotLogs(prev => [...prev.slice(-99), { timestamp, message, type }]);
+    } else {
+      setForexBotLogs(prev => [...prev.slice(-99), { timestamp, message, type }]);
+    }
   };
 
   // Fetch summaries once on mount and every 10 seconds for scanning efficiency
   useEffect(() => {
     async function fetchPairs() {
       try {
-        const response = await fetch('/api/market/pairs');
+        const response = await fetch(`/api/market/pairs?mode=${tradingMode}`);
         if (response.ok) {
           const data = await response.json();
-          setPairs(data.pairs?.length ? data.pairs : FALLBACK_PAIRS);
+          setPairs(data.pairs?.length ? data.pairs : (tradingMode === 'CRYPTO' ? FALLBACK_PAIRS : []));
         } else if (pairs.length === 0) {
-          setPairs(FALLBACK_PAIRS);
+          setPairs(tradingMode === 'CRYPTO' ? FALLBACK_PAIRS : []);
         }
       } catch (err) {
-        if (pairs.length === 0) setPairs(FALLBACK_PAIRS);
+        if (pairs.length === 0) setPairs(tradingMode === 'CRYPTO' ? FALLBACK_PAIRS : []);
         console.warn('Market pairs API unavailable, using fallback UI data.', err);
       }
     }
     fetchPairs();
     const interval = setInterval(fetchPairs, 10000); // Poll summaries every 10s
     return () => clearInterval(interval);
-  }, []);
+  }, [tradingMode]);
 
   // Fetch details every 1 second for live pricing, depth, trades, and charts (real-time per detiknya)
   useEffect(() => {
@@ -388,7 +491,7 @@ export default function DashboardPage() {
     let active = true;
     async function fetchDetails() {
       try {
-        const response = await fetch(`/api/market/details?pair=${selectedPairId}&timeframe=${timeframe}`);
+        const response = await fetch(`/api/market/details?pair=${selectedPairId}&timeframe=${timeframe}&mode=${tradingMode}`);
         if (response.ok && active) {
           const data = await response.json();
           setTicker({
@@ -435,7 +538,7 @@ export default function DashboardPage() {
       active = false;
       clearInterval(interval);
     };
-  }, [selectedPairId, timeframe, activeTab]);
+  }, [selectedPairId, timeframe, activeTab, tradingMode]);
 
   // Position Monitoring: Stops, Profits, Liquidations evaluated globally across ALL active positions on ticker or pairs update
   useEffect(() => {
@@ -564,7 +667,7 @@ export default function DashboardPage() {
     setActivePositions(prev => [...prev, newPosition]);
     
     const probText = probability ? ` | Prob: ${(probability * 100).toFixed(0)}%` : '';
-    addBotLog(`[Eksekusi] Membuka ${leverage}x ${type} pada ${targetSymbol}/IDR @ Rp ${Math.round(entry).toLocaleString('id-ID')} (Margin: Rp ${marginAmount.toLocaleString('id-ID')}${probText}).`, 'SUCCESS');
+    addBotLog(`[Eksekusi] Membuka ${leverage}x ${type} pada ${formatPairName(targetSymbol)} @ ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(entry, targetSymbol)} (Margin: ${formatMoney(marginAmount)}${probText}).`, 'SUCCESS');
 
     if (customPair) {
       setPendingPairs(prev => {
@@ -654,7 +757,7 @@ export default function DashboardPage() {
       if (reason === 'STOP_LOSS') {
         setRecentSlPairs(prev => ({ ...prev, [pos.pair]: Date.now() }));
       }
-      addBotLog(`[Accuracy Layer] Cooldown 4 jam aktif untuk ${pos.symbol}/IDR setelah sinyal gagal. Pair ditahan sampai ${new Date(cooldownUntil).toLocaleTimeString('id-ID')}.`, 'WARNING');
+      addBotLog(`[Accuracy Layer] Cooldown 4 jam aktif untuk ${formatPairName(pos.symbol)} setelah sinyal gagal. Pair ditahan sampai ${new Date(cooldownUntil).toLocaleTimeString('id-ID')}.`, 'WARNING');
     }
 
     // Trigger visual pulse animation on balance change (1.5)
@@ -670,14 +773,14 @@ export default function DashboardPage() {
 
     // Trigger toast notification feedback (1.5)
     const pnlSign = realizedPnl >= 0 ? '+' : '';
-    showToast(`Posisi ${pos.symbol}/IDR ditutup (${reason === 'MANUAL' ? 'MANUAL' : reason}). P/L: ${pnlSign}Rp ${Math.round(realizedPnl).toLocaleString('id-ID')} (${realizedPnlPercent.toFixed(1)}%)`, realizedPnl >= 0 ? 'success' : 'error');
+    showToast(`Posisi ${formatPairName(pos.symbol)} ditutup (${reason === 'MANUAL' ? 'MANUAL' : reason}). P/L: ${pnlSign}${formatMoney(realizedPnl)} (${realizedPnlPercent.toFixed(1)}%)`, realizedPnl >= 0 ? 'success' : 'error');
 
     let logType: 'SUCCESS' | 'WARNING' | 'ERROR' = 'SUCCESS';
     if (realizedPnl < 0) logType = 'ERROR';
     if (reason === 'LIQUIDATION') logType = 'ERROR';
 
     const probText = pos.probability ? ` | Prob: ${(pos.probability * 100).toFixed(0)}%` : '';
-    addBotLog(`[Penutupan] Keluar ${pos.leverage}x ${pos.type} di ${pos.symbol} @ Rp ${Math.round(price).toLocaleString('id-ID')} (${reason === 'MANUAL' ? 'MANUAL CLOSE' : reason}). Pnl: Rp ${Math.round(realizedPnl).toLocaleString('id-ID')} (${realizedPnlPercent.toFixed(1)}%)${probText}`, logType);
+    addBotLog(`[Penutupan] Keluar ${pos.leverage}x ${pos.type} di ${formatPairName(pos.symbol)} @ ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(price, pos.symbol)} (${reason === 'MANUAL' ? 'MANUAL CLOSE' : reason}). Pnl: ${formatMoney(realizedPnl)} (${realizedPnlPercent.toFixed(1)}%)${probText}`, logType);
   };
 
   // Close All Positions Simulator (1.4 & 1.5)
@@ -743,7 +846,7 @@ export default function DashboardPage() {
       closedList.push(closed);
       
       const probText = pos.probability ? ` | Prob: ${(pos.probability * 100).toFixed(0)}%` : '';
-      addBotLog(`[Penutupan] Keluar ${pos.leverage}x ${pos.type} di ${pos.symbol} @ Rp ${Math.round(price).toLocaleString('id-ID')} (MANUAL CLOSE ALL). Pnl: Rp ${Math.round(realizedPnl).toLocaleString('id-ID')} (${closed.realizedPnlPercent.toFixed(1)}%)${probText}`, realizedPnl >= 0 ? 'SUCCESS' : 'ERROR');
+      addBotLog(`[Penutupan] Keluar ${pos.leverage}x ${pos.type} di ${formatPairName(pos.symbol)} @ ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(price, pos.symbol)} (MANUAL CLOSE ALL). Pnl: ${formatMoney(realizedPnl)} (${closed.realizedPnlPercent.toFixed(1)}%)${probText}`, realizedPnl >= 0 ? 'SUCCESS' : 'ERROR');
     });
 
     // Combined sequentially flat state updates
@@ -765,7 +868,7 @@ export default function DashboardPage() {
 
     // Trigger Success Toast
     const pnlSign = totalPnl >= 0 ? '+' : '';
-    showToast(`Semua posisi (${idsToClose.length}) berhasil ditutup. Total P/L: ${pnlSign}Rp ${Math.round(totalPnl).toLocaleString('id-ID')}`, 'success');
+    showToast(`Semua posisi (${idsToClose.length}) berhasil ditutup. Total P/L: ${pnlSign}${formatMoney(totalPnl)}`, 'success');
   };
 
   // 1. Ticking Dynamic Market-Wide Quant Scanner loop: rotates through all liquid market pairs
@@ -824,7 +927,7 @@ export default function DashboardPage() {
       }
       
       // Factor C: Volume Spike & Institutional Interest (25% weight)
-      const volumeBillions = pairData.volumeIdr / 1e9;
+      const volumeBillions = tradingMode === 'FOREX' ? 5.0 : pairData.volumeIdr / 1e9;
       // Institutional interest favors solid trading volume (>1 Billion IDR) to prevent wash trading
       const volScore = Math.min(25, volumeBillions * 3.5); 
       
@@ -914,9 +1017,9 @@ export default function DashboardPage() {
         : activeData.status === 'SETUP' 
           ? `SETUP ${activeData.signal} DETECTED: ${activeData.pattern || 'QUANT CORE'} (b: ${(activeData.score / 100).toFixed(2)})`
           : 'MENCARI OPPORTUNITY...';
-      setScannerStatus(`Memindai ${symbol}/IDR: Rp ${Math.round(activeData.price).toLocaleString('id-ID')} | ${statusLabel}`);
+      setScannerStatus(`Memindai ${formatPairName(symbol)}: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activeData.price, symbol)} | ${statusLabel}`);
     }
-  }, [pairs, activeScanPair, activePositions, failedSignalCooldowns]);
+  }, [pairs, activeScanPair, activePositions, failedSignalCooldowns, tradingMode]);
 
   // 3. Autonomous Bot Execution Loop with 60-second background AI verify cooldown
   const [lastAiRunTime, setLastAiRunTime] = useState<number>(0);
@@ -951,12 +1054,14 @@ export default function DashboardPage() {
       const portfolioCapital = tempCashBalance + activePositions.reduce((acc, pos) => acc + pos.margin, 0);
       let marginAllocation = Math.round(portfolioCapital * (kellyPercent / 100));
 
-      if (marginAllocation < 50000) {
-        marginAllocation = 50000;
+      const minMargin = tradingMode === 'FOREX' ? 10 : 50000;
+
+      if (marginAllocation < minMargin) {
+        marginAllocation = minMargin;
       }
 
       if (marginAllocation > tempCashBalance) {
-        if (tempCashBalance >= 50000) {
+        if (tempCashBalance >= minMargin) {
           marginAllocation = tempCashBalance;
         } else {
           return;
@@ -979,7 +1084,7 @@ export default function DashboardPage() {
 
       if (isAiCooldownActive) {
         // Execute instantly using Client-Side Quant validation to avoid API limits
-        addBotLog(`[AI Quant Engine] Setup ${coinData.signal} (${coinData.pattern || 'QUANT CORE'}) terdeteksi pada ${symbol}/IDR (b: ${b.toFixed(2)}${kellyText}). Mengeksekusi order leverage dinamis ${dynamicLev}x dengan modal Rp ${marginAllocation.toLocaleString('id-ID')}...`, 'INFO');
+        addBotLog(`[AI Quant Engine] Setup ${coinData.signal} (${coinData.pattern || 'QUANT CORE'}) terdeteksi pada ${formatPairName(symbol)} (b: ${b.toFixed(2)}${kellyText}). Mengeksekusi order leverage dinamis ${dynamicLev}x dengan modal ${formatMoney(marginAllocation)}...`, 'INFO');
         
         const entry = coinData.price;
         const levels = buildTradeLevels(entry, coinData.signal as any);
@@ -995,7 +1100,7 @@ export default function DashboardPage() {
         handleOpenPosition(coinData.signal as 'LONG' | 'SHORT', dynamicLev, marginAllocation, entry, sl, tp, pairId, symbol, b);
       } else {
         // Dispatch background Cognitive AI verification query
-        addBotLog(`[AI Bot] Pola ${coinData.pattern || 'QUANT SETUPS'} terdeteksi pada ${symbol}/IDR (b: ${b.toFixed(2)}${kellyText}). Memulai Audit Cognitive AI mendalam...`, 'INFO');
+        addBotLog(`[AI Bot] Pola ${coinData.pattern || 'QUANT SETUPS'} terdeteksi pada ${formatPairName(symbol)} (b: ${b.toFixed(2)}${kellyText}). Memulai Audit Cognitive AI mendalam...`, 'INFO');
         setLastAiRunTime(now);
 
         setPendingPairs(prev => {
@@ -1016,18 +1121,19 @@ export default function DashboardPage() {
                 balance: cashBalance,
                 riskPercent,
                 timeframe: 'Scalping',
+                mode: tradingMode,
               }),
             });
 
             if (response.ok) {
-              addBotLog(`[AI Auditor] Audit Cognitive AI selesai untuk ${symbol}. Sinyal TERVERIFIKASI.`, 'SUCCESS');
+              addBotLog(`[AI Auditor] Audit Cognitive AI selesai untuk ${formatPairName(symbol)}. Sinyal TERVERIFIKASI.`, 'SUCCESS');
               const entry = coinData.price;
               const levels = buildTradeLevels(entry, coinData.signal as any);
               const sl = levels.sl;
               const tp = levels.tp2;
               handleOpenPosition(coinData.signal as 'LONG' | 'SHORT', dynamicLev, marginAllocation, entry, sl, tp, pairId, symbol, b);
             } else {
-              addBotLog(`[AI Auditor] Jaringan sibuk. Menggunakan Quant Core Engine untuk eksekusi ${symbol}.`, 'WARNING');
+              addBotLog(`[AI Auditor] Jaringan sibuk. Menggunakan Quant Core Engine untuk eksekusi ${formatPairName(symbol)}.`, 'WARNING');
               const entry = coinData.price;
               const levels = buildTradeLevels(entry, coinData.signal as any);
               const sl = levels.sl;
@@ -1035,7 +1141,7 @@ export default function DashboardPage() {
               handleOpenPosition(coinData.signal as 'LONG' | 'SHORT', dynamicLev, marginAllocation, entry, sl, tp, pairId, symbol, b);
             }
           } catch (err) {
-            addBotLog(`[AI Auditor] Jaringan sibuk. Menggunakan Quant Core Engine fallback untuk eksekusi ${symbol}.`, 'WARNING');
+            addBotLog(`[AI Auditor] Jaringan sibuk. Menggunakan Quant Core Engine fallback untuk eksekusi ${formatPairName(symbol)}.`, 'WARNING');
             const entry = coinData.price;
             const isLong = coinData.signal === 'LONG';
             const sl = isLong ? entry * 0.97 : entry * 1.03;
@@ -1047,7 +1153,7 @@ export default function DashboardPage() {
         triggerAiAudit();
       }
     });
-  }, [autoTrading, pairs, scannedCoinsData, activePositions, cashBalance, riskPercent, lastAiRunTime, pendingPairs, botTradeMargin, botMaxPositions, failedSignalCooldowns]);
+  }, [autoTrading, pairs, scannedCoinsData, activePositions, cashBalance, riskPercent, lastAiRunTime, pendingPairs, botTradeMargin, botMaxPositions, failedSignalCooldowns, tradingMode]);
 
   // Handler to import targets from parsed AI report
   const handleImportTargets = (entry: number, sl: number, tp: number) => {
@@ -1254,8 +1360,9 @@ export default function DashboardPage() {
         const levels = buildTradeLevels(item.price, item.signal);
         
         // Validation check for SL > 50% (Rule 5)
-        if (levels.stopLossPercent > 50.0) {
-          return `${index + 1}. **${item.symbol}/IDR** | Sinyal: **${item.signal}** | *Rekomendasi Ditahan: Stop Loss > 50% dari entry*`;
+        const maxSlPct = tradingMode === 'FOREX' ? 10.0 : 50.0;
+        if (levels.stopLossPercent > maxSlPct) {
+          return `${index + 1}. **${formatPairName(item.symbol)}** | Sinyal: **${item.signal}** | *Rekomendasi Ditahan: Stop Loss > ${maxSlPct}% dari entry*`;
         }
 
         const isLongTerm = ['720', '1D', '1W', '1M'].includes(timeframe);
@@ -1265,15 +1372,16 @@ export default function DashboardPage() {
         const kVal = Math.max(5, Math.min(25, Math.round((item.score / 100) * 0.25 * (1 - itemVolatilityFactor) * 100)));
         const bVal = item.score / 100;
 
-        return `${index + 1}. **${item.symbol}/IDR** | Sinyal: **${item.signal}** | Skor: **${item.score}%** (b: ${bVal.toFixed(2)}) | Kelly Size: **${kVal}%** | Harga: Rp ${Math.round(item.price).toLocaleString('id-ID')} | SL: Rp ${Math.round(levels.sl).toLocaleString('id-ID')} | TP2: Rp ${Math.round(levels.tp2).toLocaleString('id-ID')}${warningText} | Pola: *${item.pattern || 'Quant Core'}*`;
+        return `${index + 1}. **${formatPairName(item.symbol)}** | Sinyal: **${item.signal}** | Skor: **${item.score}%** (b: ${bVal.toFixed(2)}) | Kelly Size: **${kVal}%** | Harga: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(item.price, item.symbol)} | SL: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(levels.sl, item.symbol)} | TP2: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(levels.tp2, item.symbol)}${warningText} | Pola: *${item.pattern || 'Quant Core'}*`;
       }).join('\n');
     } else if (alternativeSetups.length > 0) {
       setupSummary = `**Setup Potensial (Skor 60-80 - Agak Berisiko)**:\n` + alternativeSetups.map((item, index) => {
         const levels = buildTradeLevels(item.price, item.signal);
         
         // Validation check for SL > 50% (Rule 5)
-        if (levels.stopLossPercent > 50.0) {
-          return `${index + 1}. **${item.symbol}/IDR** | Sinyal: **${item.signal}** | *Rekomendasi Ditahan: Stop Loss > 50% dari entry*`;
+        const maxSlPct = tradingMode === 'FOREX' ? 10.0 : 50.0;
+        if (levels.stopLossPercent > maxSlPct) {
+          return `${index + 1}. **${formatPairName(item.symbol)}** | Sinyal: **${item.signal}** | *Rekomendasi Ditahan: Stop Loss > ${maxSlPct}% dari entry*`;
         }
 
         const isLongTerm = ['720', '1D', '1W', '1M'].includes(timeframe);
@@ -1283,17 +1391,17 @@ export default function DashboardPage() {
         const kVal = Math.max(5, Math.min(25, Math.round((item.score / 100) * 0.25 * (1 - itemVolatilityFactor) * 100)));
         const bVal = item.score / 100;
 
-        return `${index + 1}. **${item.symbol}/IDR** | Sinyal: **${item.signal}** | Skor: **${item.score}%** (b: ${bVal.toFixed(2)}) | Kelly Size: **${kVal}%** | Harga: Rp ${Math.round(item.price).toLocaleString('id-ID')} | SL: Rp ${Math.round(levels.sl).toLocaleString('id-ID')} | TP2: Rp ${Math.round(levels.tp2).toLocaleString('id-ID')}${warningText} | Pola: *${item.pattern || 'Quant Core'}*`;
+        return `${index + 1}. **${formatPairName(item.symbol)}** | Sinyal: **${item.signal}** | Skor: **${item.score}%** (b: ${bVal.toFixed(2)}) | Kelly Size: **${kVal}%** | Harga: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(item.price, item.symbol)} | SL: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(levels.sl, item.symbol)} | TP2: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(levels.tp2, item.symbol)}${warningText} | Pola: *${item.pattern || 'Quant Core'}*`;
       }).join('\n') + `\n\n*Catatan*: Tidak ada koin yang melampaui threshold eksekusi ketat (>80) saat ini. Sinyal di atas adalah alternatif momentum jangka pendek.`;
     } else {
       setupSummary = `**Koin dengan Skor Teknis Tertinggi (Sideways)**:\n` + topScores.map((item, index) => {
         const bVal = item.score / 100;
-        return `${index + 1}. **${item.symbol}/IDR** | Sinyal: **${item.signal}** | Skor: **${item.score}%** (b: ${bVal.toFixed(2)}) | Harga: Rp ${Math.round(item.price).toLocaleString('id-ID')} | Pola: *${item.pattern || 'Quant Core'}*`;
+        return `${index + 1}. **${formatPairName(item.symbol)}** | Sinyal: **${item.signal}** | Skor: **${item.score}%** (b: ${bVal.toFixed(2)}) | Harga: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(item.price, item.symbol)} | Pola: *${item.pattern || 'Quant Core'}*`;
       }).join('\n') + `\n\n*Rekomendasi*: Kondisi market sangat sideways netral. AI sangat merekomendasikan **wait-and-see** demi melindungi modal Anda.`;
     }
 
     if (lowerText.includes('halo') || lowerText.includes('hi') || lowerText.includes('helo')) {
-      return `Halo! Saya adalah **Fantasma Synergy AI Auditor Core v3.0**. Saya memantau seluruh pergerakan harga Indodax per detiknya secara multi-dimensional.\n\nKonteks Aktif:\n- Koin Terpilih: **${targetCoinSymbol}/IDR** di Rp ${Math.round(activePrice).toLocaleString('id-ID')}\n- Skor AI: **${activeScore}/100** | Sinyal: **${activeSignal}**\n- Pola: *${activePattern}*\n\nAnda bisa menanyakan kepada saya tentang:\n1. Cari koin bagus untuk entry (*"carikan koin entry"*)\n2. Deep audit koin (*"tren btc"* atau *"audit eth"*)\n3. Status modal & portofolio (*"posisi aktif"*)\n4. Manajemen risiko Kelly (*"rumus kelly"*)\n5. Detail sistem (*"cara kerja bot"*)`;
+      return `Halo! Saya adalah **Fantasma Synergy AI Auditor Core v3.0**. Saya memantau seluruh pergerakan harga ${tradingMode === 'FOREX' ? 'Forex' : 'Indodax'} secara multi-dimensional.\n\nKonteks Aktif:\n- Koin Terpilih: **${formatPairName(targetCoinSymbol)}** di ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activePrice, targetCoinSymbol)}\n- Skor AI: **${activeScore}/100** | Sinyal: **${activeSignal}**\n- Pola: *${activePattern}*\n\nAnda bisa menanyakan kepada saya tentang:\n1. Cari koin bagus untuk entry (*"carikan koin entry"*)\n2. Deep audit koin (*"tren ${targetCoinSymbol.toLowerCase()}"* atau *"audit ${targetCoinSymbol.toLowerCase()}"*)\n3. Status modal & portofolio (*"posisi aktif"*)\n4. Manajemen risiko Kelly (*"rumus kelly"*)\n5. Detail sistem (*"cara kerja bot"*)`;
     }
 
     if (
@@ -1314,7 +1422,7 @@ export default function DashboardPage() {
         `**Panduan Eksekusi Kelly Sizing**:\n` +
         `- Hitung alokasi margin Anda berdasarkan kolom **Kelly Size** (contoh: 15% dari portfolio Anda).\n` +
         `- Wajib pasang Stop Loss di area yang ditentukan untuk mencegah liquidate berantai.\n` +
-        `- Jika Anda ingin mengaudit koin tertentu secara mendalam, silakan tanyakan seperti: *"tren ${targetCoinSymbol.toLowerCase()}"* atau *"audit btc"*.`;
+        `- Jika Anda ingin mengaudit koin tertentu secara mendalam, silakan tanyakan seperti: *"tren ${targetCoinSymbol.toLowerCase()}"* atau *"audit ${targetCoinSymbol.toLowerCase()}"*.`;
     }
 
     if (
@@ -1338,19 +1446,19 @@ export default function DashboardPage() {
           `- Whale Score / CVD: **${oracleSignal.smartMoney?.whaleScore}/100** / *${oracleSignal.microstructure?.cvdStatus}*`
         : '';
 
-      return `### Deep Audit AI Kuantitatif: **${targetCoinSymbol}/IDR**\n\n` +
-        `*   **Harga Saat Ini**: Rp ${Math.round(activePrice).toLocaleString('id-ID')} (${activeChange24h >= 0 ? '+' : ''}${activeChange24h.toFixed(2)}%)\n` +
+      return `### Deep Audit AI Kuantitatif: **${formatPairName(targetCoinSymbol)}**\n\n` +
+        `*   **Harga Saat Ini**: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activePrice, targetCoinSymbol)} (${activeChange24h >= 0 ? '+' : ''}${activeChange24h.toFixed(2)}%)\n` +
         `*   **AI Technical Score**: **${activeScore}/100**\n` +
         `*   **Sinyal & Pola**: **${activeSignal}** (*${activePattern}*)\n` +
         `*   **Success Probability (b)**: **${(activeB * 100).toFixed(0)}%**\n` +
         `*   **Orderbook Imbalance**: Bids volume menyumbang **${getOrderbookBidPct(targetPairId)}%** dari kedalaman visual.${oracleText}\n\n` +
         `**Koordinat Level Kerja**:\n` +
-        `*   **Rekomendasi Entry**: Rp ${Math.round(activePrice).toLocaleString('id-ID')}\n` +
-        `*   **Stop Loss (SL)**: Rp ${Math.round(activeLevels.sl).toLocaleString('id-ID')} (Toleransi risiko maksimal)\n` +
+        `*   **Rekomendasi Entry**: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activePrice, targetCoinSymbol)}\n` +
+        `*   **Stop Loss (SL)**: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activeLevels.sl, targetCoinSymbol)} (Toleransi risiko maksimal)\n` +
         `*   **Target Take Profit**:\n` +
-        `    - TP1 (RR 1:1.5): Rp ${Math.round(activeLevels.tp1).toLocaleString('id-ID')}\n` +
-        `    - TP2 (RR 1:3.0): Rp ${Math.round(activeLevels.tp2).toLocaleString('id-ID')}\n` +
-        `    - TP3 (RR 1:4.5): Rp ${Math.round(activeLevels.tp3).toLocaleString('id-ID')}\n\n` +
+        `    - TP1 (RR 1:1.5): ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activeLevels.tp1, targetCoinSymbol)}\n` +
+        `    - TP2 (RR 1:3.0): ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activeLevels.tp2, targetCoinSymbol)}\n` +
+        `    - TP3 (RR 1:4.5): ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activeLevels.tp3, targetCoinSymbol)}\n\n` +
         `**Kesimpulan AI**: ${activeScore > HIGH_ACCURACY_SIGNAL_THRESHOLD && activeSignal !== 'NEUTRAL' 
           ? `Sinyal ${activeSignal} untuk ${targetCoinSymbol} tervalidasi dengan tingkat keyakinan tinggi. Gunakan leverage **${getLeverageForSetup(activeScore)}x** dan margin Kelly **${activeKelly}%**.` 
           : `Koin ${targetCoinSymbol} saat ini belum memenuhi threshold eksekusi skor >80. Disarankan untuk menunggu konfirmasi breakout yang lebih kuat sebelum mengambil posisi.`}`;
@@ -1375,12 +1483,12 @@ export default function DashboardPage() {
         `- $\\mathbf{q}$ = Probabilitas kekalahan ($1 - p$)\n` +
         `- $\\mathbf{0.5}$ = Pengali Half-Kelly untuk proteksi modal yang lebih aman\n` +
         `- **Batas Alokasi Maksimum**: Maksimal **25%** dari total modal.\n\n` +
-        `**Perhitungan untuk ${targetCoinSymbol}/IDR saat ini**:\n` +
+        `**Perhitungan untuk ${formatPairName(targetCoinSymbol)} saat ini**:\n` +
         `- Probabilitas keberhasilan ($p$): **${(activeB * 100).toFixed(0)}%**\n` +
         `- Probabilitas kegagalan ($q$): **${(activeQ * 100).toFixed(0)}%**\n` +
         `- Alokasi Margin Kelly: **${activeKelly}%** dari total modal Anda.\n` +
         `- Rekomendasi Leverage: **${getLeverageForSetup(activeScore)}x** (leverage disesuaikan secara dinamis berdasarkan probabilitas $b$)\n\n` +
-        `*Aturan Stop Loss (SL)*: Selalu pasang Stop Loss di area ATR Stop Rp ${Math.round(activeLevels.sl).toLocaleString('id-ID')}.`;
+        `*Aturan Stop Loss (SL)*: Selalu pasang Stop Loss di area ATR Stop ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activeLevels.sl, targetCoinSymbol)}.`;
     }
 
     if (
@@ -1406,14 +1514,14 @@ export default function DashboardPage() {
             if (pnlVal < -pos.margin) pnlVal = -pos.margin;
             const pnlPercentVal = (pnlVal / pos.margin) * 100;
             const pnlColor = pnlVal >= 0 ? '🟢 +' : '🔴 ';
-            return `${idx + 1}. **${pos.symbol}/IDR** | Tipe: **${pos.type}** | Margin: Rp ${pos.margin.toLocaleString('id-ID')} | Leverage: **${pos.leverage}x** | Entry: Rp ${Math.round(pos.entryPrice).toLocaleString('id-ID')} | Sekarang: Rp ${Math.round(pos.currentPrice).toLocaleString('id-ID')} | P&L: ${pnlColor}Rp ${Math.round(pnlVal).toLocaleString('id-ID')} (${pnlPercentVal.toFixed(2)}%)`;
+            return `${idx + 1}. **${formatPairName(pos.symbol)}** | Tipe: **${pos.type}** | Margin: ${formatMoney(pos.margin)} | Leverage: **${pos.leverage}x** | Entry: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(pos.entryPrice, pos.symbol)} | Sekarang: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(pos.currentPrice, pos.symbol)} | P&L: ${pnlColor}${formatMoney(pnlVal)} (${pnlPercentVal.toFixed(2)}%)`;
           }).join('\n')
         : 'Tidak ada posisi trading yang aktif saat ini.';
       
       return `### Laporan Audit Portofolio Simulasi\n\n` +
-        `*   **Saldo Kas Tersedia**: Rp ${cashBalance.toLocaleString('id-ID')}\n` +
-        `*   **Margin Posisi Aktif**: Rp ${openRisk.toLocaleString('id-ID')}\n` +
-        `*   **Total Ekuitas Portofolio**: Rp ${Math.round(currentEquity).toLocaleString('id-ID')}\n` +
+        `*   **Saldo Kas Tersedia**: ${formatMoney(cashBalance)}\n` +
+        `*   **Margin Posisi Aktif**: ${formatMoney(openRisk)}\n` +
+        `*   **Total Ekuitas Portofolio**: ${formatMoney(currentEquity)}\n` +
         `*   **Jumlah Posisi Terbuka**: ${activePositions.length} posisi\n` +
         `*   **Total Riwayat Transaksi**: ${closedTrades.length} selesai${closedTrades.length ? ` (Win Rate: ${winRate}%)` : ''}\n\n` +
         `**Detail Posisi Aktif saat ini**:\n` +
@@ -1439,14 +1547,14 @@ export default function DashboardPage() {
         `4.  **Elliott Wave & Fibonacci Auto-Scanner**: Memetakan struktur gelombang koreksi dan target Fibonacci extension secara mekanikal.\n` +
         `5.  **9-Model Ensemble AI Engine**: Menggunakan konsensus dari 9 model pembelajaran mesin (LSTM, XGBoost, Transformer, Random Forest, LightGBM, CatBoost, GRU, CNN, Prophet) untuk menyimpulkan arah utama.\n` +
         `6.  **Accuracy Layer validation**: Memfilter sinyal agar hanya mengeksekusi setup dengan tingkat akurasi internal di atas **80/100** dan minimal 3 layer konfirmasi terpenuhi.\n\n` +
-        `*Catatan Kecepatan*: Semua data diambil dari live cache terminal berkecepatan tinggi (15s cooldown) sehingga respons AI sangat cepat dan tidak melanggar rate limit Indodax.`;
+        `*Catatan Kecepatan*: Semua data diambil dari live cache terminal berkecepatan tinggi (15s cooldown) sehingga respons AI sangat cepat dan tidak melanggar rate limit ${tradingMode === 'FOREX' ? 'Forex provider' : 'Indodax'}.`;
     }
 
     // Default conversational fallback
     return `### AI Auditor Core v3.0\n\n` +
       `Saya mendengarkan pesan Anda: "${userText}".\n\n` +
-      `Berikut adalah status pasar live untuk **${targetCoinSymbol}/IDR** saat ini:\n` +
-      `-   **Harga Saat Ini**: Rp ${Math.round(activePrice).toLocaleString('id-ID')}\n` +
+      `Berikut adalah status pasar live untuk **${formatPairName(targetCoinSymbol)}** saat ini:\n` +
+      `-   **Harga Saat Ini**: ${tradingMode === 'FOREX' ? '$' : 'Rp '}${formatPrice(activePrice, targetCoinSymbol)}\n` +
       `-   **Skor Teknis AI**: **${activeScore}/100** (Sinyal: **${activeSignal}**)\n` +
       `-   **Pola Grafik**: *${activePattern}*\n\n` +
       `**Setups Menarik di Pasar saat ini**:\n` +
@@ -1764,7 +1872,34 @@ export default function DashboardPage() {
               <h1 className="font-extrabold text-base tracking-wide bg-gradient-to-r from-[#58A6FF] to-indigo-300 bg-clip-text text-transparent uppercase flex items-center gap-1.5 font-sans">
                 Fantasma Synergy <span className="text-[10px] text-[#58A6FF] font-mono tracking-widest bg-[#58A6FF]/10 border border-[#58A6FF]/20 px-2 py-0.5 rounded hidden xs:inline-block">Core v1.0</span>
               </h1>
-              <span className="text-[10px] text-[#8B949E] font-mono hidden sm:block">Sistem Kuantitatif Cryptocurrency - Indodax IDR</span>
+              <span className="text-[10px] text-[#8B949E] font-mono hidden sm:block">
+                {tradingMode === 'FOREX' ? 'Sistem Kuantitatif Forex - MIFX, eXness & TradingView' : 'Sistem Kuantitatif Cryptocurrency - Indodax IDR'}
+              </span>
+            </div>
+            {/* Glowing Mode Switcher */}
+            <div className="flex items-center bg-[#030407] border border-[#1E2333] p-1 rounded-[3px] gap-1 ml-4 select-none">
+              <button
+                type="button"
+                onClick={() => handleToggleMode('CRYPTO')}
+                className={`px-3 py-1 text-[10px] font-bold uppercase rounded-[2px] transition-all duration-300 cursor-pointer font-sans ${
+                  tradingMode === 'CRYPTO'
+                    ? 'bg-[#58A6FF] text-[#0D1117] shadow-[0_0_8px_rgba(88,166,255,0.4)] font-extrabold'
+                    : 'text-[#8B949E] hover:text-[#E6EDF3]'
+                }`}
+              >
+                Crypto
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleMode('FOREX')}
+                className={`px-3 py-1 text-[10px] font-bold uppercase rounded-[2px] transition-all duration-300 cursor-pointer font-sans ${
+                  tradingMode === 'FOREX'
+                    ? 'bg-[#00E5FF] text-[#0D1117] shadow-[0_0_8px_rgba(0,229,255,0.4)] font-extrabold'
+                    : 'text-[#8B949E] hover:text-[#E6EDF3]'
+                }`}
+              >
+                Forex
+              </button>
             </div>
           </div>
 
@@ -1774,7 +1909,11 @@ export default function DashboardPage() {
               {pairs.slice(0, 10).map((pair) => (
                 <span key={`ticker-${pair.id}`} className="flex items-center gap-1.5 cursor-pointer hover:text-[#58A6FF] transition-colors">
                   <span className="font-bold text-[#E6EDF3]">{pair.symbol}</span>
-                  <span>{pair.price >= 1000 ? Math.round(pair.price).toLocaleString('id-ID') : pair.price.toFixed(2)}</span>
+                  <span>
+                    {tradingMode === 'FOREX' 
+                      ? pair.price.toFixed(pair.symbol.includes('JPY') ? 3 : 5) 
+                      : (pair.price >= 1000 ? Math.round(pair.price).toLocaleString('id-ID') : pair.price.toFixed(2))}
+                  </span>
                   <span className={`font-bold text-[10px] ${pair.change24h >= 0 ? 'text-[#3FB950]' : 'text-[#F85149]'}`}>
                     {pair.change24h >= 0 ? '+' : ''}{pair.change24h.toFixed(1)}%
                   </span>
@@ -1823,6 +1962,7 @@ export default function DashboardPage() {
                   setSelectedPairId(id);
                   setLoading(true);
                 }}
+                isForex={tradingMode === 'FOREX'}
               />
             </div>
 
@@ -1926,7 +2066,7 @@ export default function DashboardPage() {
                     <TradingChart
                       candles={candles}
                       timeframe={timeframe}
-                      tickerName={`${activePairSymbol}/IDR`}
+                      tickerName={tradingMode === 'FOREX' ? `${activePairSymbol.slice(0, 3)}/${activePairSymbol.slice(3)}` : `${activePairSymbol}/IDR`}
                       currentPrice={ticker?.last}
                     />
                   )}
@@ -1938,6 +2078,7 @@ export default function DashboardPage() {
                     asks={depth.asks}
                     trades={trades}
                     currentPrice={ticker?.last || 0}
+                    isForex={tradingMode === 'FOREX'}
                   />
                 </div>
               </div>
@@ -1966,6 +2107,7 @@ export default function DashboardPage() {
                     symbol={activePairSymbol}
                     onBalanceChange={setCashBalance}
                     onRiskChange={setRiskPercent}
+                    isForex={tradingMode === 'FOREX'}
                   />
                 </div>
               </div>
@@ -2001,6 +2143,7 @@ export default function DashboardPage() {
                 onFixedLeverageChange={setFixedLeverage}
                 onSetCashBalance={setCashBalance}
                 balanceChangePulse={balanceChangePulse}
+                isForex={tradingMode === 'FOREX'}
               />
             </div>
           </main>
@@ -2413,9 +2556,11 @@ export default function DashboardPage() {
                 
                 // Switch to main dashboard tab to review filled inputs
                 setActiveTab('DASHBOARD');
-                showToast(`Setup Risk Lab berhasil diterapkan untuk ${activePairSymbol}/IDR. Sinyal: ${direction}, SL: Rp ${sl.toLocaleString('id-ID')}, TP2: Rp ${tp2.toLocaleString('id-ID')}.`, 'success');
+                const currencySign = tradingMode === 'FOREX' ? '$' : 'Rp ';
+                showToast(`Setup Risk Lab berhasil diterapkan untuk ${formatPairName(selectedPairId)}. Sinyal: ${direction}, SL: ${currencySign}${formatPrice(sl, selectedPairId)}, TP2: ${currencySign}${formatPrice(tp2, selectedPairId)}.`, 'success');
               }}
               recentSlPairs={recentSlPairs}
+              isForex={tradingMode === 'FOREX'}
             />
           </main>
         )}
@@ -2759,10 +2904,10 @@ export default function DashboardPage() {
         <footer className="border-t border-[#1E2333] bg-[#07090F] px-6 py-4 flex flex-col md:flex-row items-center justify-between text-[10px] text-[#8B949E] gap-3 select-none">
           <div className="flex items-center gap-1.5">
             <Shield className="h-4 w-4 text-[#58A6FF]" />
-            <span>Terminal Perdagangan Kuantitatif Fantasma Synergy. Didukung oleh Next.js 15 & Data Pasar Indodax.</span>
+            <span>Terminal Perdagangan Kuantitatif Fantasma Synergy. Didukung oleh Next.js 15, Data Pasar Indodax, MIFX, eXness, dan TradingView.</span>
           </div>
           <span className="text-center md:text-right italic">
-            Disclaimer: Ini bukan saran keuangan. Perdagangan aset kripto memiliki risiko sangat tinggi. Keputusan akhir sepenuhnya di tangan pengguna.
+            Disclaimer: Ini bukan saran keuangan. Perdagangan aset kripto dan forex memiliki risiko sangat tinggi. Keputusan akhir sepenuhnya di tangan pengguna.
           </span>
         </footer>
       </div>

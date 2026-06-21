@@ -37,6 +37,7 @@ interface RiskLabConsoleProps {
     margin: number;
   }) => void;
   recentSlPairs: Record<string, number>; // Maps pairId to SL timestamp
+  isForex?: boolean;
 }
 
 function RiskLabConsole({
@@ -49,7 +50,8 @@ function RiskLabConsole({
   cashBalance,
   activePositions,
   onApplySetup,
-  recentSlPairs
+  recentSlPairs,
+  isForex = false
 }: RiskLabConsoleProps) {
   // Config States
   const [style, setStyle] = useState<'SCALPING' | 'SHORT' | 'MEDIUM' | 'LONG'>('SHORT');
@@ -85,6 +87,32 @@ function RiskLabConsole({
   const [newPresetName, setNewPresetName] = useState('');
   const [showBacktestModal, setShowBacktestModal] = useState(false);
 
+  // Dynamic formatting helpers
+  const formatMoney = (value: number): string => {
+    if (isForex) {
+      return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `Rp ${Math.round(value || 0).toLocaleString('id-ID')}`;
+  };
+
+  const formatPrice = (value: number, sym: string): string => {
+    if (isForex) {
+      const isJpy = sym.toUpperCase().includes('JPY');
+      return value.toFixed(isJpy ? 3 : 5);
+    }
+    return value >= 1000 
+      ? Math.round(value).toLocaleString('id-ID') 
+      : value.toFixed(2);
+  };
+
+  const formatPairName = (sym: string): string => {
+    const symbolStr = sym.replace('_idr', '').toUpperCase();
+    if (isForex) {
+      return symbolStr;
+    }
+    return `${symbolStr}/IDR`;
+  };
+
   // Get active pair metadata
   const activePair = pairs.find(p => p.id === selectedPairId) || {
     id: selectedPairId,
@@ -113,12 +141,20 @@ function RiskLabConsole({
   // Update simulator values if ticker changes
   useEffect(() => {
     if (activePair.price) {
-      setSimEntry(Math.round(activePair.price).toString());
-      setSimTp(Math.round(activePair.price * 1.06).toString());
-      setSimSl(Math.round(activePair.price * 0.97).toString());
+      if (isForex) {
+        const isJpy = activePair.symbol.toUpperCase().includes('JPY');
+        const decimals = isJpy ? 3 : 5;
+        setSimEntry(activePair.price.toFixed(decimals));
+        setSimTp((activePair.price * 1.01).toFixed(decimals));
+        setSimSl((activePair.price * 0.99).toFixed(decimals));
+      } else {
+        setSimEntry(Math.round(activePair.price).toString());
+        setSimTp(Math.round(activePair.price * 1.06).toString());
+        setSimSl(Math.round(activePair.price * 0.97).toString());
+      }
       setSimProbability(null);
     }
-  }, [selectedPairId, activePair.price]);
+  }, [selectedPairId, activePair.price, isForex]);
 
   // Determine Signal direction from standard candles list
   const getSignalDirection = (): 'LONG' | 'SHORT' | 'NEUTRAL' => {
@@ -153,7 +189,8 @@ function RiskLabConsole({
     candles,
     rrRatio,
     cashBalance,
-    riskPercent
+    riskPercent,
+    isForex
   );
 
   // Dynamic win rate confidence override
@@ -253,7 +290,7 @@ function RiskLabConsole({
 
       if (leftFilter === 'GAINERS') return p.change24h > 1.5;
       if (leftFilter === 'LOSERS') return p.change24h < -1.5;
-      if (leftFilter === 'HIGH_VOL') return p.volumeIdr > 2e9; // > 2 B IDR
+      if (leftFilter === 'HIGH_VOL') return isForex ? p.volumeIdr > 10 : p.volumeIdr > 2e9; // > 2 B IDR / > 10 spread simulated
       return true;
     });
   };
@@ -269,7 +306,7 @@ function RiskLabConsole({
             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-500" />
             <input
               type="text"
-              placeholder="Cari pair koin..."
+              placeholder={isForex ? "Cari pair forex..." : "Cari pair koin..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-8 pr-3 py-1.5 bg-[#030407] border border-[#1E2333] rounded-[3px] text-base md:text-xs text-[#E6EDF3] placeholder-slate-600 focus:outline-none focus:border-[#58A6FF]"
@@ -293,7 +330,7 @@ function RiskLabConsole({
           </button>
           <button 
             onClick={() => setLeftFilter('LOSERS')}
-            className={`py-2 text-center border-b-2 transition-all ${leftFilter === 'LOSERS' ? 'border-rose-500 text-rose-400 bg-rose-950/10' : 'border-transparent text-slate-500'}`}
+            className={`py-2 text-center border-b-2 transition-all ${leftFilter === 'LOSERS' ? 'border-rose-500 text-rose-450 bg-rose-950/10' : 'border-transparent text-slate-500'}`}
           >
             LOSERS
           </button>
@@ -318,14 +355,16 @@ function RiskLabConsole({
                 }`}
               >
                 <div className="flex flex-col">
-                  <span className="text-xs font-mono font-bold text-[#E6EDF3]">{p.symbol}/IDR</span>
-                  <span className="text-[9px] text-slate-500">Vol: Rp {(p.volumeIdr / 1e6).toFixed(0)}M</span>
+                  <span className="text-xs font-mono font-bold text-[#E6EDF3]">{formatPairName(p.symbol)}</span>
+                  <span className="text-[9px] text-slate-500">
+                    {isForex ? `Spread: ${(p.volumeIdr / 100000).toFixed(1)} pips` : `Vol: Rp ${(p.volumeIdr / 1e6).toFixed(0)}M`}
+                  </span>
                 </div>
                 <div className="flex flex-col items-end">
                   <span className="text-xs font-mono font-bold text-slate-300">
-                    Rp {p.price >= 1000 ? Math.round(p.price).toLocaleString('id-ID') : p.price.toFixed(2)}
+                    {isForex ? '$' : 'Rp'} {formatPrice(p.price, p.symbol)}
                   </span>
-                  <span className={`text-[10px] font-bold ${p.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <span className={`text-[10px] font-bold ${p.change24h >= 0 ? 'text-emerald-400' : 'text-rose-450'}`}>
                     {p.change24h >= 0 ? '+' : ''}{p.change24h.toFixed(2)}%
                   </span>
                 </div>
@@ -514,18 +553,18 @@ function RiskLabConsole({
             </div>
             <div className="flex flex-col justify-between text-right">
               <span className="text-[9px] text-slate-500 block">Available Capital:</span>
-              <span className="text-xs font-mono font-bold text-[#E6EDF3] block">Rp {Math.round(cashBalance).toLocaleString('id-ID')}</span>
+              <span className="text-xs font-mono font-bold text-[#E6EDF3] block">{formatMoney(cashBalance)}</span>
             </div>
           </div>
 
           <div className="border-t border-[#1E2333]/50 pt-2 grid grid-cols-2 text-xs">
             <div className="flex flex-col gap-0.5">
               <span className="text-[9px] text-slate-500">Suggested Capital Margin:</span>
-              <span className="font-mono font-bold text-slate-200">Rp {setup.positionMargin.toLocaleString('id-ID')}</span>
+              <span className="font-mono font-bold text-slate-200">{formatMoney(setup.positionMargin)}</span>
             </div>
             <div className="flex flex-col gap-0.5 text-right">
               <span className="text-[9px] text-slate-500">Lot Size:</span>
-              <span className="font-mono font-bold text-[#58A6FF]">{setup.lotSize} {activeCoinSymbol}</span>
+              <span className="font-mono font-bold text-[#58A6FF]">{setup.lotSize} {isForex ? 'Lots' : activeCoinSymbol}</span>
             </div>
           </div>
         </div>
@@ -637,27 +676,27 @@ function RiskLabConsole({
           <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 text-xs font-mono">
             <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-[3px] p-2 flex flex-col justify-center">
               <span className="text-[9px] text-slate-500 uppercase font-sans">Rekomendasi Entry:</span>
-              <span className="font-bold text-slate-200">Rp {setup.entryPrice.toLocaleString('id-ID')}</span>
+              <span className="font-bold text-slate-200">{isForex ? '$' : 'Rp'} {formatPrice(setup.entryPrice, activeCoinSymbol)}</span>
             </div>
             
             <div className="bg-[#07090F] border border-rose-950/40 rounded-[3px] p-2 flex flex-col justify-center">
-              <span className="text-[9px] text-rose-400 uppercase font-sans">Stop Loss (SL):</span>
-              <span className="font-bold text-rose-400">Rp {setup.stopLoss.toLocaleString('id-ID')}</span>
+              <span className="text-[9px] text-rose-450 uppercase font-sans">Stop Loss (SL):</span>
+              <span className="font-bold text-rose-450">{isForex ? '$' : 'Rp'} {formatPrice(setup.stopLoss, activeCoinSymbol)}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 min-[480px]:grid-cols-3 gap-2 text-xs font-mono mt-1">
             <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-[3px] p-2 flex flex-col justify-center">
               <span className="text-[8px] text-emerald-500 uppercase font-sans">Take Profit 1 (50%):</span>
-              <span className="font-bold text-emerald-400">Rp {setup.takeProfit1.toLocaleString('id-ID')}</span>
+              <span className="font-bold text-emerald-400">{isForex ? '$' : 'Rp'} {formatPrice(setup.takeProfit1, activeCoinSymbol)}</span>
             </div>
             <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-[3px] p-2 flex flex-col justify-center">
               <span className="text-[8px] text-emerald-500 uppercase font-sans">Take Profit 2 (30%):</span>
-              <span className="font-bold text-emerald-400">Rp {setup.takeProfit2.toLocaleString('id-ID')}</span>
+              <span className="font-bold text-emerald-400">{isForex ? '$' : 'Rp'} {formatPrice(setup.takeProfit2, activeCoinSymbol)}</span>
             </div>
             <div className="bg-[#07090F] border border-[#1E2333]/40 rounded-[3px] p-2 flex flex-col justify-center">
               <span className="text-[8px] text-emerald-500 uppercase font-sans">Take Profit 3 (20%):</span>
-              <span className="font-bold text-emerald-400">Rp {setup.takeProfit3.toLocaleString('id-ID')}</span>
+              <span className="font-bold text-emerald-400">{isForex ? '$' : 'Rp'} {formatPrice(setup.takeProfit3, activeCoinSymbol)}</span>
             </div>
           </div>
 
@@ -669,10 +708,10 @@ function RiskLabConsole({
             const tp3Change = entry > 0 ? Math.abs(setup.takeProfit3 - entry) / entry : 0;
             const slChange = entry > 0 ? Math.abs(entry - setup.stopLoss) / entry : 0;
 
-            const tp1Profit = Math.round(setup.positionMargin * leverageRec * 0.5 * tp1Change);
-            const tp2Profit = Math.round(setup.positionMargin * leverageRec * 0.3 * tp2Change);
-            const tp3Profit = Math.round(setup.positionMargin * leverageRec * 0.2 * tp3Change);
-            const maxLoss = Math.round(setup.positionMargin * leverageRec * slChange);
+            const tp1Profit = setup.positionMargin * leverageRec * 0.5 * tp1Change;
+            const tp2Profit = setup.positionMargin * leverageRec * 0.3 * tp2Change;
+            const tp3Profit = setup.positionMargin * leverageRec * 0.2 * tp3Change;
+            const maxLoss = setup.positionMargin * leverageRec * slChange;
             
             const tp1Pct = Math.round(leverageRec * tp1Change * 100);
             const tp2Pct = Math.round(leverageRec * tp2Change * 100);
@@ -687,24 +726,24 @@ function RiskLabConsole({
                 <div className="grid grid-cols-1 min-[360px]:grid-cols-3 gap-1.5 font-mono text-[9px]">
                   <div className="bg-[#07090F]/60 p-1.5 rounded border border-[#1E2333]/30">
                     <span className="text-slate-500 block text-[8px]">TP1 (50%)</span>
-                    <span className="text-emerald-400 font-bold block">+Rp {tp1Profit.toLocaleString('id-ID')}</span>
+                    <span className="text-emerald-400 font-bold block">+{formatMoney(tp1Profit)}</span>
                     <span className="text-[8px] text-slate-500">+{tp1Pct}% PnL</span>
                   </div>
                   <div className="bg-[#07090F]/60 p-1.5 rounded border border-[#1E2333]/30">
                     <span className="text-slate-500 block text-[8px]">TP2 (30%)</span>
-                    <span className="text-emerald-400 font-bold block">+Rp {tp2Profit.toLocaleString('id-ID')}</span>
+                    <span className="text-emerald-400 font-bold block">+{formatMoney(tp2Profit)}</span>
                     <span className="text-[8px] text-slate-500">+{tp2Pct}% PnL</span>
                   </div>
                   <div className="bg-[#07090F]/60 p-1.5 rounded border border-[#1E2333]/30">
                     <span className="text-slate-500 block text-[8px]">TP3 (20%)</span>
-                    <span className="text-emerald-400 font-bold block">+Rp {tp3Profit.toLocaleString('id-ID')}</span>
+                    <span className="text-emerald-400 font-bold block">+{formatMoney(tp3Profit)}</span>
                     <span className="text-[8px] text-slate-500">+{tp3Pct}% PnL</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-[9px] mt-1 pt-1.5 border-t border-[#1E2333]/20">
-                  <span>Target Profit: <strong className="text-emerald-400 font-mono text-[10px]">+Rp {totalEstProfit.toLocaleString('id-ID')}</strong></span>
+                  <span>Target Profit: <strong className="text-emerald-400 font-mono text-[10px]">+{formatMoney(totalEstProfit)}</strong></span>
                   <span className="text-slate-500">|</span>
-                  <span>Max Loss (SL): <strong className="text-rose-450 font-mono text-rose-400 text-[10px]">-Rp {maxLoss.toLocaleString('id-ID')} (-{slPct}%)</strong></span>
+                  <span>Max Loss (SL): <strong className="text-rose-450 font-mono text-rose-450 text-[10px]">-{formatMoney(maxLoss)} (-{slPct}%)</strong></span>
                 </div>
               </div>
             );
@@ -917,12 +956,11 @@ function RiskLabConsole({
                 ✕
               </button>
             </div>
-
-            <div className="flex flex-col gap-3 font-sans text-xs text-slate-400">
+             <div className="flex flex-col gap-3 font-sans text-xs text-slate-400">
               <div className="grid grid-cols-2 gap-3 bg-[#030407] p-3 rounded-[3px] border border-[#1E2333]/60 font-mono text-slate-200">
                 <div>
                   <span className="text-[9px] text-slate-500 block">Asset / Method:</span>
-                  <span>{activeCoinSymbol}/IDR ({method})</span>
+                  <span>{formatPairName(activeCoinSymbol)} ({method})</span>
                 </div>
                 <div className="text-right">
                   <span className="text-[9px] text-slate-500 block">Gaya Trading:</span>
@@ -951,12 +989,12 @@ function RiskLabConsole({
                 </div>
                 <div className="bg-[#030407] p-2 rounded-[3px]">
                   <span className="text-slate-500 block">Skenario Loss</span>
-                  <span className="font-mono font-bold text-rose-400">{24 - Math.round(24 * (setup.backtestWinRate/100))}</span>
+                  <span className="font-mono font-bold text-rose-450">{24 - Math.round(24 * (setup.backtestWinRate/100))}</span>
                 </div>
               </div>
 
               <div className="p-3 bg-purple-500/5 border border-purple-500/20 rounded-[3px] leading-relaxed text-[11px]">
-                <strong>Kesimpulan Backtest:</strong> Metode <strong>{method}</strong> pada koin <strong>{activeCoinSymbol}</strong> menghasilkan tingkat stabilitas sebesar <strong>{setup.backtestWinRate}%</strong> di bawah rentang volatilitas sesi aktif. Pastikan filter berita besar diaktifkan untuk menghindari kegagalan eksekusi akibat anomali spread.
+                <strong>Kesimpulan Backtest:</strong> Metode <strong>{method}</strong> pada <strong>{formatPairName(activeCoinSymbol)}</strong> menghasilkan tingkat stabilitas sebesar <strong>{setup.backtestWinRate}%</strong> di bawah rentang volatilitas sesi aktif. Pastikan filter berita besar diaktifkan untuk menghindari kegagalan eksekusi akibat anomali spread.
               </div>
             </div>
 
