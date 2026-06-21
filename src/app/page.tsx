@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import DashboardPage from './dashboard/page';
 import { Activity, BarChart3, Cpu, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
 import { audio } from '@/lib/audio';
 
 export default function Home() {
   const [accessed, setAccessed] = useState(false);
+  const [isBypassed, setIsBypassed] = useState(false);
   const [glitching, setGlitching] = useState(false);
   const [bypassCheck, setBypassCheck] = useState(false);
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
@@ -51,6 +53,7 @@ export default function Home() {
     const bypass = localStorage.getItem('fantasma_bypass_portal') === 'true';
     setBypassCheck(bypass);
     if (bypass) {
+      setIsBypassed(true);
       setAccessed(true);
       return;
     }
@@ -766,130 +769,150 @@ export default function Home() {
     localStorage.setItem('fantasma_bypass_portal', checked ? 'true' : 'false');
   };
 
-  if (accessed) {
+  if (isBypassed && accessed) {
     return <DashboardPage />;
   }
 
   return (
-    <div 
-      className={`min-h-screen relative overflow-x-hidden bg-[#030407] text-[#F0F3F8] font-sans flex flex-col items-center justify-between select-none ${
-        glitching ? 'animate-[pulse_0.1s_infinite] saturate-[300%] contrast-[150%]' : ''
-      }`}
-    >
-      {/* Dynamic Parallax Background Canvas */}
-      <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" />
-
-      <div className="fixed inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.18)_50%),linear-gradient(90deg,rgba(88,166,255,0.018),rgba(157,78,221,0.012),rgba(0,229,255,0.018))] bg-[length:100%_4px,8px_100%] pointer-events-none z-10 opacity-55" />
-      <div className="fixed inset-0 z-10 pointer-events-none parallax-layer parallax-slow">
-        <div className="absolute inset-0 premium-grid-overlay" />
-      </div>
-
-      {/* Top Banner Alert */}
-      <header className="w-full max-w-6xl px-6 py-4 flex items-center justify-between z-20">
-        <div className="flex items-center gap-2 border border-[#8B2BE2]/40 bg-[#9D4EDD]/5 px-3 py-1.5 rounded-[3px]">
-          <ShieldAlert className="h-4 w-4 text-[#9D4EDD] animate-pulse" />
-          <span className="text-[10px] font-bold tracking-widest text-[#9D4EDD] font-mono">
-            COGNITIVE CRYPTO SHIELD ACTIVE
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => {
-              if (audio) {
-                const isMuted = audio.toggleMute();
-                setMutedState(isMuted);
-                if (!isMuted) {
-                  audio.playClick();
-                }
-              }
-            }}
-            className="text-[#8B98A6] hover:text-white transition p-1.5 border border-[#1E2333] bg-[#07090F]/60 rounded-[3px] cursor-pointer flex items-center justify-center"
-            title={mutedState ? "Unmute Audio" : "Mute Audio"}
-          >
-            {mutedState ? <VolumeX className="h-4 w-4 text-rose-500" /> : <Volume2 className="h-4 w-4 text-cyan-400" />}
-          </button>
-          <div className="text-[10px] font-mono text-cyan-400 font-bold tracking-widest">
-            SYS_STATUS: CRYPTED
-          </div>
-        </div>
-      </header>
-
-      {/* Main Core Elements */}
-      <div className="flex flex-col items-center justify-center text-center z-20 flex-1 px-4 max-w-2xl mt-[-20px] min-h-[calc(100vh-148px)] scroll-reveal">
-        {/* Wireframe Area Placeholder for spacing (canvas draws over this) */}
-        <div className="h-[260px] w-full pointer-events-none" />
-
-        {/* Brand Names & Subtitle */}
-        <h1 
-          className="text-4xl md:text-5xl font-extrabold tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-r from-[#58A6FF] via-[#00E5FF] to-[#9D4EDD] drop-shadow-[0_0_20px_rgba(88,166,255,0.16)] font-sans uppercase cursor-crosshair"
-          title="FANTASMA SYNERGY"
+    <AnimatePresence mode="wait">
+      {!accessed ? (
+        <motion.div
+          key="portal"
+          initial={{ opacity: 1 }}
+          exit={{ 
+            opacity: 0, 
+            scale: 1.05,
+            filter: 'blur(8px)',
+            transition: { duration: 0.8, ease: 'easeInOut' } 
+          }}
+          className="min-h-screen relative overflow-x-hidden bg-[#030407] text-[#F0F3F8] font-sans flex flex-col items-center justify-between select-none"
         >
-          FANTASMA SYNERGY
-        </h1>
-        <p className="text-[10px] font-bold font-mono tracking-[0.4em] text-cyan-400/80 uppercase mt-2 select-none">
-          Quantitative Oracle Investment Terminal v4.0 | FOREX + CRYPTO
-        </p>
+          {/* Dynamic Parallax Background Canvas */}
+          <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none" />
 
-        {/* Cyber Logs Feed Console */}
-        <div className="w-full bg-[#07090F]/80 border border-[#1E2333] rounded-[3px] p-4 mt-8 font-mono text-[9px] text-left leading-normal text-[#8B98A6] flex flex-col gap-1.5 h-[120px] overflow-hidden shadow-2xl backdrop-blur-sm">
-          {consoleLogs.map((log, index) => (
-            <div key={`log-${index}`} className="flex items-start gap-1">
-              <span className="text-[#9D4EDD] font-bold">{'>'}</span>
-              <span className={index === consoleLogs.length - 1 ? 'text-white font-extrabold' : ''}>
-                {log}
+          <div className="fixed inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.18)_50%),linear-gradient(90deg,rgba(88,166,255,0.018),rgba(157,78,221,0.012),rgba(0,229,255,0.018))] bg-[length:100%_4px,8px_100%] pointer-events-none z-10 opacity-55" />
+          <div className="fixed inset-0 z-10 pointer-events-none parallax-layer parallax-slow">
+            <div className="absolute inset-0 premium-grid-overlay" />
+          </div>
+
+          {/* Top Banner Alert */}
+          <header className="w-full max-w-6xl px-6 py-4 flex items-center justify-between z-20">
+            <div className="flex items-center gap-2 border border-[#8B2BE2]/40 bg-[#9D4EDD]/5 px-3 py-1.5 rounded-[3px]">
+              <ShieldAlert className="h-4 w-4 text-[#9D4EDD] animate-pulse" />
+              <span className="text-[10px] font-bold tracking-widest text-[#9D4EDD] font-mono">
+                COGNITIVE CRYPTO SHIELD ACTIVE
               </span>
             </div>
-          ))}
-          {consoleLogs.length === 0 && (
-            <span className="text-gray-600 animate-pulse">Establishing encrypted socket tunnel...</span>
-          )}
-        </div>
-
-        <div className="mt-6 grid grid-cols-3 gap-3 w-full text-left">
-          {[
-            { icon: Activity, label: 'Live Market Engine', value: '1s Ticks' },
-            { icon: BarChart3, label: 'Risk Layer', value: 'Kelly Aware' },
-            { icon: Cpu, label: 'AI Consensus', value: 'Multi Model' }
-          ].map(item => (
-            <div key={item.label} className="bg-[#07090F]/70 border border-[#1E2333] rounded-[6px] p-3 backdrop-blur-sm">
-              <item.icon className="h-4 w-4 text-[#58A6FF] mb-2" />
-              <div className="text-[9px] text-[#8B98A6] uppercase font-mono font-bold">{item.label}</div>
-              <div className="text-xs text-[#F0F3F8] font-extrabold mt-0.5">{item.value}</div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => {
+                  if (audio) {
+                    const isMuted = audio.toggleMute();
+                    setMutedState(isMuted);
+                    if (!isMuted) {
+                      audio.playClick();
+                    }
+                  }
+                }}
+                className="text-[#8B98A6] hover:text-white transition p-1.5 border border-[#1E2333] bg-[#07090F]/60 rounded-[3px] cursor-pointer flex items-center justify-center"
+                title={mutedState ? "Unmute Audio" : "Mute Audio"}
+              >
+                {mutedState ? <VolumeX className="h-4 w-4 text-rose-500" /> : <Volume2 className="h-4 w-4 text-cyan-400" />}
+              </button>
+              <div className="text-[10px] font-mono text-cyan-400 font-bold tracking-widest">
+                SYS_STATUS: CRYPTED
+              </div>
             </div>
-          ))}
-        </div>
+          </header>
 
-        {/* Action Button & Bypass controls */}
-        <div className="mt-8 flex flex-col items-center gap-3 w-full">
-          <button
-            onClick={handleAccessCore}
-            disabled={glitching}
-            className="w-full md:w-72 bg-[#58A6FF] hover:bg-[#79B8FF] border border-[#58A6FF] text-[#030407] font-extrabold text-xs tracking-widest py-3.5 px-6 rounded-[6px] transition-all duration-300 transform active:scale-95 hover:shadow-[0_0_25px_rgba(88,166,255,0.35)] cursor-pointer"
-          >
-            {glitching ? 'MENYIAPKAN CORE...' : 'MASUK KE TERMINAL'}
-          </button>
-          
-          <label className="flex items-center gap-2 cursor-pointer select-none py-1.5">
-            <input
-              type="checkbox"
-              checked={bypassCheck}
-              onChange={(e) => toggleBypassOption(e.target.checked)}
-              className="w-3.5 h-3.5 rounded border-[#1E2333] bg-[#07090F] checked:bg-cyan-400 focus:ring-0 cursor-pointer"
-            />
-            <span className="text-[10px] text-[#8B98A6] font-mono hover:text-white transition">
-              Bypass intro pada kunjungan berikutnya
-            </span>
-          </label>
-        </div>
-      </div>
+          {/* Main Core Elements */}
+          <div className="flex flex-col items-center justify-center text-center z-20 flex-1 px-4 max-w-2xl mt-[-20px] min-h-[calc(100vh-148px)] scroll-reveal">
+            {/* Wireframe Area Placeholder for spacing (canvas draws over this) */}
+            <div className="h-[260px] w-full pointer-events-none" />
 
-      {/* Footer */}
-      <footer className="w-full max-w-6xl px-6 py-6 border-t border-[#1E2333]/30 flex flex-col sm:flex-row items-center justify-between text-[8px] text-[#8B98A6]/60 font-mono tracking-widest gap-2 z-20">
-        <div>COGNITIVE AUDIT BLOCK #0409A8F</div>
-        <div className="text-center sm:text-right">
-          (C) 2026 FANTASMA SYNERGY INC. ALL PROTOCOLS ENCRYPTED.
-        </div>
-      </footer>
-    </div>
+            {/* Brand Names & Subtitle */}
+            <h1 
+              className="text-4xl md:text-5xl font-extrabold tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-r from-[#58A6FF] via-[#00E5FF] to-[#9D4EDD] drop-shadow-[0_0_20px_rgba(88,166,255,0.16)] font-sans uppercase cursor-crosshair"
+              title="FANTASMA SYNERGY"
+            >
+              FANTASMA SYNERGY
+            </h1>
+            <p className="text-[10px] font-bold font-mono tracking-[0.4em] text-cyan-400/80 uppercase mt-2 select-none">
+              Quantitative Oracle Investment Terminal v4.0 | FOREX + CRYPTO
+            </p>
+
+            {/* Cyber Logs Feed Console */}
+            <div className="w-full bg-[#07090F]/80 border border-[#1E2333] rounded-[3px] p-4 mt-8 font-mono text-[9px] text-left leading-normal text-[#8B98A6] flex flex-col gap-1.5 h-[120px] overflow-hidden shadow-2xl backdrop-blur-sm">
+              {consoleLogs.map((log, index) => (
+                <div key={`log-${index}`} className="flex items-start gap-1">
+                  <span className="text-[#9D4EDD] font-bold">{'>'}</span>
+                  <span className={index === consoleLogs.length - 1 ? 'text-white font-extrabold' : ''}>
+                    {log}
+                  </span>
+                </div>
+              ))}
+              {consoleLogs.length === 0 && (
+                <span className="text-gray-600 animate-pulse">Establishing encrypted socket tunnel...</span>
+              )}
+            </div>
+
+            <div className="mt-6 grid grid-cols-3 gap-3 w-full text-left">
+              {[
+                { icon: Activity, label: 'Live Market Engine', value: '1s Ticks' },
+                { icon: BarChart3, label: 'Risk Layer', value: 'Kelly Aware' },
+                { icon: Cpu, label: 'AI Consensus', value: 'Multi Model' }
+              ].map(item => (
+                <div key={item.label} className="bg-[#07090F]/70 border border-[#1E2333] rounded-[6px] p-3 backdrop-blur-sm">
+                  <item.icon className="h-4 w-4 text-[#58A6FF] mb-2" />
+                  <div className="text-[9px] text-[#8B98A6] uppercase font-mono font-bold">{item.label}</div>
+                  <div className="text-xs text-[#F0F3F8] font-extrabold mt-0.5">{item.value}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Action Button & Bypass controls */}
+            <div className="mt-8 flex flex-col items-center gap-3 w-full">
+              <button
+                onClick={handleAccessCore}
+                disabled={glitching}
+                className="w-full md:w-72 bg-[#58A6FF] hover:bg-[#79B8FF] border border-[#58A6FF] text-[#030407] font-extrabold text-xs tracking-widest py-3.5 px-6 rounded-[6px] transition-all duration-300 transform active:scale-95 hover:shadow-[0_0_25px_rgba(88,166,255,0.35)] cursor-pointer"
+              >
+                {glitching ? 'MENYIAPKAN CORE...' : 'MASUK KE TERMINAL'}
+              </button>
+              
+              <label className="flex items-center gap-2 cursor-pointer select-none py-1.5">
+                <input
+                  type="checkbox"
+                  checked={bypassCheck}
+                  onChange={(e) => toggleBypassOption(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded border-[#1E2333] bg-[#07090F] checked:bg-cyan-400 focus:ring-0 cursor-pointer"
+                />
+                <span className="text-[10px] text-[#8B98A6] font-mono hover:text-white transition">
+                  Bypass intro pada kunjungan berikutnya
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <footer className="w-full max-w-6xl px-6 py-6 border-t border-[#1E2333]/30 flex flex-col sm:flex-row items-center justify-between text-[8px] text-[#8B98A6]/60 font-mono tracking-widest gap-2 z-20">
+            <div>COGNITIVE AUDIT BLOCK #0409A8F</div>
+            <div className="text-center sm:text-right">
+              (C) 2026 FANTASMA SYNERGY INC. ALL PROTOCOLS ENCRYPTED.
+            </div>
+          </footer>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="dashboard"
+          initial={{ opacity: 0, scale: 0.96, filter: 'blur(6px)' }}
+          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+          transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
+          className="min-h-screen w-full bg-[#030407]"
+        >
+          <DashboardPage />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
