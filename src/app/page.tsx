@@ -75,7 +75,7 @@ export default function Home() {
     }
   };
 
-  // Decryption & Gateway Access Transition
+  // Clean, Anti-Crash Gateway Transition
   const handleAccessTerminal = () => {
     if (glitching) return;
     setGlitching(true);
@@ -85,21 +85,21 @@ export default function Home() {
     const glitchPhases = [
       'DECRYPTING QUANTUM CORE...',
       'ARMING SAC & WYCKOFF FILTERS...',
-      'ESTABLISHING COGNITIVE TUNNEL...',
       'ACCESS GRANTED // WELCOME',
     ];
 
     glitchPhases.forEach((phrase, idx) => {
       setTimeout(() => {
         setGlitchText(phrase);
-      }, (idx + 1) * 260);
+      }, (idx + 1) * 160);
     });
 
+    // 0.5s laser charge then clean fade-in
     setTimeout(() => {
       audio?.playSuccess();
       setAccessed(true);
       setGlitching(false);
-    }, 1200);
+    }, 550);
   };
 
   // 60 FPS Ambient Digital Dust & Particle Canvas
@@ -126,18 +126,17 @@ export default function Home() {
     resize();
     window.addEventListener('resize', resize);
 
-    // 70 quantum data particles (cyan and lavender)
-    const particles = Array.from({ length: 65 }, () => ({
+    const particles = Array.from({ length: 60 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
       size: Math.random() * 1.5 + 0.6,
-      vx: (Math.random() - 0.5) * 0.22,
-      vy: (Math.random() - 0.5) * 0.22,
-      alpha: Math.random() * 0.6 + 0.2,
-      baseAlpha: Math.random() * 0.6 + 0.2,
+      vx: (Math.random() - 0.5) * 0.2,
+      vy: (Math.random() - 0.5) * 0.2,
+      alpha: Math.random() * 0.5 + 0.2,
+      baseAlpha: Math.random() * 0.5 + 0.2,
       pulseSpeed: Math.random() * 0.02 + 0.01,
-      color: Math.random() > 0.25 ? '#00F0FF' : '#A78BFA',
-      parallaxFactor: Math.random() * 0.04 + 0.01,
+      color: Math.random() > 0.3 ? '#00F0FF' : '#A78BFA',
+      parallaxFactor: Math.random() * 0.03 + 0.01,
     }));
 
     const render = () => {
@@ -182,7 +181,14 @@ export default function Home() {
 
   // If user bypassed, directly render Dashboard
   if (isBypassed && accessed) {
-    return <DashboardPage onExit={() => { setAccessed(false); setIsBypassed(false); }} />;
+    return (
+      <DashboardPage
+        onExit={() => {
+          setAccessed(false);
+          setIsBypassed(false);
+        }}
+      />
+    );
   }
 
   return (
@@ -190,20 +196,20 @@ export default function Home() {
       {!accessed ? (
         <motion.div
           key="gateway-portal"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, filter: 'blur(0px)' }}
           exit={{
             opacity: 0,
-            scale: 1.04,
-            filter: 'blur(10px) brightness(1.5)',
-            transition: { duration: 0.75, ease: 'easeInOut' },
+            filter: 'blur(10px)',
+            transition: { duration: 0.4, ease: 'easeInOut' },
           }}
+          transition={{ duration: 0.4, ease: 'easeInOut' }}
           onMouseMove={handleMouseMove}
           className="h-screen w-full relative bg-[#05070A] text-slate-100 font-sans flex flex-col justify-between overflow-hidden select-none"
           style={{
             backgroundImage: `
               radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.08) 0%, rgba(10, 15, 22, 0.75) 45%, #05070A 85%),
-              conic-gradient(from 180deg at 50% 50%, rgba(0, 240, 255, 0.015) 0deg, rgba(157, 78, 221, 0.015) 180deg, rgba(0, 240, 255, 0.015) 360deg)
+              conic-gradient(from 180deg at 50% 50%, rgba(0, 240, 255, 0.012) 0deg, rgba(157, 78, 221, 0.012) 180deg, rgba(0, 240, 255, 0.012) 360deg)
             `,
           }}
         >
@@ -212,8 +218,8 @@ export default function Home() {
             className="fixed inset-0 pointer-events-none z-0"
             style={{
               backgroundImage: `
-                linear-gradient(rgba(0, 240, 255, 0.10) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.10) 1px, transparent 1px)
+                linear-gradient(rgba(0, 240, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.08) 1px, transparent 1px)
               `,
               backgroundSize: '48px 48px',
               maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 40%, rgba(0,0,0,0.3) 95%)',
@@ -227,9 +233,9 @@ export default function Home() {
           />
 
           {/* ========================================================
-              5. FULL-WIDTH TELEMETRY BAR: TOP HEADER
+              HEADER TELEMETRY (Full-Width Bar)
              ======================================================== */}
-          <header className="w-full h-11 px-6 md:px-8 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-b border-[rgba(0,240,255,0.18)] flex items-center justify-between z-30 shrink-0">
+          <header className="w-full h-11 px-6 md:px-10 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-b border-[rgba(0,240,255,0.18)] flex items-center justify-between z-30 shrink-0">
             {/* Top-Left: Cognitive Crypto Shield Active */}
             <div className="flex items-center gap-2 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3 py-1 rounded-[4px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
               <ShieldCheck className="w-3.5 h-3.5 text-[#00F0FF] animate-pulse" />
@@ -270,43 +276,55 @@ export default function Home() {
           </header>
 
           {/* ========================================================
-              1. FULL-WIDTH COCKPIT GRID (OPSI A): 12-COLUMN LAYOUT
+              THE UNIFIED FRAME: MAX-WIDTH CENTRALIZED COCKPIT ZONE
+              (Wrapped inside max-w-7xl to prevent edge disconnection)
              ======================================================== */}
-          <main className="flex-1 w-full px-4 md:px-6 py-2.5 overflow-y-auto lg:overflow-hidden z-20 flex flex-col justify-center">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 xl:gap-6 h-full items-stretch max-w-[1780px] mx-auto w-full">
+          <main className="flex-1 w-full px-4 md:px-6 py-2 overflow-y-auto lg:overflow-hidden z-20 flex flex-col justify-center items-center">
+            <div className="max-w-[1240px] xl:max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-center">
               
               {/* ----------------------------------------------------
-                  KOLOM KIRI (col-span-3): Vertical Streaming Log Panel
+                  KOLOM KIRI (col-span-3): Diagnostic Stream (h-400px)
                  ---------------------------------------------------- */}
-              <div className="lg:col-span-3 h-[320px] lg:h-full order-2 lg:order-1">
+              <div className="lg:col-span-3 order-2 lg:order-1 flex justify-center">
                 <LeftTerminalLog />
               </div>
 
               {/* ----------------------------------------------------
-                  KOLOM TENGAH (col-span-6): The Core Branding & Radar
+                  KOLOM TENGAH (col-span-6): The Core Anchor
                  ---------------------------------------------------- */}
-              <div className="lg:col-span-6 h-[460px] lg:h-full flex flex-col items-center justify-center relative order-1 lg:order-2">
-                {/* Dynamic 3D Orbital Radar Rings */}
-                <OrbitalRadarRings mouseX={mousePos.x} mouseY={mousePos.y} />
+              <div className="lg:col-span-6 h-[400px] xl:h-[420px] flex flex-col items-center justify-center relative order-1 lg:order-2">
+                
+                {/* Visual HUD Corner Brackets framing the Center Anchor */}
+                <div className="absolute inset-x-2 inset-y-2 md:inset-x-4 md:inset-y-4 pointer-events-none z-15 border border-cyan-500/10 rounded-[12px]">
+                  {/* Top-Left Bracket */}
+                  <span className="absolute -top-[1px] -left-[1px] w-4 h-4 border-t-2 border-l-2 border-[#00F0FF]/60" />
+                  {/* Top-Right Bracket */}
+                  <span className="absolute -top-[1px] -right-[1px] w-4 h-4 border-t-2 border-r-2 border-[#00F0FF]/60" />
+                  {/* Bottom-Left Bracket */}
+                  <span className="absolute -bottom-[1px] -left-[1px] w-4 h-4 border-b-2 border-l-2 border-[#00F0FF]/60" />
+                  {/* Bottom-Right Bracket */}
+                  <span className="absolute -bottom-[1px] -right-[1px] w-4 h-4 border-b-2 border-r-2 border-[#00F0FF]/60" />
+                </div>
 
-                {/* ANTI-OVERLAP ISOLATION LAYER:
-                    Radial backdrop mask that isolates typography completely
-                    from radar wireframe lines crossing through the text */}
+                {/* Radar Rings with Low Opacity (Max 20%) in Background */}
+                <OrbitalRadarRings mouseX={mousePos.x} mouseY={mousePos.y} opacity={0.18} />
+
+                {/* SOLID RADIAL BACKDROP: Completely isolates typography from wireframe lines */}
                 <div
-                  className="absolute w-[440px] md:w-[600px] h-[220px] md:h-[300px] rounded-full pointer-events-none z-10"
+                  className="absolute w-[440px] md:w-[560px] h-[220px] md:h-[280px] rounded-full pointer-events-none z-10"
                   style={{
-                    background: 'radial-gradient(ellipse at center, rgba(5,7,10,0.96) 50%, rgba(5,7,10,0.75) 75%, transparent 100%)',
+                    background: 'radial-gradient(ellipse at center, #05070A 60%, rgba(5,7,10,0.85) 80%, transparent 100%)',
                     backdropFilter: 'blur(4px)',
                   }}
                 />
 
                 {/* Central Typography & Action */}
-                <div className="relative z-20 flex flex-col items-center justify-center text-center px-4">
+                <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 w-full">
                   {/* Huge Branding Text */}
                   <h1
                     className="font-black uppercase leading-[0.92] tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#E0F7FA] to-[#93C5FD] drop-shadow-[0_0_24px_rgba(0,240,255,0.9)] drop-shadow-[0_0_60px_rgba(0,240,255,0.4)]"
                     style={{
-                      fontSize: 'clamp(2.6rem, 5.5vw, 4.8rem)',
+                      fontSize: 'clamp(2.4rem, 4.8vw, 4.2rem)',
                     }}
                   >
                     <span className="block">FANTASMA</span>
@@ -314,28 +332,28 @@ export default function Home() {
                   </h1>
 
                   {/* Monospace Sub-Badge Title */}
-                  <p className="mt-3 text-[10px] md:text-[11.5px] font-mono tracking-[0.24em] md:tracking-[0.28em] text-cyan-300 font-semibold uppercase">
+                  <p className="mt-2.5 text-[9.5px] md:text-[11px] font-mono tracking-[0.22em] md:tracking-[0.26em] text-cyan-300 font-semibold uppercase">
                     QUANTITATIVE ORACLE INVESTMENT TERMINAL v4.0 | FOREX + CRYPTO
                   </p>
 
-                  {/* Action Gateway Button */}
-                  <div className="mt-6 md:mt-8 flex flex-col items-center gap-2.5">
+                  {/* PROMINENT HEAVY-WEIGHT GATEWAY BUTTON */}
+                  <div className="mt-6 md:mt-7 flex flex-col items-center gap-2 w-full">
                     <button
                       onClick={handleAccessTerminal}
                       onMouseEnter={() => audio?.playHover()}
                       disabled={glitching}
-                      className="w-[280px] sm:w-[320px] py-3.5 px-6 rounded-[12px] clip-cyber-beveled neon-sweep-btn bg-[rgba(0,240,255,0.1)] hover:bg-[rgba(0,240,255,0.22)] border-2 border-[#00F0FF] text-white font-mono font-extrabold text-xs md:text-sm tracking-[0.18em] uppercase transition-all duration-300 transform active:scale-95 shadow-[0_0_24px_rgba(0,240,255,0.45),inset_0_0_14px_rgba(0,240,255,0.2)] hover:shadow-[0_0_42px_rgba(0,240,255,0.7),inset_0_0_22px_rgba(0,240,255,0.35)] cursor-pointer flex items-center justify-center gap-2"
+                      className="w-[310px] sm:w-[360px] md:w-[380px] py-4 px-8 rounded-[12px] clip-cyber-beveled neon-sweep-btn bg-[rgba(0,240,255,0.12)] hover:bg-[rgba(0,240,255,0.25)] border-2 border-[#00F0FF] text-white font-mono font-black text-xs sm:text-sm md:text-base tracking-[0.2em] uppercase transition-all duration-300 transform active:scale-95 shadow-[0_0_30px_rgba(0,240,255,0.5),inset_0_0_16px_rgba(0,240,255,0.25)] hover:shadow-[0_0_50px_rgba(0,240,255,0.8),inset_0_0_24px_rgba(0,240,255,0.4)] cursor-pointer flex items-center justify-center gap-2"
                       style={{
-                        textShadow: '0 0 10px rgba(0, 240, 255, 0.85)',
+                        textShadow: '0 0 12px rgba(0, 240, 255, 0.95)',
                       }}
                     >
                       {glitching ? (
                         <span>{glitchText}</span>
                       ) : (
                         <>
-                          <span className="text-[#00F0FF] text-base font-bold">[</span>
+                          <span className="text-[#00F0FF] text-lg font-bold">[</span>
                           <span>MASUK KE TERMINAL →</span>
-                          <span className="text-[#00F0FF] text-base font-bold">]</span>
+                          <span className="text-[#00F0FF] text-lg font-bold">]</span>
                         </>
                       )}
                     </button>
@@ -357,9 +375,9 @@ export default function Home() {
               </div>
 
               {/* ----------------------------------------------------
-                  KOLOM KANAN (col-span-3): Tactical KPI Cards - Expanded
+                  KOLOM KANAN (col-span-3): Tactical Cards (h-400px)
                  ---------------------------------------------------- */}
-              <div className="lg:col-span-3 h-[420px] lg:h-full order-3">
+              <div className="lg:col-span-3 order-3 flex justify-center">
                 <RightTelemetryCards />
               </div>
 
@@ -367,21 +385,25 @@ export default function Home() {
           </main>
 
           {/* ========================================================
-              5. FULL-WIDTH TELEMETRY BAR: BOTTOM FOOTER
+              FOOTER TELEMETRY (Full-Width Bar)
              ======================================================== */}
-          <footer className="w-full h-10 px-6 md:px-8 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-t border-[rgba(0,240,255,0.12)] flex items-center justify-between text-[9px] md:text-[9.5px] font-mono tracking-[0.2em] text-slate-500 uppercase z-30 shrink-0">
+          <footer className="w-full h-10 px-6 md:px-10 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-t border-[rgba(0,240,255,0.12)] flex items-center justify-between text-[9px] md:text-[9.5px] font-mono tracking-[0.2em] text-slate-500 uppercase z-30 shrink-0">
             <div>FANTASMA SYNERGY SYSTEMS INC.</div>
             <div>ALL PROTOCOLS ENCRYPTED // [V4.0]</div>
           </footer>
         </motion.div>
       ) : (
-        /* Transition to the Full Institutional Dashboard */
+        /* Seamless, Anti-Crash Transition to Institutional Dashboard */
         <motion.div
           key="terminal-dashboard"
-          initial={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }}
-          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
+          initial={{ opacity: 0, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, filter: 'blur(0px)' }}
+          exit={{
+            opacity: 0,
+            filter: 'blur(10px)',
+            transition: { duration: 0.4, ease: 'easeInOut' },
+          }}
+          transition={{ duration: 0.4, ease: 'easeInOut' }}
           className="min-h-screen w-full bg-[#05070A]"
         >
           <DashboardPage

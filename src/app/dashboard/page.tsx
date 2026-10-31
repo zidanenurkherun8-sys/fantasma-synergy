@@ -126,7 +126,7 @@ export default function DashboardPage({ onExit }: { onExit?: () => void }) {
       if (onExit) {
         onExit();
       }
-    }, 850);
+    }, 400);
   };
 
   const closedPositionsRef = React.useRef<Set<string>>(new Set());
