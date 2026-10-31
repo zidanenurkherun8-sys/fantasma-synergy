@@ -1,173 +1,449 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardPage from './dashboard/page';
-import {
-  ShieldCheck,
-  Radio,
-  Volume2,
-  VolumeX,
-} from 'lucide-react';
-import { audio } from '@/lib/audio';
-import { OrbitalRadarRings } from '@/components/gateway/OrbitalRadarRings';
-import { LeftTerminalLog } from '@/components/gateway/LeftTerminalLog';
-import { RightTelemetryCards } from '@/components/gateway/RightTelemetryCards';
 
-export default function Home() {
-  const [accessed, setAccessed] = useState(false);
-  const [isBypassed, setIsBypassed] = useState(false);
-  const [glitching, setGlitching] = useState(false);
-  const [glitchText, setGlitchText] = useState('');
-  const [bypassCheck, setBypassCheck] = useState(false);
-  const [mutedState, setMutedState] = useState(false);
+export interface LogEntry {
+  time: string;
+  tag: string;
+  msg: string;
+  status?: string;
+  statusColor?: string;
+}
 
-  // Mouse coordinates normalized (-1 to 1) for 3D gyro parallax
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | null>(null);
+interface StarParticle {
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  alpha: number;
+  speed: number;
+}
 
-  // Check saved audio preference
-  useEffect(() => {
-    if (audio) {
-      setMutedState(audio.isMuted());
-    }
-  }, []);
+interface SphereNode {
+  phi: number;
+  theta: number;
+  size: number;
+}
 
-  // Check saved bypass portal preference
+interface ProjectedNode {
+  x: number;
+  y: number;
+  z: number;
+  alpha: number;
+  size: number;
+}
+
+interface DegreeLabel {
+  deg: number;
+  text: string;
+}
+
+interface BrainNode {
+  x: number;
+  y: number;
+  z: number;
+}
+
+type AudioFeedbackType = 'hover' | 'click';
+
+export default function App(): React.JSX.Element {
+  const [accessed, setAccessed] = useState<boolean>(false);
+  const [isBypassed, setIsBypassed] = useState<boolean>(false);
+  const [bypassIntro, setBypassIntro] = useState<boolean>(false);
+
+  const [logs] = useState<LogEntry[]>([
+    {
+      time: '11:35:43 AM',
+      tag: 'SYSTEM:',
+      msg: 'DE METHODOLOGY ANALYZERS',
+      status: 'INITIALIZED (SAC, WYCKOFF, HARMONIC...)',
+      statusColor: '#10b981',
+    },
+    {
+      time: '11:35:43 AM',
+      tag: 'SYSTEM:',
+      msg: 'MULTI-TIMEFRAME ANALYSIS COMPLETE //',
+      status: 'ACTIVE',
+      statusColor: '#00f2fe',
+    },
+    {
+      time: '11:35:44 AM',
+      tag: 'SYSTEM:',
+      msg: 'HALF-KELLY CAPITAL PRESERVATION STRATEGY:',
+      status: 'STABLE',
+      statusColor: '#10b981',
+    },
+    {
+      time: '11:35:44 AM',
+      tag: 'SYSTEM:',
+      msg: 'WARPING: TIME MACHINE VOLATILITY DETECTED:',
+      status: 'HIGH',
+      statusColor: '#10b981',
+    },
+    {
+      time: '11:35:45 AM',
+      tag: 'SYSTEM:',
+      msg: 'COGNITIVE ENCRYPTION COMPLETE //',
+      status: 'CONNECTED',
+      statusColor: '#10b981',
+    },
+  ]);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const brainCanvasRef = useRef<HTMLCanvasElement>(null);
+  const sparklineCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Check saved bypass portal preference on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const bypass = localStorage.getItem('fantasma_bypass_portal') === 'true';
-      setBypassCheck(bypass);
-      if (bypass) {
+      const savedBypass = localStorage.getItem('fantasma_bypass_portal') === 'true';
+      setBypassIntro(savedBypass);
+      if (savedBypass) {
         setIsBypassed(true);
         setAccessed(true);
       }
     }
   }, []);
 
-  // Mouse movement tracking for 3D orbital rings & particles
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { clientX, clientY } = e;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const normX = (clientX / w) * 2 - 1;
-    const normY = (clientY / h) * 2 - 1;
-    setMousePos({ x: normX, y: normY });
-  };
-
-  // Toggle Bypass Preference
-  const handleToggleBypass = (checked: boolean) => {
-    setBypassCheck(checked);
+  const handleToggleBypass = (checked: boolean): void => {
+    setBypassIntro(checked);
     if (typeof window !== 'undefined') {
       localStorage.setItem('fantasma_bypass_portal', checked ? 'true' : 'false');
     }
-    audio?.playClick();
   };
 
-  // Toggle Sound FX
-  const handleToggleSound = () => {
-    if (audio) {
-      const newMuted = audio.toggleMute();
-      setMutedState(newMuted);
-      if (!newMuted) {
-        audio.playClick();
+  // Sintesis Suara Cybernetic Audio menggunakan Web Audio API
+  const playCyberSound = (type: AudioFeedbackType = 'click'): void => {
+    try {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'hover') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.03, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.05);
+      } else {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
       }
+    } catch {
+      // Abaikan jika browser membatasi audio tanpa interaksi awal
     }
   };
 
-  // Clean, Anti-Crash Gateway Transition
-  const handleAccessTerminal = () => {
-    if (glitching) return;
-    setGlitching(true);
-    setGlitchText('DECRYPTING QUANTUM CORE...');
-    audio?.playLaserCharge();
-
-    const glitchPhases = [
-      'DECRYPTING QUANTUM CORE...',
-      'ARMING SAC & WYCKOFF FILTERS...',
-      'ACCESS GRANTED // WELCOME',
-    ];
-
-    glitchPhases.forEach((phrase, idx) => {
-      setTimeout(() => {
-        setGlitchText(phrase);
-      }, (idx + 1) * 160);
-    });
-
-    // 0.5s laser charge then clean fade-in
+  const handleEnterTerminal = (): void => {
+    playCyberSound('click');
     setTimeout(() => {
-      audio?.playSuccess();
       setAccessed(true);
-      setGlitching(false);
-    }, 550);
+    }, 280);
   };
 
-  // 60 FPS Ambient Digital Dust & Particle Canvas
+  // -------------------------------------------------------------
+  // 1. CANVAS UTAMA: Celestial Holographic Radar, Degrees & Sphere
+  // -------------------------------------------------------------
   useEffect(() => {
-    if (accessed || !canvasElement) return;
-    const canvas = canvasElement;
+    if (accessed) return;
+    const canvas = canvasRef.current;
+    if (!canvas || !canvas.parentElement) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     let animId: number;
-    let width = window.innerWidth;
-    let height = window.innerHeight;
 
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    let w = (canvas.width = canvas.parentElement.clientWidth);
+    let h = (canvas.height = canvas.parentElement.clientHeight);
+
+    const onResize = (): void => {
+      if (!canvas || !canvas.parentElement) return;
+      w = canvas.width = canvas.parentElement.clientWidth;
+      h = canvas.height = canvas.parentElement.clientHeight;
     };
-    resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', onResize);
 
-    const particles = Array.from({ length: 60 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      size: Math.random() * 1.5 + 0.6,
-      vx: (Math.random() - 0.5) * 0.2,
-      vy: (Math.random() - 0.5) * 0.2,
-      alpha: Math.random() * 0.5 + 0.2,
-      baseAlpha: Math.random() * 0.5 + 0.2,
-      pulseSpeed: Math.random() * 0.02 + 0.01,
-      color: Math.random() > 0.3 ? '#00F0FF' : '#A78BFA',
-      parallaxFactor: Math.random() * 0.03 + 0.01,
-    }));
+    // Kumpulan partikel bintang kosmik di latar belakang
+    const stars: StarParticle[] = [];
+    for (let i = 0; i < 90; i++) {
+      stars.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        size: Math.random() * 1.8 + 0.5,
+        color: Math.random() > 0.4 ? '#00f2fe' : Math.random() > 0.5 ? '#c084fc' : '#38bdf8',
+        alpha: Math.random() * 0.7 + 0.2,
+        speed: Math.random() * 0.02 + 0.005,
+      });
+    }
 
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
+    // Titik-titik pada permukaan bola 3D (Spherical Constellation)
+    const sphereNodes: SphereNode[] = [];
+    const numNodes = 42;
+    for (let i = 0; i < numNodes; i++) {
+      const phi = Math.acos(-1 + (2 * i) / numNodes);
+      const theta = Math.sqrt(numNodes * Math.PI) * phi;
+      sphereNodes.push({ phi, theta, size: Math.random() * 2 + 1.5 });
+    }
 
-      particles.forEach(p => {
-        const px = p.x - mousePos.x * width * p.parallaxFactor;
-        const py = p.y - mousePos.y * height * p.parallaxFactor;
+    let angle = 0;
 
-        p.alpha += p.pulseSpeed;
-        const currentAlpha = Math.abs(Math.sin(p.alpha)) * p.baseAlpha;
+    const render = (): void => {
+      ctx.clearRect(0, 0, w, h);
+      angle += 0.008;
 
+      // Pusat Radar (Tepat di atas title "FANTASMA SYNERGY")
+      const cx = w * 0.5;
+      const cy = h * 0.36;
+      const baseR = Math.min(w * 0.24, 210);
+
+      // (A) Gambar Grid Latar Belakang Siber & Crosshairs
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.035)';
+      ctx.lineWidth = 1;
+      const gridSize = 48;
+      for (let x = 0; x < w; x += gridSize) {
         ctx.beginPath();
-        ctx.arc(px, py, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = currentAlpha;
-        ctx.shadowBlur = p.size * 3;
-        ctx.shadowColor = p.color;
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // (B) Bintang-bintang Kosmik Berkedip
+      stars.forEach((s) => {
+        s.alpha += Math.sin(angle * 2 + s.x) * 0.01;
+        ctx.fillStyle = s.color;
+        ctx.globalAlpha = Math.max(0.1, Math.min(0.9, s.alpha));
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
         ctx.fill();
-
-        p.x += p.vx;
-        p.y += p.vy;
-
-        if (p.x < 0) p.x = width;
-        if (p.x > width) p.x = 0;
-        if (p.y < 0) p.y = height;
-        if (p.y > height) p.y = 0;
+        ctx.globalAlpha = 1;
       });
 
-      ctx.globalAlpha = 1;
+      // (C) Wireframe Proyeksi Ruang Isometrik di Sisi Kiri & Kanan Belakang
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.08)';
+      ctx.lineWidth = 1;
+      // Grid kiri
+      ctx.beginPath();
+      ctx.moveTo(w * 0.12, h * 0.65);
+      ctx.lineTo(w * 0.24, h * 0.68);
+      ctx.lineTo(w * 0.22, h * 0.74);
+      ctx.lineTo(w * 0.1, h * 0.71);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Grid kanan
+      ctx.beginPath();
+      ctx.moveTo(w * 0.76, h * 0.64);
+      ctx.lineTo(w * 0.88, h * 0.61);
+      ctx.lineTo(w * 0.9, h * 0.67);
+      ctx.lineTo(w * 0.78, h * 0.7);
+      ctx.closePath();
+      ctx.stroke();
+
+      // (D) Anamorphic Horizontal Lens Flare Streak (Menyilang di pusat)
+      const flareGrad = ctx.createLinearGradient(cx - baseR * 2.2, cy, cx + baseR * 2.2, cy);
+      flareGrad.addColorStop(0, 'rgba(0, 242, 254, 0)');
+      flareGrad.addColorStop(0.35, 'rgba(0, 242, 254, 0.15)');
+      flareGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.75)');
+      flareGrad.addColorStop(0.65, 'rgba(0, 242, 254, 0.15)');
+      flareGrad.addColorStop(1, 'rgba(0, 242, 254, 0)');
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(cx - baseR * 2.2, cy);
+      ctx.lineTo(cx + baseR * 2.2, cy);
+      ctx.strokeStyle = flareGrad;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+
+      // (E) Cincin Lingkaran Radar Holografis Luar dengan Skala Derajat
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      // Cincin Busur Utama Berpendar (Cyan Glow Outer Ring)
+      ctx.beginPath();
+      ctx.arc(0, 0, baseR, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.55)';
+      ctx.lineWidth = 1.6;
+      ctx.shadowColor = '#00f2fe';
+      ctx.shadowBlur = 14;
+      ctx.stroke();
       ctx.shadowBlur = 0;
+
+      // Cincin Busur Konsentris Sekunder
+      ctx.beginPath();
+      ctx.arc(0, 0, baseR * 0.88, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.28)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // Lingkaran Putus-putus
+      ctx.beginPath();
+      ctx.arc(0, 0, baseR * 0.94, 0, Math.PI * 2);
+      ctx.setLineDash([3, 5]);
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Garis Skala Derajat & Label Teks Derajat (0°, 10°, 20°, ... 370°)
+      const degreeLabels: DegreeLabel[] = [
+        { deg: 0, text: '0°' },
+        { deg: 10, text: '10°' },
+        { deg: 20, text: '20°' },
+        { deg: 30, text: '30°' },
+        { deg: 40, text: '40°' },
+        { deg: 60, text: '60°' },
+        { deg: 70, text: '70°' },
+        { deg: 80, text: '80°' },
+        { deg: 90, text: '90°' },
+        { deg: 130, text: '130°' },
+        { deg: 160, text: '160°' },
+        { deg: 180, text: '180°' },
+        { deg: 290, text: '290°' },
+        { deg: 320, text: '320°' },
+        { deg: 330, text: '330°' },
+        { deg: 370, text: '370°' },
+      ];
+
+      // Gambar semua garis tick kecil di sepanjang keliling lingkaran
+      for (let d = 0; d < 360; d += 3) {
+        const rad = (d - 90) * (Math.PI / 180);
+        const isMajor = d % 15 === 0;
+        const tickLength = isMajor ? 9 : 4.5;
+        const rInner = baseR - tickLength;
+        const rOuter = baseR;
+
+        const x1 = Math.cos(rad) * rInner;
+        const y1 = Math.sin(rad) * rInner;
+        const x2 = Math.cos(rad) * rOuter;
+        const y2 = Math.sin(rad) * rOuter;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = isMajor ? 'rgba(0, 242, 254, 0.7)' : 'rgba(0, 242, 254, 0.3)';
+        ctx.lineWidth = isMajor ? 1.4 : 0.8;
+        ctx.stroke();
+      }
+
+      // Cetak Teks Derajat
+      ctx.fillStyle = 'rgba(0, 242, 254, 0.85)';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      degreeLabels.forEach((item) => {
+        const rad = (item.deg - 90) * (Math.PI / 180);
+        const tr = baseR + 13;
+        const tx = Math.cos(rad) * tr;
+        const ty = Math.sin(rad) * tr;
+        ctx.save();
+        ctx.translate(tx, ty);
+        ctx.rotate(rad + Math.PI / 2);
+        ctx.fillText(item.text, 0, 0);
+        ctx.restore();
+      });
+
+      // (F) Satelit / Mutiara Sian Mengorbit di Busur Lingkaran Atas
+      const orbitAngle = -Math.PI * 0.45 + Math.sin(angle * 0.7) * 0.4;
+      const orbX = Math.cos(orbitAngle) * baseR;
+      const orbY = Math.sin(orbitAngle) * baseR;
+
+      ctx.beginPath();
+      ctx.arc(orbX, orbY, 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#00f2fe';
+      ctx.shadowColor = '#00f2fe';
+      ctx.shadowBlur = 16;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Inti putih satelit
+      ctx.beginPath();
+      ctx.arc(orbX, orbY, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      // (G) Bola Selestial 3D (3D Celestial Globe Latitudes & Rotating Nodes)
+      const sphereRadius = baseR * 0.72;
+
+      // Elips garis lintang / bujur 3D
+      const tilts: number[] = [-0.65, -0.25, 0.25, 0.7];
+      tilts.forEach((tilt, idx) => {
+        ctx.save();
+        ctx.rotate(angle * (idx % 2 === 0 ? 0.3 : -0.2) + idx);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, sphereRadius, sphereRadius * Math.abs(Math.sin(tilt + 1)), 0, 0, Math.PI * 2);
+        ctx.strokeStyle = idx % 2 === 0 ? 'rgba(0, 242, 254, 0.22)' : 'rgba(56, 189, 248, 0.15)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Proyeksi 3D Nodes pada Permukaan Bola
+      const projected: ProjectedNode[] = [];
+      sphereNodes.forEach((node) => {
+        const currentTheta = node.theta + angle * 0.4;
+        const currentPhi = node.phi;
+
+        const x3 = sphereRadius * Math.sin(currentPhi) * Math.cos(currentTheta);
+        const y3 = sphereRadius * Math.cos(currentPhi);
+        const z3 = sphereRadius * Math.sin(currentPhi) * Math.sin(currentTheta);
+
+        const alphaNorm = (z3 + sphereRadius) / (2 * sphereRadius);
+        projected.push({ x: x3, y: y3, z: z3, alpha: alphaNorm, size: node.size });
+      });
+
+      // Hubungkan garis antar titik terdekat di bola
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.18)';
+      ctx.lineWidth = 0.8;
+      for (let i = 0; i < projected.length; i++) {
+        for (let j = i + 1; j < projected.length; j++) {
+          const dx = projected[i].x - projected[j].x;
+          const dy = projected[i].y - projected[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < sphereRadius * 0.38) {
+            ctx.beginPath();
+            ctx.moveTo(projected[i].x, projected[i].y);
+            ctx.lineTo(projected[j].x, projected[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Gambar simpul titik pada bola
+      projected.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(1, p.size * (0.6 + p.alpha * 0.5)), 0, Math.PI * 2);
+        ctx.fillStyle = p.z > 0 ? '#00f2fe' : 'rgba(56, 189, 248, 0.4)';
+        ctx.shadowColor = '#00f2fe';
+        ctx.shadowBlur = p.z > 0 ? 8 : 0;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      ctx.restore();
+
       animId = requestAnimationFrame(render);
     };
 
@@ -175,11 +451,155 @@ export default function Home() {
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', onResize);
     };
-  }, [accessed, canvasElement, mousePos]);
+  }, [accessed]);
 
-  // If user bypassed, directly render Dashboard
+  // -------------------------------------------------------------
+  // 2. CANVAS SPARKLINE (Kartu: 1s Ticks)
+  // -------------------------------------------------------------
+  useEffect(() => {
+    if (accessed) return;
+    const canvas = sparklineCanvasRef.current;
+    if (!canvas || !canvas.parentElement) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+
+    const data: number[] = [22, 26, 19, 32, 28, 42, 35, 50, 38, 45, 55, 48, 62, 58, 68, 60, 75, 70, 82];
+    let offset = 0;
+
+    const drawSparkline = (): void => {
+      if (!canvas.parentElement) return;
+      const w = (canvas.width = canvas.parentElement.clientWidth || 100);
+      const h = (canvas.height = canvas.parentElement.clientHeight || 40);
+
+      ctx.clearRect(0, 0, w, h);
+      offset += 0.05;
+
+      const dynamicPoints = data.map((v, i) => {
+        const wave = Math.sin(offset + i * 0.6) * 6;
+        return {
+          x: (i / (data.length - 1)) * w,
+          y: h - ((v + wave) / 100) * (h * 0.8) - 4,
+        };
+      });
+
+      // Garis Waveform
+      ctx.beginPath();
+      ctx.moveTo(dynamicPoints[0].x, dynamicPoints[0].y);
+      for (let i = 1; i < dynamicPoints.length; i++) {
+        ctx.lineTo(dynamicPoints[i].x, dynamicPoints[i].y);
+      }
+      ctx.strokeStyle = '#00f2fe';
+      ctx.lineWidth = 1.8;
+      ctx.shadowColor = '#00f2fe';
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Garis Area Bawah Lembut
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, 'rgba(0, 242, 254, 0.25)');
+      grad.addColorStop(1, 'rgba(0, 242, 254, 0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      animId = requestAnimationFrame(drawSparkline);
+    };
+
+    drawSparkline();
+    return () => cancelAnimationFrame(animId);
+  }, [accessed]);
+
+  // -------------------------------------------------------------
+  // 3. CANVAS BRAIN CLUSTER (Kartu: Multi Model)
+  // -------------------------------------------------------------
+  useEffect(() => {
+    if (accessed) return;
+    const canvas = brainCanvasRef.current;
+    if (!canvas || !canvas.parentElement) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+
+    const brainNodes: BrainNode[] = [
+      { x: -14, y: -8, z: 2 },
+      { x: -18, y: -2, z: -4 },
+      { x: -16, y: 6, z: 4 },
+      { x: -10, y: 12, z: -2 },
+      { x: -4, y: 14, z: 5 },
+      { x: -2, y: -10, z: -5 },
+      { x: -8, y: -14, z: 4 },
+      { x: 14, y: -8, z: -2 },
+      { x: 18, y: -2, z: 4 },
+      { x: 16, y: 6, z: -4 },
+      { x: 10, y: 12, z: 2 },
+      { x: 4, y: 14, z: -5 },
+      { x: 2, y: -10, z: 5 },
+      { x: 8, y: -14, z: -4 },
+      { x: 0, y: 0, z: 6 },
+      { x: -6, y: 2, z: -6 },
+      { x: 6, y: 2, z: 6 },
+    ];
+
+    let t = 0;
+
+    const drawBrain = (): void => {
+      if (!canvas.parentElement) return;
+      const w = (canvas.width = canvas.parentElement.clientWidth || 50);
+      const h = (canvas.height = canvas.parentElement.clientHeight || 45);
+
+      ctx.clearRect(0, 0, w, h);
+      t += 0.02;
+
+      const cx = w * 0.5;
+      const cy = h * 0.5;
+
+      const rot = brainNodes.map((n) => {
+        const cos = Math.cos(t);
+        const sin = Math.sin(t);
+        const rx = n.x * cos - n.z * sin;
+        const rz = n.x * sin + n.z * cos;
+        return { x: cx + rx * 1.1, y: cy + n.y * 1.1, z: rz };
+      });
+
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.35)';
+      ctx.lineWidth = 0.9;
+      for (let i = 0; i < rot.length; i++) {
+        for (let j = i + 1; j < rot.length; j++) {
+          const d = Math.hypot(rot[i].x - rot[j].x, rot[i].y - rot[j].y);
+          if (d < 16) {
+            ctx.beginPath();
+            ctx.moveTo(rot[i].x, rot[i].y);
+            ctx.lineTo(rot[j].x, rot[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      rot.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
+        ctx.fillStyle = p.z > 0 ? '#00f2fe' : 'rgba(56, 189, 248, 0.4)';
+        ctx.shadowColor = '#00f2fe';
+        ctx.shadowBlur = p.z > 0 ? 6 : 0;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      });
+
+      animId = requestAnimationFrame(drawBrain);
+    };
+
+    drawBrain();
+    return () => cancelAnimationFrame(animId);
+  }, [accessed]);
+
   if (isBypassed && accessed) {
     return (
       <DashboardPage
@@ -204,196 +624,222 @@ export default function Home() {
             transition: { duration: 0.4, ease: 'easeInOut' },
           }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
-          onMouseMove={handleMouseMove}
-          className="h-screen w-full relative bg-[#05070A] text-slate-100 font-sans flex flex-col justify-between overflow-hidden select-none"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.08) 0%, rgba(10, 15, 22, 0.75) 45%, #05070A 85%),
-              conic-gradient(from 180deg at 50% 50%, rgba(0, 240, 255, 0.012) 0deg, rgba(157, 78, 221, 0.012) 180deg, rgba(0, 240, 255, 0.012) 360deg)
-            `,
-          }}
+          className="relative min-h-screen w-full bg-[#050811] text-slate-100 flex flex-col justify-between overflow-hidden font-mono select-none"
         >
-          {/* Subtle Fine Gridline Overlay (Opacity 10% across entire widescreen) */}
-          <div
-            className="fixed inset-0 pointer-events-none z-0"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(0, 240, 255, 0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.08) 1px, transparent 1px)
-              `,
-              backgroundSize: '48px 48px',
-              maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 40%, rgba(0,0,0,0.3) 95%)',
-            }}
-          />
+          <style>{`
+            /* Beveled Cyber Tactical Corners untuk Tombol Utama */
+            .cyber-button {
+              position: relative;
+              background: rgba(0, 242, 254, 0.08);
+              clip-path: polygon(
+                12px 0%, 
+                calc(100% - 12px) 0%, 
+                100% 12px, 
+                100% calc(100% - 12px), 
+                calc(100% - 12px) 100%, 
+                12px 100%, 
+                0% calc(100% - 12px), 
+                0% 12px
+              );
+            }
 
-          {/* Digital Dust Particle Canvas */}
-          <canvas
-            ref={setCanvasElement}
-            className="fixed inset-0 z-0 pointer-events-none"
-          />
+            .cyber-border-wrap {
+              position: relative;
+              clip-path: polygon(
+                12px 0%, 
+                calc(100% - 12px) 0%, 
+                100% 12px, 
+                100% calc(100% - 12px), 
+                calc(100% - 12px) 100%, 
+                12px 100%, 
+                0% calc(100% - 12px), 
+                0% 12px
+              );
+              padding: 1.5px;
+              background: linear-gradient(135deg, #00f2fe 0%, rgba(0, 242, 254, 0.4) 50%, #00f2fe 100%);
+              box-shadow: 0 0 25px rgba(0, 242, 254, 0.4);
+              transition: all 0.3s ease;
+            }
 
-          {/* ========================================================
-              HEADER TELEMETRY (Full-Width Bar)
-             ======================================================== */}
-          <header className="w-full h-11 px-6 md:px-10 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-b border-[rgba(0,240,255,0.18)] flex items-center justify-between z-30 shrink-0">
-            {/* Top-Left: Cognitive Crypto Shield Active */}
-            <div className="flex items-center gap-2 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3 py-1 rounded-[4px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#00F0FF] animate-pulse" />
-              <span className="text-[10px] font-mono tracking-[0.14em] text-slate-200 font-semibold uppercase">
+            .cyber-border-wrap:hover {
+              box-shadow: 0 0 40px rgba(0, 242, 254, 0.7);
+              transform: translateY(-1px);
+            }
+          `}</style>
+
+          {/* ========================================================================
+              KANVAS LATAR BELAKANG: SPHERE, RADAR, DEGREES, PARTICLES
+          ======================================================================== */}
+          <div className="absolute inset-0 pointer-events-none z-0">
+            <canvas ref={canvasRef} className="w-full h-full block" />
+          </div>
+
+          {/* ========================================================================
+              TOP HEADER TELEMETRY BAR
+          ======================================================================== */}
+          <header className="relative z-20 w-full px-6 pt-5 pb-2 flex items-center justify-between text-[11px] tracking-wider">
+            {/* Top-Left Pill: COGNITIVE CRYPTO SHIELD ACTIVE */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-[#090e1a]/80 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
+              <span className="text-cyan-400 text-xs">🛡</span>
+              <span className="text-cyan-300 font-semibold tracking-widest">
                 COGNITIVE CRYPTO SHIELD ACTIVE
               </span>
             </div>
 
-            {/* Top-Right: Sound Toggle & System Status Badge */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleToggleSound}
-                onMouseEnter={() => audio?.playHover()}
-                className="text-slate-400 hover:text-cyan-400 p-1.5 rounded-[4px] border border-[#1E293B] bg-[rgba(10,15,22,0.7)] transition-colors cursor-pointer"
-                title={mutedState ? 'Unmute Audio' : 'Mute Audio'}
-              >
-                {mutedState ? (
-                  <VolumeX className="w-3.5 h-3.5 text-rose-400" />
-                ) : (
-                  <Volume2 className="w-3.5 h-3.5 text-[#00F0FF]" />
-                )}
-              </button>
-
-              <div className="flex items-center gap-2.5 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3.5 py-1 rounded-[4px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
-                <Radio className="w-3.5 h-3.5 text-[#00FF9D] animate-pulse" />
-                <span className="text-[10px] font-mono tracking-[0.14em] font-semibold text-slate-300 uppercase">
-                  SYS_STATUS:{' '}
-                  <span className="text-[#00FF9D] drop-shadow-[0_0_6px_rgba(0,255,157,0.7)]">
-                    CRYPTED
-                  </span>{' '}
-                  //{' '}
-                  <span className="text-[#00FF9D] drop-shadow-[0_0_6px_rgba(0,255,157,0.7)]">
-                    ONLINE (12MS)
-                  </span>
-                </span>
-              </div>
+            {/* Top-Right Pill: SYS_STATUS: CRYPTED // ONLINE */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-cyan-500/30 bg-[#090e1a]/80 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
+              <span className="text-cyan-400 text-xs">((i))</span>
+              <span className="text-slate-300 font-medium tracking-wider">SYS_STATUS:</span>
+              <span className="text-cyan-400 font-bold">CRYPTED</span>
+              <span className="text-slate-500">//</span>
+              <span className="text-emerald-400 font-bold">ONLINE</span>
             </div>
           </header>
 
-          {/* ========================================================
-              THE UNIFIED FRAME: MAX-WIDTH CENTRALIZED COCKPIT ZONE
-              (Wrapped inside max-w-7xl to prevent edge disconnection)
-             ======================================================== */}
-          <main className="flex-1 w-full px-4 md:px-6 py-2 overflow-y-auto lg:overflow-hidden z-20 flex flex-col justify-center items-center">
-            <div className="max-w-[1240px] xl:max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-center">
-              
-              {/* ----------------------------------------------------
-                  KOLOM KIRI (col-span-3): Diagnostic Stream (h-400px)
-                 ---------------------------------------------------- */}
-              <div className="lg:col-span-3 order-2 lg:order-1 flex justify-center">
-                <LeftTerminalLog />
-              </div>
+          {/* ========================================================================
+              CENTER HERO CONTENT: BRANDING, CONSOLE LOGS & TELEMETRY CARDS
+          ======================================================================== */}
+          <main className="relative z-10 w-full max-w-4xl mx-auto px-4 my-auto flex flex-col items-center text-center pt-2 pb-6">
+            {/* BRANDING TITLE: FANTASMA SYNERGY */}
+            <div className="mb-2 relative">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#e0f7fe] to-[#38bdf8] drop-shadow-[0_0_35px_rgba(0,242,254,0.65)] uppercase">
+                FANTASMA
+              </h1>
+              <h2 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#e0f7fe] to-[#38bdf8] drop-shadow-[0_0_35px_rgba(0,242,254,0.65)] uppercase -mt-2 sm:-mt-3">
+                SYNERGY
+              </h2>
+            </div>
 
-              {/* ----------------------------------------------------
-                  KOLOM TENGAH (col-span-6): The Core Anchor
-                 ---------------------------------------------------- */}
-              <div className="lg:col-span-6 h-[400px] xl:h-[420px] flex flex-col items-center justify-center relative order-1 lg:order-2">
-                
-                {/* Visual HUD Corner Brackets framing the Center Anchor */}
-                <div className="absolute inset-x-2 inset-y-2 md:inset-x-4 md:inset-y-4 pointer-events-none z-15 border border-cyan-500/10 rounded-[12px]">
-                  {/* Top-Left Bracket */}
-                  <span className="absolute -top-[1px] -left-[1px] w-4 h-4 border-t-2 border-l-2 border-[#00F0FF]/60" />
-                  {/* Top-Right Bracket */}
-                  <span className="absolute -top-[1px] -right-[1px] w-4 h-4 border-t-2 border-r-2 border-[#00F0FF]/60" />
-                  {/* Bottom-Left Bracket */}
-                  <span className="absolute -bottom-[1px] -left-[1px] w-4 h-4 border-b-2 border-l-2 border-[#00F0FF]/60" />
-                  {/* Bottom-Right Bracket */}
-                  <span className="absolute -bottom-[1px] -right-[1px] w-4 h-4 border-b-2 border-r-2 border-[#00F0FF]/60" />
-                </div>
+            {/* SUBTITLE */}
+            <p className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-cyan-300/90 mb-5">
+              QUANTITATIVE ORACLE INVESTMENT TERMINAL v4.0 &nbsp;|&nbsp; FOREX + CRYPTO
+            </p>
 
-                {/* Radar Rings with Low Opacity (Max 20%) in Background */}
-                <OrbitalRadarRings mouseX={mousePos.x} mouseY={mousePos.y} opacity={0.18} />
-
-                {/* SOLID RADIAL BACKDROP: Completely isolates typography from wireframe lines */}
-                <div
-                  className="absolute w-[440px] md:w-[560px] h-[220px] md:h-[280px] rounded-full pointer-events-none z-10"
-                  style={{
-                    background: 'radial-gradient(ellipse at center, #05070A 60%, rgba(5,7,10,0.85) 80%, transparent 100%)',
-                    backdropFilter: 'blur(4px)',
-                  }}
-                />
-
-                {/* Central Typography & Action */}
-                <div className="relative z-20 flex flex-col items-center justify-center text-center px-4 w-full">
-                  {/* Huge Branding Text */}
-                  <h1
-                    className="font-black uppercase leading-[0.92] tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#E0F7FA] to-[#93C5FD] drop-shadow-[0_0_24px_rgba(0,240,255,0.9)] drop-shadow-[0_0_60px_rgba(0,240,255,0.4)]"
-                    style={{
-                      fontSize: 'clamp(2.4rem, 4.8vw, 4.2rem)',
-                    }}
-                  >
-                    <span className="block">FANTASMA</span>
-                    <span className="block mt-1">SYNERGY</span>
-                  </h1>
-
-                  {/* Monospace Sub-Badge Title */}
-                  <p className="mt-2.5 text-[9.5px] md:text-[11px] font-mono tracking-[0.22em] md:tracking-[0.26em] text-cyan-300 font-semibold uppercase">
-                    QUANTITATIVE ORACLE INVESTMENT TERMINAL v4.0 | FOREX + CRYPTO
-                  </p>
-
-                  {/* PROMINENT HEAVY-WEIGHT GATEWAY BUTTON */}
-                  <div className="mt-6 md:mt-7 flex flex-col items-center gap-2 w-full">
-                    <button
-                      onClick={handleAccessTerminal}
-                      onMouseEnter={() => audio?.playHover()}
-                      disabled={glitching}
-                      className="w-[310px] sm:w-[360px] md:w-[380px] py-4 px-8 rounded-[12px] clip-cyber-beveled neon-sweep-btn bg-[rgba(0,240,255,0.12)] hover:bg-[rgba(0,240,255,0.25)] border-2 border-[#00F0FF] text-white font-mono font-black text-xs sm:text-sm md:text-base tracking-[0.2em] uppercase transition-all duration-300 transform active:scale-95 shadow-[0_0_30px_rgba(0,240,255,0.5),inset_0_0_16px_rgba(0,240,255,0.25)] hover:shadow-[0_0_50px_rgba(0,240,255,0.8),inset_0_0_24px_rgba(0,240,255,0.4)] cursor-pointer flex items-center justify-center gap-2"
-                      style={{
-                        textShadow: '0 0 12px rgba(0, 240, 255, 0.95)',
-                      }}
+            {/* ========================================================================
+                DIAGNOSTIC CONSOLE LOG WINDOW (GAYA TERMINAL VERSI GAMBAR)
+            ======================================================================== */}
+            <div className="w-full max-w-[620px] rounded-xl border border-cyan-500/40 bg-[#080d19]/85 backdrop-blur-xl p-3.5 mb-4 shadow-[0_10px_35px_rgba(0,242,254,0.12)] text-left text-[10px] sm:text-[10.5px] leading-relaxed">
+              {logs.map((item, idx) => (
+                <div key={idx} className="flex flex-wrap items-baseline gap-1.5 font-mono py-0.5">
+                  <span className="text-slate-400 tracking-tight">[{item.time}]</span>
+                  <span className="text-cyan-400 font-bold">{item.tag}</span>
+                  <span className="text-slate-200">{item.msg}</span>
+                  {item.status && (
+                    <span
+                      className="font-bold tracking-wider"
+                      style={{ color: item.statusColor }}
                     >
-                      {glitching ? (
-                        <span>{glitchText}</span>
-                      ) : (
-                        <>
-                          <span className="text-[#00F0FF] text-lg font-bold">[</span>
-                          <span>MASUK KE TERMINAL →</span>
-                          <span className="text-[#00F0FF] text-lg font-bold">]</span>
-                        </>
-                      )}
-                    </button>
+                      {item.status}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
 
-                    {/* Bypass Intro Checkbox */}
-                    <label className="flex items-center gap-2 cursor-pointer select-none py-1 group">
-                      <input
-                        type="checkbox"
-                        checked={bypassCheck}
-                        onChange={e => handleToggleBypass(e.target.checked)}
-                        className="w-3.5 h-3.5 rounded-[2px] border border-[#1E293B] bg-[#0A0F16] accent-[#00F0FF] cursor-pointer focus:ring-0"
-                      />
-                      <span className="text-[10px] md:text-[10.5px] font-mono text-slate-400 group-hover:text-cyan-300 transition-colors">
-                        bypass intro pada kunjungan berikutnya
-                      </span>
-                    </label>
+            {/* ========================================================================
+                3 MODULAR KPI TELEMETRY CARDS (1s Ticks, Kelly Aware, Multi Model)
+            ======================================================================== */}
+            <div className="w-full max-w-[620px] grid grid-cols-3 gap-3 mb-6">
+              {/* KARTU 1: 1s Ticks */}
+              <div className="rounded-xl border border-cyan-500/30 bg-[#080d19]/80 backdrop-blur-md p-2.5 flex items-center justify-between text-left shadow-[0_4px_20px_rgba(0,242,254,0.06)] hover:border-cyan-400/60 transition-colors">
+                <div>
+                  <div className="flex items-center gap-1 text-[8px] text-slate-400 tracking-wider mb-0.5">
+                    <span className="text-cyan-400">📈</span>
+                    <span>LIVE MARKET TICKER</span>
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-white tracking-wide">
+                    1s Ticks
                   </div>
                 </div>
+                {/* Live Sparkline Waveform Canvas */}
+                <div className="w-16 h-8 relative">
+                  <canvas ref={sparklineCanvasRef} className="w-full h-full block" />
+                </div>
               </div>
 
-              {/* ----------------------------------------------------
-                  KOLOM KANAN (col-span-3): Tactical Cards (h-400px)
-                 ---------------------------------------------------- */}
-              <div className="lg:col-span-3 order-3 flex justify-center">
-                <RightTelemetryCards />
+              {/* KARTU 2: Kelly Aware */}
+              <div className="rounded-xl border border-cyan-500/30 bg-[#080d19]/80 backdrop-blur-md p-2.5 flex items-center justify-between text-left shadow-[0_4px_20px_rgba(0,242,254,0.06)] hover:border-cyan-400/60 transition-colors">
+                <div>
+                  <div className="flex items-center gap-1 text-[8px] text-slate-400 tracking-wider mb-0.5">
+                    <span className="text-cyan-400">📊</span>
+                    <span>R25K LAYER:</span>
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-white tracking-wide">
+                    Kelly Aware
+                  </div>
+                </div>
+                {/* Stepped Battery / Bar Risk Gauge with Angled Profile */}
+                <div
+                  className="flex items-end gap-[2px] h-7 px-1.5 py-1 rounded bg-[#050811]/60 border border-cyan-500/30 shadow-[0_0_8px_rgba(0,242,254,0.15)]"
+                  style={{
+                    clipPath: 'polygon(0 15%, 100% 0%, 100% 100%, 0 100%)',
+                  }}
+                >
+                  {[8, 12, 16, 20, 24].map((hVal, i) => (
+                    <div
+                      key={i}
+                      className="w-1.5 rounded-[1px] bg-gradient-to-t from-cyan-400 to-[#10b981] shadow-[0_0_6px_#00f2fe]"
+                      style={{ height: `${hVal}px` }}
+                    />
+                  ))}
+                </div>
               </div>
 
+              {/* KARTU 3: Multi Model */}
+              <div className="rounded-xl border border-cyan-500/30 bg-[#080d19]/80 backdrop-blur-md p-2.5 flex items-center justify-between text-left shadow-[0_4px_20px_rgba(0,242,254,0.06)] hover:border-cyan-400/60 transition-colors">
+                <div>
+                  <div className="flex items-center gap-1 text-[8px] text-slate-400 tracking-wider mb-0.5">
+                    <span className="text-cyan-400">⚙</span>
+                    <span>AI CONSENSUS:</span>
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-white tracking-wide">
+                    Multi Model
+                  </div>
+                </div>
+                {/* 3D Rotating Neural Brain Cluster Canvas */}
+                <div className="w-10 h-8 relative">
+                  <canvas ref={brainCanvasRef} className="w-full h-full block" />
+                </div>
+              </div>
             </div>
+
+            {/* ========================================================================
+                TOMBOL UTAMA: [ MASUK KE TERMINAL → ]
+            ======================================================================== */}
+            <div className="cyber-border-wrap mb-3.5">
+              <button
+                onClick={handleEnterTerminal}
+                onMouseEnter={() => playCyberSound('hover')}
+                className="cyber-button px-9 py-2.5 text-xs sm:text-sm font-black tracking-[0.2em] text-cyan-300 hover:text-white flex items-center justify-center gap-2 cursor-pointer transition-colors"
+              >
+                <span>[ MASUK KE TERMINAL → ]</span>
+              </button>
+            </div>
+
+            {/* Checkbox: bypass intro pada kunjungan berikutnya */}
+            <label className="flex items-center gap-2 text-[10px] text-slate-400 cursor-pointer select-none hover:text-slate-300 transition-colors">
+              <input
+                type="checkbox"
+                checked={bypassIntro}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleToggleBypass(e.target.checked)
+                }
+                className="w-3.5 h-3.5 rounded border border-cyan-500/60 bg-[#080d19] accent-cyan-500 cursor-pointer"
+              />
+              <span>bypass intro pada kunjungan berikutnya</span>
+            </label>
           </main>
 
-          {/* ========================================================
-              FOOTER TELEMETRY (Full-Width Bar)
-             ======================================================== */}
-          <footer className="w-full h-10 px-6 md:px-10 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-t border-[rgba(0,240,255,0.12)] flex items-center justify-between text-[9px] md:text-[9.5px] font-mono tracking-[0.2em] text-slate-500 uppercase z-30 shrink-0">
+          {/* ========================================================================
+              FOOTER TELEMETRY STATUS BAR
+          ======================================================================== */}
+          <footer className="relative z-20 w-full px-6 py-4 flex items-center justify-between text-[10px] tracking-widest text-slate-500 font-mono">
             <div>FANTASMA SYNERGY SYSTEMS INC.</div>
-            <div>ALL PROTOCOLS ENCRYPTED // [V4.0]</div>
+            <div>ALL PROTOCOLS ENCRYPTED // [v4.0]</div>
           </footer>
         </motion.div>
       ) : (
-        /* Seamless, Anti-Crash Transition to Institutional Dashboard */
+        /* Transition to Institutional Dashboard */
         <motion.div
           key="terminal-dashboard"
           initial={{ opacity: 0, filter: 'blur(10px)' }}
