@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardPage from './dashboard/page';
 import {
@@ -10,7 +10,7 @@ import {
   VolumeX,
   Activity,
   BarChart2,
-  Cpu,
+  Settings,
 } from 'lucide-react';
 import { audio } from '@/lib/audio';
 import { OrbitalRadarRings } from '@/components/gateway/OrbitalRadarRings';
@@ -131,17 +131,17 @@ export default function Home() {
     resize();
     window.addEventListener('resize', resize);
 
-    // Spawn 65 cyber particles
+    // 70 fine quantum particles (cyan and lavender)
     const particles = Array.from({ length: 65 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      size: Math.random() * 1.6 + 0.6,
-      vx: (Math.random() - 0.5) * 0.25,
-      vy: (Math.random() - 0.5) * 0.25,
+      size: Math.random() * 1.5 + 0.6,
+      vx: (Math.random() - 0.5) * 0.22,
+      vy: (Math.random() - 0.5) * 0.22,
       alpha: Math.random() * 0.6 + 0.2,
       baseAlpha: Math.random() * 0.6 + 0.2,
       pulseSpeed: Math.random() * 0.02 + 0.01,
-      color: Math.random() > 0.25 ? '#00F0FF' : '#9D4EDD',
+      color: Math.random() > 0.25 ? '#00F0FF' : '#A78BFA',
       parallaxFactor: Math.random() * 0.04 + 0.01,
     }));
 
@@ -149,7 +149,6 @@ export default function Home() {
       ctx.clearRect(0, 0, width, height);
 
       particles.forEach(p => {
-        // Shift particle position based on mouse parallax
         const px = p.x - mousePos.x * width * p.parallaxFactor;
         const py = p.y - mousePos.y * height * p.parallaxFactor;
 
@@ -167,7 +166,6 @@ export default function Home() {
         p.x += p.vx;
         p.y += p.vy;
 
-        // Wrap around boundaries
         if (p.x < 0) p.x = width;
         if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
@@ -206,15 +204,15 @@ export default function Home() {
             transition: { duration: 0.75, ease: 'easeInOut' },
           }}
           onMouseMove={handleMouseMove}
-          className="min-h-screen w-full relative bg-[#05070A] text-slate-100 font-sans flex flex-col justify-between overflow-x-hidden select-none"
+          className="h-screen w-full relative bg-[#05070A] text-slate-100 font-sans flex flex-col justify-between overflow-hidden select-none"
           style={{
             backgroundImage: `
-              radial-gradient(circle at 50% 38%, rgba(0, 240, 255, 0.08) 0%, rgba(10, 15, 22, 0.75) 45%, #05070A 85%),
-              conic-gradient(from 180deg at 50% 50%, rgba(0, 240, 255, 0.015) 0deg, rgba(157, 78, 221, 0.015) 180deg, rgba(0, 240, 255, 0.015) 360deg)
+              radial-gradient(circle at 50% 36%, rgba(0, 240, 255, 0.08) 0%, rgba(10, 15, 22, 0.75) 45%, #05070A 85%),
+              conic-gradient(from 180deg at 50% 50%, rgba(0, 240, 255, 0.012) 0deg, rgba(157, 78, 221, 0.012) 180deg, rgba(0, 240, 255, 0.012) 360deg)
             `,
           }}
         >
-          {/* Subtle Fine Gridline Overlay (Opacity 0.035) */}
+          {/* Subtle Fine Gridline Overlay (Opacity 0.03) */}
           <div
             className="fixed inset-0 pointer-events-none z-0"
             style={{
@@ -227,30 +225,30 @@ export default function Home() {
             }}
           />
 
-          {/* Interactive Digital Dust Particle Canvas */}
+          {/* Digital Dust Particle Canvas */}
           <canvas
             ref={setCanvasElement}
             className="fixed inset-0 z-0 pointer-events-none"
           />
 
           {/* ========================================================
-              6. FULL-WIDTH TELEMETRY BAR: TOP HEADER
+              TOP TELEMETRY HEADER
              ======================================================== */}
-          <header className="w-full h-11 px-4 md:px-8 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-b border-[rgba(0,240,255,0.18)] flex items-center justify-between z-30">
+          <header className="w-full h-12 px-6 md:px-12 flex items-center justify-between z-30 shrink-0">
             {/* Top-Left: Cognitive Crypto Shield Active */}
-            <div className="flex items-center gap-2 border border-[rgba(0,240,255,0.25)] bg-[rgba(0,240,255,0.05)] px-3 py-1 rounded-[4px] shadow-[0_0_12px_rgba(0,240,255,0.12)]">
+            <div className="flex items-center gap-2 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3.5 py-1.5 rounded-[6px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
               <ShieldCheck className="w-3.5 h-3.5 text-[#00F0FF] animate-pulse" />
-              <span className="text-[10px] font-mono tracking-[0.15em] text-[#00F0FF] font-semibold uppercase">
+              <span className="text-[10px] font-mono tracking-[0.14em] text-slate-200 font-semibold uppercase">
                 COGNITIVE CRYPTO SHIELD ACTIVE
               </span>
             </div>
 
-            {/* Top-Right: Sound Control & System Status */}
+            {/* Top-Right: Sound Toggle & System Status Badge */}
             <div className="flex items-center gap-3">
               <button
                 onClick={handleToggleSound}
                 onMouseEnter={() => audio?.playHover()}
-                className="text-slate-400 hover:text-cyan-400 p-1 rounded border border-[#1E293B] bg-[rgba(10,15,22,0.6)] transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-cyan-400 p-1.5 rounded-[4px] border border-[#1E293B] bg-[rgba(10,15,22,0.7)] transition-colors cursor-pointer"
                 title={mutedState ? 'Unmute Audio' : 'Mute Audio'}
               >
                 {mutedState ? (
@@ -260,15 +258,15 @@ export default function Home() {
                 )}
               </button>
 
-              <div className="flex items-center gap-2 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3 py-1 rounded-[4px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
+              <div className="flex items-center gap-2.5 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3.5 py-1.5 rounded-[6px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
                 <Radio className="w-3.5 h-3.5 text-[#00FF9D] animate-pulse" />
-                <span className="text-[10px] font-mono tracking-[0.15em] font-semibold text-slate-300 uppercase">
+                <span className="text-[10px] font-mono tracking-[0.14em] font-semibold text-slate-300 uppercase">
                   SYS_STATUS:{' '}
                   <span className="text-[#00FF9D] drop-shadow-[0_0_6px_rgba(0,255,157,0.7)]">
                     CRYPTED
                   </span>{' '}
                   //{' '}
-                  <span className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]">
+                  <span className="text-[#00FF9D] drop-shadow-[0_0_6px_rgba(0,255,157,0.7)]">
                     ONLINE
                   </span>
                 </span>
@@ -279,44 +277,44 @@ export default function Home() {
           {/* ========================================================
               CENTRAL QUANTITATIVE ORACLE CORE
              ======================================================== */}
-          <main className="flex-1 flex flex-col items-center justify-center relative w-full px-4 py-4 md:py-6 z-20">
-            {/* Center Eye: 3D Orbital Radar Rings */}
-            <div className="relative w-full max-w-[560px] h-[220px] md:h-[260px] flex items-center justify-center">
+          <main className="flex-1 flex flex-col items-center justify-center relative w-full px-4 z-20">
+            {/* Center Eye: 3D Orbital Radar Rings & Branding */}
+            <div className="relative w-full max-w-[580px] h-[210px] md:h-[240px] flex items-center justify-center">
               <OrbitalRadarRings mouseX={mousePos.x} mouseY={mousePos.y} />
 
               {/* Central Branding Typography: FANTASMA SYNERGY */}
               <div className="relative z-10 flex flex-col items-center justify-center text-center px-4">
                 <h1
-                  className="font-extrabold uppercase leading-[0.95] tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#E0F7FA] to-[#00F0FF] drop-shadow-[0_0_20px_rgba(0,240,255,0.85)] drop-shadow-[0_0_45px_rgba(0,240,255,0.4)]"
+                  className="font-extrabold uppercase leading-[0.94] tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#E0F7FA] to-[#93C5FD] drop-shadow-[0_0_20px_rgba(0,240,255,0.85)] drop-shadow-[0_0_45px_rgba(0,240,255,0.35)]"
                   style={{
-                    fontSize: 'clamp(2rem, 5.5vw, 3.4rem)',
+                    fontSize: 'clamp(2.2rem, 5.2vw, 3.4rem)',
                   }}
                 >
                   <span className="block">FANTASMA</span>
                   <span className="block mt-1">SYNERGY</span>
                 </h1>
 
-                {/* Quantitative Terminal Subtitle */}
-                <p className="mt-3 text-[9px] md:text-[10.5px] font-mono tracking-[0.22em] md:tracking-[0.28em] text-cyan-300/90 font-semibold uppercase">
+                {/* Sub-badge Monospace Title */}
+                <p className="mt-2.5 text-[9.5px] md:text-[10.5px] font-mono tracking-[0.24em] md:tracking-[0.28em] text-cyan-300/90 font-semibold uppercase">
                   QUANTITATIVE ORACLE INVESTMENT TERMINAL v4.0 | FOREX + CRYPTO
                 </p>
               </div>
             </div>
 
-            {/* 3. Terminal Diagnostic Console (Frosted Glassmorphism Log) */}
-            <div className="w-full max-w-[620px] mt-4 md:mt-5">
+            {/* Terminal Diagnostic Panel (Frosted Glassmorphism Console) */}
+            <div className="w-full max-w-[640px] mt-4">
               <TerminalDiagnosticConsole />
             </div>
 
-            {/* 4. Tactical KPI Telemetry Cards (3 Horizontal Cards) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full max-w-[620px] mt-3 md:mt-4">
-              {/* Card 1: Live Market Ticker */}
-              <div className="rounded-[4px] p-3 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
-                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-1">
+            {/* Modular Tactical KPI Telemetry Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full max-w-[640px] mt-3">
+              {/* Card 1: 1s Ticks */}
+              <div className="rounded-[8px] p-3 px-3.5 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
+                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-0.5">
                   <Activity className="w-3.5 h-3.5 text-[#00F0FF]" />
                   <span>LIVE MARKET TICKER</span>
                 </div>
-                <div className="flex items-center justify-between mt-1">
+                <div className="flex items-center justify-between">
                   <div className="text-sm md:text-base font-mono font-bold text-white tracking-tight">
                     1s Ticks
                   </div>
@@ -324,27 +322,27 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Card 2: R2K Layer / Kelly Aware */}
-              <div className="rounded-[4px] p-3 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
-                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-1">
-                  <BarChart2 className="w-3.5 h-3.5 text-[#00FF9D]" />
-                  <span>R2K LAYER:</span>
+              {/* Card 2: Kelly Aware */}
+              <div className="rounded-[8px] p-3 px-3.5 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
+                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-0.5">
+                  <BarChart2 className="w-3.5 h-3.5 text-[#00F0FF]" />
+                  <span>R25K LAYER:</span>
                 </div>
-                <div className="flex items-center justify-between mt-1">
+                <div className="flex items-center justify-between">
                   <div className="text-sm md:text-base font-mono font-bold text-white tracking-tight">
                     Kelly Aware
                   </div>
-                  <SegmentedKellyBar percentage={68} />
+                  <SegmentedKellyBar />
                 </div>
               </div>
 
-              {/* Card 3: AI Conscious / Multi Model */}
-              <div className="rounded-[4px] p-3 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
-                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-1">
-                  <Cpu className="w-3.5 h-3.5 text-[#00F0FF]" />
+              {/* Card 3: Multi Model */}
+              <div className="rounded-[8px] p-3 px-3.5 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
+                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-0.5">
+                  <Settings className="w-3.5 h-3.5 text-[#00F0FF]" />
                   <span>AI CONSENSUS:</span>
                 </div>
-                <div className="flex items-center justify-between mt-1">
+                <div className="flex items-center justify-between">
                   <div className="text-sm md:text-base font-mono font-bold text-white tracking-tight">
                     Multi Model
                   </div>
@@ -353,22 +351,30 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 5. Gateway Action Button (Beveled Cybernetic Button) */}
-            <div className="mt-5 md:mt-6 flex flex-col items-center gap-2.5 w-full max-w-[620px]">
+            {/* Gateway Action Button & Bypass intro */}
+            <div className="mt-4 md:mt-5 flex flex-col items-center gap-2 w-full max-w-[640px]">
               <button
                 onClick={handleAccessTerminal}
                 onMouseEnter={() => audio?.playHover()}
                 disabled={glitching}
-                className="w-full sm:w-[320px] py-3.5 px-6 clip-cyber-beveled neon-sweep-btn bg-[rgba(0,240,255,0.1)] hover:bg-[rgba(0,240,255,0.2)] border border-[#00F0FF] text-white font-mono font-extrabold text-xs md:text-sm tracking-[0.2em] uppercase transition-all duration-300 transform active:scale-95 shadow-[0_0_20px_rgba(0,240,255,0.35),inset_0_0_12px_rgba(0,240,255,0.15)] hover:shadow-[0_0_32px_rgba(0,240,255,0.6),inset_0_0_20px_rgba(0,240,255,0.3)] cursor-pointer"
+                className="w-[280px] sm:w-[320px] py-2.5 px-6 rounded-[12px] bg-[rgba(0,240,255,0.08)] hover:bg-[rgba(0,240,255,0.18)] border-2 border-[#00F0FF] text-white font-mono font-extrabold text-xs md:text-sm tracking-[0.18em] uppercase transition-all duration-300 transform active:scale-95 shadow-[0_0_22px_rgba(0,240,255,0.4),inset_0_0_12px_rgba(0,240,255,0.18)] hover:shadow-[0_0_36px_rgba(0,240,255,0.65),inset_0_0_20px_rgba(0,240,255,0.3)] cursor-pointer flex items-center justify-center gap-2 group"
                 style={{
                   textShadow: '0 0 10px rgba(0, 240, 255, 0.85)',
                 }}
               >
-                {glitching ? glitchText : '[ MASUK KE TERMINAL → ]'}
+                {glitching ? (
+                  <span>{glitchText}</span>
+                ) : (
+                  <>
+                    <span className="text-[#00F0FF] text-base font-bold">[</span>
+                    <span>MASUK KE TERMINAL →</span>
+                    <span className="text-[#00F0FF] text-base font-bold">]</span>
+                  </>
+                )}
               </button>
 
-              {/* Bypass Intro Checkbox */}
-              <label className="flex items-center gap-2 cursor-pointer select-none py-1 group">
+              {/* Bypass intro checkbox */}
+              <label className="flex items-center gap-2 cursor-pointer select-none py-0.5 group">
                 <input
                   type="checkbox"
                   checked={bypassCheck}
@@ -383,9 +389,9 @@ export default function Home() {
           </main>
 
           {/* ========================================================
-              6. FULL-WIDTH TELEMETRY BAR: BOTTOM FOOTER
+              BOTTOM TELEMETRY FOOTER
              ======================================================== */}
-          <footer className="w-full h-10 px-4 md:px-8 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-t border-[rgba(0,240,255,0.12)] flex items-center justify-between text-[9px] md:text-[9.5px] font-mono tracking-[0.2em] text-slate-500 uppercase z-30">
+          <footer className="w-full h-11 px-6 md:px-12 flex items-center justify-between text-[9px] md:text-[9.5px] font-mono tracking-[0.2em] text-slate-500 uppercase z-30 shrink-0">
             <div>FANTASMA SYNERGY SYSTEMS INC.</div>
             <div>ALL PROTOCOLS ENCRYPTED // [V4.0]</div>
           </footer>

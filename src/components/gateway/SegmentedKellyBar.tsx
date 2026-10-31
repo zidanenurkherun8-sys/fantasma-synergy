@@ -2,54 +2,68 @@
 
 import React from 'react';
 
-interface SegmentedKellyBarProps {
-  percentage?: number; // 0 to 100
-}
-
-export const SegmentedKellyBar: React.FC<SegmentedKellyBarProps> = ({
-  percentage = 68,
-}) => {
-  const totalBars = 8;
-  const activeCount = Math.round((percentage / 100) * totalBars);
-
-  // Height progression for stepped telemetry aesthetic (from 14px to 28px)
-  const barHeights = [12, 14, 16, 19, 22, 25, 28, 30];
+export const SegmentedKellyBar: React.FC = () => {
+  // Slices inside the angled trapezoid gauge
+  // Total 7 bars stepping up, 5 active, 2 inactive
+  const bars = [
+    { x: 4,  y: 18, h: 10, active: true,  color: '#00E5FF' },
+    { x: 14, y: 15, h: 13, active: true,  color: '#00EFF5' },
+    { x: 24, y: 12, h: 16, active: true,  color: '#00F8DE' },
+    { x: 34, y: 9,  h: 19, active: true,  color: '#00FFBF' },
+    { x: 44, y: 6,  h: 22, active: true,  color: '#00FF9D' },
+    { x: 54, y: 3,  h: 25, active: false, color: 'rgba(30, 41, 59, 0.4)' },
+    { x: 64, y: 0,  h: 28, active: false, color: 'rgba(30, 41, 59, 0.3)' },
+  ];
 
   return (
-    <div className="flex items-end gap-1.5 h-[34px] px-2 py-1 bg-[#05080E]/70 border border-[#00F0FF]/20 rounded-[4px] relative overflow-hidden">
-      {/* Background Subtle Cyber Scan */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00F0FF]/5 to-transparent pointer-events-none" />
+    <div className="w-[84px] h-[36px] flex items-center justify-end">
+      <svg
+        viewBox="0 0 80 34"
+        className="w-full h-full overflow-visible"
+      >
+        <defs>
+          <filter id="gaugeGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2" />
+            <feMerge>
+              <feMergeNode />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-      {barHeights.map((h, idx) => {
-        const isActive = idx < activeCount;
-        const isLeading = idx === activeCount - 1;
+        {/* Outer Angled Trapezoid Border */}
+        <polygon
+          points="2,22 76,0 76,32 2,32"
+          fill="rgba(5, 8, 14, 0.65)"
+          stroke="rgba(0, 240, 255, 0.35)"
+          strokeWidth="1.2"
+        />
 
-        // Color interpolation between Cyan (#00F0FF) and Matrix Green (#00FF9D)
-        const ratio = idx / (totalBars - 1);
-        const activeColor = ratio < 0.5 ? '#00F0FF' : '#00FF9D';
+        {/* Angled Vertical Bars */}
+        {bars.map((bar, idx) => (
+          <rect
+            key={`kbar-${idx}`}
+            x={bar.x}
+            y={bar.y + 4}
+            width="7"
+            height={bar.h}
+            fill={bar.color}
+            filter={bar.active ? 'url(#gaugeGlow)' : undefined}
+            opacity={bar.active ? 0.95 : 0.4}
+            rx="1"
+          />
+        ))}
 
-        return (
-          <div
-            key={`bar-${idx}`}
-            className="w-2 rounded-t-[1px] transition-all duration-300 relative"
-            style={{
-              height: `${h}px`,
-              backgroundColor: isActive ? activeColor : 'rgba(30, 41, 59, 0.45)',
-              transform: 'skewX(-14deg)',
-              boxShadow: isLeading
-                ? `0 0 10px ${activeColor}, 0 0 4px ${activeColor}`
-                : isActive
-                ? `0 0 4px ${activeColor}55`
-                : 'none',
-              border: isActive ? `1px solid ${activeColor}` : '1px solid rgba(255,255,255,0.05)',
-            }}
-          >
-            {isLeading && (
-              <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_#00FF9D] animate-ping" />
-            )}
-          </div>
-        );
-      })}
+        {/* Highlight Bloom on Leading Active Bar */}
+        <circle
+          cx="47.5"
+          cy="10"
+          r="2.5"
+          fill="#FFFFFF"
+          className="animate-ping"
+          style={{ animationDuration: '2.5s' }}
+        />
+      </svg>
     </div>
   );
 };
