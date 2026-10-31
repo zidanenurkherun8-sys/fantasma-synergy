@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardPage from './dashboard/page';
 
@@ -75,6 +75,36 @@ interface ActionPotential {
   color: string;
 }
 
+interface IndodaxPair {
+  id: string;
+  symbol: string;
+  name: string;
+  price: number;
+  change24h: number;
+  high: number;
+  low: number;
+  volumeIdr: number;
+  volumeCoin?: number;
+}
+
+interface Candle {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+interface CommandLogEntry {
+  id: string;
+  time: string;
+  category: 'SYSTEM' | 'INDODAX' | 'ORACLE' | 'RISK';
+  msg: string;
+  status?: string;
+  statusColor?: string;
+}
+
 type AudioFeedbackType = 'hover' | 'click';
 
 export default function App(): React.JSX.Element {
@@ -82,11 +112,220 @@ export default function App(): React.JSX.Element {
   const [isBypassed, setIsBypassed] = useState<boolean>(false);
   const [bypassIntro, setBypassIntro] = useState<boolean>(false);
 
+  // Left Panel State: Tabs & Settings
+  const [leftTab, setLeftTab] = useState<'tradingview' | 'indodax'>('tradingview');
+  const [selectedPair, setSelectedPair] = useState<string>('BTC/IDR');
+  const [timeframe, setTimeframe] = useState<string>('15m');
+  const [logFilter, setLogFilter] = useState<'ALL' | 'INDODAX' | 'ORACLE' | 'RISK'>('ALL');
+
+  // Indodax Live Feed State (with robust institutional defaults)
+  const [indodaxPairs, setIndodaxPairs] = useState<IndodaxPair[]>([
+    {
+      id: 'btc_idr',
+      symbol: 'BTC',
+      name: 'Bitcoin',
+      price: 1486500000,
+      change24h: 3.84,
+      high: 1512000000,
+      low: 1445000000,
+      volumeIdr: 184500000000,
+      volumeCoin: 124.5,
+    },
+    {
+      id: 'eth_idr',
+      symbol: 'ETH',
+      name: 'Ethereum',
+      price: 54320000,
+      change24h: 2.15,
+      high: 55800000,
+      low: 52900000,
+      volumeIdr: 48900000000,
+      volumeCoin: 902.1,
+    },
+    {
+      id: 'usdt_idr',
+      symbol: 'USDT',
+      name: 'Tether USD',
+      price: 16245,
+      change24h: 0.08,
+      high: 16290,
+      low: 16190,
+      volumeIdr: 92400000000,
+      volumeCoin: 5690000,
+    },
+    {
+      id: 'sol_idr',
+      symbol: 'SOL',
+      name: 'Solana',
+      price: 3140000,
+      change24h: 5.62,
+      high: 3260000,
+      low: 2970000,
+      volumeIdr: 28500000000,
+      volumeCoin: 9076,
+    },
+  ]);
+
+  // Command Log Stream State
+  const [logs, setLogs] = useState<CommandLogEntry[]>([
+    {
+      id: '1',
+      time: '11:35:43 AM',
+      category: 'SYSTEM',
+      msg: 'DE METHODOLOGY ANALYZERS INITIALIZED (SAC, WYCKOFF, HARMONIC...)',
+    },
+    {
+      id: '2',
+      time: '11:35:43 AM',
+      category: 'SYSTEM',
+      msg: 'MULTI-TIMEFRAME ANALYSIS COMPLETE //',
+      status: 'ACTIVE',
+      statusColor: '#00f2fe',
+    },
+    {
+      id: '3',
+      time: '11:35:44 AM',
+      category: 'INDODAX',
+      msg: 'WSS TICKER GATEWAY CONNECTED [api.indodax.com]',
+      status: '14MS',
+      statusColor: '#10b981',
+    },
+    {
+      id: '4',
+      time: '11:35:44 AM',
+      category: 'RISK',
+      msg: 'HALF-KELLY CAPITAL PRESERVATION STRATEGY:',
+      status: 'STABLE',
+      statusColor: '#10b981',
+    },
+    {
+      id: '5',
+      time: '11:35:44 AM',
+      category: 'ORACLE',
+      msg: 'WARPING: TIME MACHINE VOLATILITY DETECTED:',
+      status: 'HIGH',
+      statusColor: '#00f2fe',
+    },
+    {
+      id: '6',
+      time: '11:35:45 AM',
+      category: 'SYSTEM',
+      msg: 'COGNITIVE ENCRYPTION COMPLETE //',
+      status: 'CONNECTED',
+      statusColor: '#10b981',
+    },
+    {
+      id: '7',
+      time: '11:35:46 AM',
+      category: 'ORACLE',
+      msg: 'TRADINGVIEW ENGINE READY [BTC/IDR 15M WYCKOFF ACCUMULATION]',
+      status: 'SYNCED',
+      statusColor: '#00f2fe',
+    },
+  ]);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sparklineCanvasRef = useRef<HTMLCanvasElement>(null);
   const brainCanvasRef = useRef<HTMLCanvasElement>(null);
   const globeCanvasRef = useRef<HTMLCanvasElement>(null);
+  const tvCanvasRef = useRef<HTMLCanvasElement>(null);
   const telemetryTagRef = useRef<HTMLSpanElement>(null);
+  const logContainerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch real Indodax pairs if available
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMarket = async () => {
+      try {
+        const res = await fetch('/api/market/pairs?mode=CRYPTO');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (isMounted && data.pairs && data.pairs.length > 0) {
+          setIndodaxPairs(data.pairs.slice(0, 5));
+        }
+      } catch {
+        // Retain robust default state
+      }
+    };
+
+    fetchMarket();
+    const interval = setInterval(fetchMarket, 9000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Periodic Live Command Log Streamer to make the terminal feel alive
+  useEffect(() => {
+    const liveStreamMessages: {
+      category: 'SYSTEM' | 'INDODAX' | 'ORACLE' | 'RISK';
+      msg: string;
+      status?: string;
+      statusColor?: string;
+    }[] = [
+      {
+        category: 'INDODAX',
+        msg: 'ORDERBOOK DEPTH SYNC: BIDS 53.4% VS ASKS 46.6% // SPREAD 0.02%',
+        status: 'BALANCED',
+        statusColor: '#10b981',
+      },
+      {
+        category: 'ORACLE',
+        msg: 'WYCKOFF SPRING RETEST CONFIRMED (VOLUME SPIKE 1.48x)',
+        status: 'BULLISH',
+        statusColor: '#00f2fe',
+      },
+      {
+        category: 'RISK',
+        msg: 'MAX ALLOWABLE DRAWDOWN CEILING: 2.5% [KELLY AWARE ON]',
+        status: 'SECURE',
+        statusColor: '#10b981',
+      },
+      {
+        category: 'SYSTEM',
+        msg: 'LATENCY BENCHMARK: TOKYO-SG-INDODAX ROUTE 12.4MS',
+        status: 'OPTIMAL',
+        statusColor: '#00f2fe',
+      },
+      {
+        category: 'ORACLE',
+        msg: 'NEURAL CLUSTER CONSENSUS: FOREX EUR/USD & BTC/IDR DECOUPLING',
+        status: 'DIVERGENT',
+        statusColor: '#f59e0b',
+      },
+    ];
+
+    let step = 0;
+    const interval = setInterval(() => {
+      const entry = liveStreamMessages[step % liveStreamMessages.length];
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { hour12: true });
+
+      setLogs((prev) => [
+        ...prev.slice(-12),
+        {
+          id: `${Date.now()}-${step}`,
+          time: timeStr,
+          category: entry.category,
+          msg: entry.msg,
+          status: entry.status,
+          statusColor: entry.statusColor,
+        },
+      ]);
+
+      step++;
+    }, 5500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-scroll command log
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [logs]);
 
   // Cek preferensi bypass portal dari localStorage
   useEffect(() => {
@@ -150,7 +389,7 @@ export default function App(): React.JSX.Element {
   };
 
   // --------------------------------------------------------------------------
-  // 1. KANVAS LATAR BELAKANG: GRID SIBER, BINTANG, LENS FLARE & CORNER CONNECTORS
+  // 1. KANVAS LATAR BELAKANG: GRID SIBER, BINTANG, AMBIENT GLOW
   // --------------------------------------------------------------------------
   useEffect(() => {
     if (accessed) return;
@@ -216,18 +455,18 @@ export default function App(): React.JSX.Element {
         ctx.globalAlpha = 1;
       });
 
-      // Soft Luxury Ambient Glow (Tanpa garis laser/garis tembak yang tajam)
+      // Soft Luxury Ambient Glow
       const cx = w * 0.5;
-      const cy = h * 0.36;
-      const flareGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 320);
-      flareGrad.addColorStop(0, 'rgba(0, 242, 254, 0.08)');
-      flareGrad.addColorStop(0.4, 'rgba(14, 165, 233, 0.025)');
+      const cy = h * 0.38;
+      const flareGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 340);
+      flareGrad.addColorStop(0, 'rgba(0, 242, 254, 0.09)');
+      flareGrad.addColorStop(0.4, 'rgba(14, 165, 233, 0.03)');
       flareGrad.addColorStop(1, 'rgba(0, 242, 254, 0)');
 
       ctx.save();
       ctx.fillStyle = flareGrad;
       ctx.beginPath();
-      ctx.arc(cx, cy, 320, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 340, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
@@ -243,7 +482,7 @@ export default function App(): React.JSX.Element {
   }, [accessed]);
 
   // --------------------------------------------------------------------------
-  // 1B. KANVAS 3D LUXURY CELESTIAL CORE (SMOOTH, LIQUID & LUXURY FINISH)
+  // 1B. KANVAS 3D LUXURY CELESTIAL CORE (DRAGGABLE / TOUCH)
   // --------------------------------------------------------------------------
   useEffect(() => {
     if (accessed) return;
@@ -253,7 +492,6 @@ export default function App(): React.JSX.Element {
     if (!ctx) return;
     let animId: number;
 
-    // Parameter Fisika Rotasi Halus & Bobot Mewah (Velvet Damping)
     const rot: RotState = {
       yaw: 0.42,
       pitch: 0.22,
@@ -264,7 +502,6 @@ export default function App(): React.JSX.Element {
       lastY: 0,
     };
 
-    // Partikel Debu Kosmik Berpendar Lembut di Sekitar Bola
     const stardustCount = 85;
     const stardust: StardustParticle[] = [];
     for (let i = 0; i < stardustCount; i++) {
@@ -281,35 +518,10 @@ export default function App(): React.JSX.Element {
       });
     }
 
-    // Mutiara Orbit Mewah (Satellites berkecepatan tenang)
     const luxuryPearls: LuxuryPearl[] = [
-      {
-        ringRadius: 1.34,
-        angle: 0.8,
-        speed: 0.008,
-        tiltX: 0.25,
-        tiltZ: 0.95,
-        size: 3.2,
-        glow: '#00f2fe',
-      },
-      {
-        ringRadius: 1.22,
-        angle: 3.4,
-        speed: -0.006,
-        tiltX: 0.85,
-        tiltZ: 0.35,
-        size: 2.6,
-        glow: '#ffffff',
-      },
-      {
-        ringRadius: 1.48,
-        angle: 1.9,
-        speed: 0.005,
-        tiltX: 0.55,
-        tiltZ: 0.75,
-        size: 2.2,
-        glow: '#38bdf8',
-      },
+      { ringRadius: 1.34, angle: 0.8, speed: 0.008, tiltX: 0.25, tiltZ: 0.95, size: 3.2, glow: '#00f2fe' },
+      { ringRadius: 1.22, angle: 3.4, speed: -0.006, tiltX: 0.85, tiltZ: 0.35, size: 2.6, glow: '#ffffff' },
+      { ringRadius: 1.48, angle: 1.9, speed: 0.005, tiltX: 0.55, tiltZ: 0.75, size: 2.2, glow: '#38bdf8' },
     ];
 
     const getClientCoords = (e: MouseEvent | TouchEvent): { x: number; y: number } => {
@@ -322,7 +534,6 @@ export default function App(): React.JSX.Element {
       return { x: 0, y: 0 };
     };
 
-    // Event Listener Interaksi Drag (Mouse & Touch)
     const onPointerDown = (e: MouseEvent | TouchEvent): void => {
       rot.isDragging = true;
       rot.velYaw = 0;
@@ -361,13 +572,8 @@ export default function App(): React.JSX.Element {
     container.addEventListener('mousedown', onPointerDown as EventListener);
     window.addEventListener('mousemove', onPointerMove as EventListener);
     window.addEventListener('mouseup', onPointerUp as EventListener);
-
-    container.addEventListener('touchstart', onPointerDown as EventListener, {
-      passive: true,
-    });
-    window.addEventListener('touchmove', onPointerMove as EventListener, {
-      passive: true,
-    });
+    container.addEventListener('touchstart', onPointerDown as EventListener, { passive: true });
+    window.addEventListener('touchmove', onPointerMove as EventListener, { passive: true });
     window.addEventListener('touchend', onPointerUp as EventListener);
 
     let time = 0;
@@ -379,7 +585,6 @@ export default function App(): React.JSX.Element {
       ctx.clearRect(0, 0, w, h);
       time += 0.015;
 
-      // Inersia Halus & Rotasi Otomatis yang Anggun
       if (!rot.isDragging) {
         rot.yaw += rot.velYaw;
         rot.pitch = Math.max(-1.1, Math.min(1.1, rot.pitch + rot.velPitch));
@@ -387,15 +592,13 @@ export default function App(): React.JSX.Element {
         rot.velPitch *= 0.95;
 
         if (Math.abs(rot.velYaw) < 0.001) {
-          rot.yaw += 0.0025; // Putaran santai dan konstan
+          rot.yaw += 0.0025;
         }
       }
 
-      // Update Label Telemetri Horologi Mewah
       if (telemetryTagRef.current) {
         const azDeg = Math.round(
-          ((((rot.yaw % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) * 180) /
-            Math.PI
+          ((((rot.yaw % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) * 180) / Math.PI
         );
         const elDeg = Math.round((rot.pitch * 180) / Math.PI);
         telemetryTagRef.current.innerText = `AZIMUTH: ${azDeg}° | ELEVATION: ${elDeg}° // ${
@@ -403,7 +606,6 @@ export default function App(): React.JSX.Element {
         }`;
       }
 
-      // Pusat Bola dengan Efek Mengambang Harmonis (Breathing Levitation)
       const levitation = Math.sin(time * 1.2) * 3.5;
       const cx = w * 0.5;
       const cy = h * 0.52 + levitation;
@@ -415,13 +617,7 @@ export default function App(): React.JSX.Element {
       const sinX = Math.sin(rot.pitch);
       const fov = 320;
 
-      // Helper untuk Proyeksi Titik 3D ke 2D Layar
-      const projectPoint = (
-        x: number,
-        y: number,
-        z: number,
-        baseR: number
-      ): ProjectedPoint => {
+      const projectPoint = (x: number, y: number, z: number, baseR: number): ProjectedPoint => {
         const x1 = x * cosY - z * sinY;
         const z1 = x * sinY + z * cosY;
         const y2 = y * cosX - z1 * sinX;
@@ -435,14 +631,12 @@ export default function App(): React.JSX.Element {
         };
       };
 
-      // Konfigurasi Cincin-Cincin Orbital Sutra (Tanpa gerigi atau garis tembak)
       const luxuryRings: LuxuryRing[] = [
         { r: sphereR * 1.35, tiltX: 0.25, tiltZ: 0.95, width: 1.4, baseAlpha: 0.45 },
         { r: sphereR * 1.22, tiltX: 0.85, tiltZ: 0.35, width: 1.0, baseAlpha: 0.3 },
         { r: sphereR * 1.48, tiltX: 0.55, tiltZ: 0.75, width: 0.8, baseAlpha: 0.22 },
       ];
 
-      // FUNGSI MENGGAMBAR SEGMEN CINCIN (Dipisahkan belakang & depan untuk kedalaman 3D nyata)
       const drawRingSegment = (ring: LuxuryRing, isFrontPass: boolean): void => {
         const segments = 100;
         const pts: (ProjectedPoint & { angle: number })[] = [];
@@ -464,10 +658,7 @@ export default function App(): React.JSX.Element {
 
           if (isFront === isFrontPass) {
             const depthFactor = (p1.pz + 1) * 0.5;
-            const alpha = Math.max(
-              0.04,
-              Math.min(0.85, ring.baseAlpha * (depthFactor * 1.4 + 0.2))
-            );
+            const alpha = Math.max(0.04, Math.min(0.85, ring.baseAlpha * (depthFactor * 1.4 + 0.2)));
 
             ctx.beginPath();
             ctx.moveTo(p1.px, p1.py);
@@ -485,23 +676,9 @@ export default function App(): React.JSX.Element {
         ctx.restore();
       };
 
-      // -------------------------------------------------------------
-      // 1. TAHAP PERTAMA: GAMBAR CINCIN BAGIAN BELAKANG (DI BALIK BOLA)
-      // -------------------------------------------------------------
       luxuryRings.forEach((r) => drawRingSegment(r, false));
 
-      // -------------------------------------------------------------
-      // 2. TAHAP KEDUA: BOLA CELESTIAL KRISTAL MEWAH (SMOOTH GLASS BODY)
-      // -------------------------------------------------------------
-      // (A) Pendaran Aura Atmosferik Halus (Ambient Optical Halo)
-      const auraGrad = ctx.createRadialGradient(
-        cx,
-        cy,
-        sphereR * 0.6,
-        cx,
-        cy,
-        sphereR * 1.35
-      );
+      const auraGrad = ctx.createRadialGradient(cx, cy, sphereR * 0.6, cx, cy, sphereR * 1.35);
       auraGrad.addColorStop(0, 'rgba(0, 242, 254, 0.16)');
       auraGrad.addColorStop(0.5, 'rgba(14, 165, 233, 0.06)');
       auraGrad.addColorStop(1, 'rgba(0, 242, 254, 0)');
@@ -510,7 +687,6 @@ export default function App(): React.JSX.Element {
       ctx.arc(cx, cy, sphereR * 1.35, 0, Math.PI * 2);
       ctx.fill();
 
-      // (B) Badan Bola Kristal Kuantum dengan Shading Kedalaman Elegan
       const sphereGrad = ctx.createRadialGradient(
         cx - sphereR * 0.32,
         cy - sphereR * 0.32,
@@ -519,11 +695,11 @@ export default function App(): React.JSX.Element {
         cy,
         sphereR
       );
-      sphereGrad.addColorStop(0, 'rgba(235, 254, 255, 0.95)'); // Pantulan cahaya atas
-      sphereGrad.addColorStop(0.18, 'rgba(0, 242, 254, 0.85)'); // Pendar sian primer
-      sphereGrad.addColorStop(0.48, 'rgba(3, 105, 161, 0.45)'); // Safir transparan
-      sphereGrad.addColorStop(0.82, 'rgba(8, 18, 38, 0.7)'); // Obsidian bayangan
-      sphereGrad.addColorStop(1, 'rgba(3, 7, 18, 0.95)'); // Batas tepi gelap
+      sphereGrad.addColorStop(0, 'rgba(235, 254, 255, 0.95)');
+      sphereGrad.addColorStop(0.18, 'rgba(0, 242, 254, 0.85)');
+      sphereGrad.addColorStop(0.48, 'rgba(3, 105, 161, 0.45)');
+      sphereGrad.addColorStop(0.82, 'rgba(8, 18, 38, 0.7)');
+      sphereGrad.addColorStop(1, 'rgba(3, 7, 18, 0.95)');
 
       ctx.save();
       ctx.fillStyle = sphereGrad;
@@ -531,7 +707,6 @@ export default function App(): React.JSX.Element {
       ctx.arc(cx, cy, sphereR, 0, Math.PI * 2);
       ctx.fill();
 
-      // (C) Kabut Nebula Dalam Bola (Internal Silk Swirl)
       const pulseWave = Math.sin(time * 2) * 4;
       const innerAura = ctx.createRadialGradient(
         cx + Math.sin(time) * 10,
@@ -549,7 +724,6 @@ export default function App(): React.JSX.Element {
       ctx.arc(cx, cy, sphereR * 0.75 + pulseWave, 0, Math.PI * 2);
       ctx.fill();
 
-      // (D) Tepi Cahaya Refraktif (Fresnel Rim Highlight)
       ctx.strokeStyle = 'rgba(0, 242, 254, 0.55)';
       ctx.lineWidth = 1.2;
       ctx.shadowColor = '#00f2fe';
@@ -557,15 +731,11 @@ export default function App(): React.JSX.Element {
       ctx.stroke();
       ctx.restore();
 
-      // -------------------------------------------------------------
-      // 3. TAHAP KETIGA: PARTIKEL DEBU BINTANG HALUS (STARDUST)
-      // -------------------------------------------------------------
       stardust.forEach((p) => {
         const proj = projectPoint(p.x, p.y, p.z, sphereR);
         const isFront = proj.pz > -0.15;
         const alphaPulse = Math.sin(time * 3 + p.pulse) * 0.25 + 0.75;
-        const depthAlpha =
-          Math.max(0.08, Math.min(1, (proj.pz + 1) * 0.5)) * alphaPulse;
+        const depthAlpha = Math.max(0.08, Math.min(1, (proj.pz + 1) * 0.5)) * alphaPulse;
 
         ctx.beginPath();
         ctx.arc(proj.px, proj.py, p.size * (isFront ? 1.15 : 0.75), 0, Math.PI * 2);
@@ -578,14 +748,8 @@ export default function App(): React.JSX.Element {
         ctx.shadowBlur = 0;
       });
 
-      // -------------------------------------------------------------
-      // 4. TAHAP KEEMPAT: GAMBAR CINCIN BAGIAN DEPAN (MELINTANG DI DEPAN BOLA)
-      // -------------------------------------------------------------
       luxuryRings.forEach((r) => drawRingSegment(r, true));
 
-      // -------------------------------------------------------------
-      // 5. TAHAP KELIMA: MUTIARA ORBITAL MEWAH (CELESTIAL PEARLS)
-      // -------------------------------------------------------------
       luxuryPearls.forEach((pearl) => {
         pearl.angle += pearl.speed;
         const rad = pearl.ringRadius * sphereR;
@@ -625,6 +789,183 @@ export default function App(): React.JSX.Element {
   }, [accessed]);
 
   // --------------------------------------------------------------------------
+  // 1C. KANVAS TRADINGVIEW ("TRATING VIEW") PREVIEW MINI-CHART
+  // --------------------------------------------------------------------------
+  useEffect(() => {
+    if (accessed || leftTab !== 'tradingview') return;
+    const canvas = tvCanvasRef.current;
+    if (!canvas || !canvas.parentElement) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let animId: number;
+
+    // Generate high-resolution mock candles representing BTC/IDR Wyckoff accumulation
+    const generateCandles = (): Candle[] => {
+      const list: Candle[] = [];
+      let base = 1450000000;
+      const now = Math.floor(Date.now() / 1000);
+      const count = 28;
+
+      for (let i = 0; i < count; i++) {
+        const trend = (i / count) * 35000000;
+        const volatility = (Math.sin(i * 0.8) + Math.cos(i * 0.4)) * 9000000;
+        const open = base + trend + volatility;
+        const change = (Math.random() - 0.45) * 8000000;
+        const close = open + change;
+        const high = Math.max(open, close) + Math.random() * 5000000;
+        const low = Math.min(open, close) - Math.random() * 5000000;
+        const volume = Math.random() * 85 + 25;
+        list.push({ time: now - (count - i) * 900, open, high, low, close, volume });
+      }
+      return list;
+    };
+
+    const candleData = generateCandles();
+    let tickCounter = 0;
+
+    const renderChart = (): void => {
+      if (!canvas.parentElement) return;
+      const w = (canvas.width = canvas.parentElement.clientWidth || 320);
+      const h = (canvas.height = canvas.parentElement.clientHeight || 155);
+
+      ctx.clearRect(0, 0, w, h);
+      tickCounter += 0.05;
+
+      // Slight live wiggle on the last candle close
+      const lastCandle = candleData[candleData.length - 1];
+      const liveClose = lastCandle.close + Math.sin(tickCounter) * 1200000;
+
+      // Calculate Min & Max for scaling
+      let minPrice = Infinity;
+      let maxPrice = -Infinity;
+      let maxVol = 0;
+
+      candleData.forEach((c, idx) => {
+        const curClose = idx === candleData.length - 1 ? liveClose : c.close;
+        minPrice = Math.min(minPrice, c.low, curClose);
+        maxPrice = Math.max(maxPrice, c.high, curClose);
+        maxVol = Math.max(maxVol, c.volume);
+      });
+
+      const padTop = 15;
+      const padBottom = 25;
+      const chartH = h - padTop - padBottom;
+      const priceRange = maxPrice - minPrice || 1;
+      const candleW = Math.max(4, (w - 50) / candleData.length - 3);
+
+      const getY = (val: number): number => {
+        return padTop + (1 - (val - minPrice) / priceRange) * chartH;
+      };
+
+      // 1. Gridlines
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.05)';
+      ctx.lineWidth = 1;
+      for (let gy = padTop; gy <= h - padBottom; gy += 30) {
+        ctx.beginPath();
+        ctx.moveTo(0, gy);
+        ctx.lineTo(w - 45, gy);
+        ctx.stroke();
+      }
+
+      // 2. Volume Histogram at Bottom
+      const volHMax = 32;
+      candleData.forEach((c, i) => {
+        const x = i * (candleW + 3) + 12;
+        const isGreen = c.close >= c.open;
+        const vH = (c.volume / maxVol) * volHMax;
+        ctx.fillStyle = isGreen ? 'rgba(0, 255, 157, 0.25)' : 'rgba(244, 63, 94, 0.25)';
+        ctx.fillRect(x, h - padBottom - vH, candleW, vH);
+      });
+
+      // 3. EMA 8 (Cyan) & EMA 21 (Amber) Indicator Lines
+      const drawEma = (period: number, color: string): void => {
+        ctx.beginPath();
+        let k = 2 / (period + 1);
+        let ema = candleData[0].close;
+
+        candleData.forEach((c, i) => {
+          const cClose = i === candleData.length - 1 ? liveClose : c.close;
+          ema = cClose * k + ema * (1 - k);
+          const x = i * (candleW + 3) + 12 + candleW / 2;
+          const y = getY(ema);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.3;
+        ctx.stroke();
+      };
+
+      drawEma(8, '#00f2fe'); // EMA 8 (Cyan)
+      drawEma(21, '#f59e0b'); // EMA 21 (Amber)
+
+      // 4. Candlesticks (Green & Red)
+      candleData.forEach((c, i) => {
+        const curClose = i === candleData.length - 1 ? liveClose : c.close;
+        const isGreen = curClose >= c.open;
+        const x = i * (candleW + 3) + 12;
+        const candleCenter = x + candleW / 2;
+
+        const yOpen = getY(c.open);
+        const yClose = getY(curClose);
+        const yHigh = getY(c.high);
+        const yLow = getY(c.low);
+
+        const color = isGreen ? '#00ff9d' : '#f43f5e';
+
+        // Sumbu Lilin (Wick)
+        ctx.beginPath();
+        ctx.moveTo(candleCenter, yHigh);
+        ctx.lineTo(candleCenter, yLow);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Badan Lilin (Body)
+        const topY = Math.min(yOpen, yClose);
+        const bodyH = Math.max(2, Math.abs(yClose - yOpen));
+        ctx.fillStyle = color;
+        ctx.fillRect(x, topY, candleW, bodyH);
+
+        // Pendaran Lilin Terakhir (Current Live Price Pulse)
+        if (i === candleData.length - 1) {
+          ctx.beginPath();
+          ctx.arc(candleCenter, yClose, 3, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = '#00f2fe';
+          ctx.shadowBlur = 10;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Garis Putus-Putus Menuju Sumbu Harga Kanan
+          ctx.beginPath();
+          ctx.setLineDash([3, 3]);
+          ctx.moveTo(candleCenter, yClose);
+          ctx.lineTo(w, yClose);
+          ctx.strokeStyle = 'rgba(0, 242, 254, 0.7)';
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Tag Harga Sisi Kanan
+          ctx.fillStyle = isGreen ? '#10b981' : '#f43f5e';
+          ctx.fillRect(w - 44, yClose - 8, 44, 16);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '8px monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText((liveClose / 1000000).toFixed(1) + 'M', w - 22, yClose);
+        }
+      });
+
+      animId = requestAnimationFrame(renderChart);
+    };
+
+    renderChart();
+    return () => cancelAnimationFrame(animId);
+  }, [accessed, leftTab]);
+
+  // --------------------------------------------------------------------------
   // 2. KANVAS SPARKLINE BESAR (Kartu Kanan: 1s Ticks)
   // --------------------------------------------------------------------------
   useEffect(() => {
@@ -656,7 +997,6 @@ export default function App(): React.JSX.Element {
         };
       });
 
-      // Garis Area Gradasi Bawah
       ctx.beginPath();
       ctx.moveTo(dynamicPoints[0].x, dynamicPoints[0].y);
       for (let i = 1; i < dynamicPoints.length; i++) {
@@ -673,7 +1013,6 @@ export default function App(): React.JSX.Element {
       ctx.fillStyle = grad;
       ctx.fill();
 
-      // Garis Waveform Pendar
       ctx.beginPath();
       ctx.moveTo(dynamicPoints[0].x, dynamicPoints[0].y);
       for (let i = 1; i < dynamicPoints.length; i++) {
@@ -704,7 +1043,6 @@ export default function App(): React.JSX.Element {
     if (!ctx) return;
     let animId: number;
 
-    // Generator Node Otak Anatomis (Cerebrum Hemispheres, Temporal Lobes & Cerebellum)
     const generateRealisticBrain = (): {
       nodes: BrainNode[];
       connections: BrainEdge[];
@@ -712,44 +1050,35 @@ export default function App(): React.JSX.Element {
       const nodes: BrainNode[] = [];
       const connections: BrainEdge[] = [];
 
-      // 1. Belahan Otak Besar (Kiri & Kanan) dengan Celah Longitudinal
       [-1, 1].forEach((hemisphere) => {
-        const hOffset = hemisphere * 3.8; // Celah pemisah antar belahan otak (Longitudinal Fissure)
+        const hOffset = hemisphere * 3.8;
         const hemiNodes: number[] = [];
 
-        // Lapisan Korteks / Cortex Folds (Frontal, Parietal, Occipital, Temporal)
         const latSteps = 8;
         const lonSteps = 10;
         for (let i = 1; i <= latSteps; i++) {
-          const u = (i / (latSteps + 1)) * Math.PI; // Sudut vertikal (kutub atas ke bawah)
+          const u = (i / (latSteps + 1)) * Math.PI;
           for (let j = 0; j < lonSteps; j++) {
-            const v = (j / lonSteps) * Math.PI * 2; // Sudut radial
+            const v = (j / lonSteps) * Math.PI * 2;
 
-            // Ukuran dasar elipsoid otak manusia: Z (panjang depan-belakang), Y (tinggi), X (lebar)
             let bx = 16 * Math.sin(u) * Math.cos(v);
             let by = 19 * Math.cos(u);
             let bz = 24 * Math.sin(u) * Math.sin(v);
 
-            // Modifikasi bentuk anatomis:
-            // - Bagian depan (Frontal Lobe) membulat lebar
             if (bz > 0) {
               bx *= 1 + 0.12 * (bz / 24);
               by += 1.5 * (bz / 24);
             }
-            // - Bagian belakang (Occipital Lobe) meruncing melengkung ke bawah
             if (bz < 0) {
               by -= 2.2 * Math.abs(bz / 24);
             }
-            // - Bagian samping bawah (Temporal Lobe) menggembung khas di ventrolateral
             if (Math.abs(bz) < 12 && by < 2 && by > -12) {
               bx *= 1.28;
             }
-            // - Cekungan dasar otak
             if (by < -10) {
               by *= 0.75;
             }
 
-            // Lipatan girus dan sulkus (gyri & sulci wrinkles)
             const fold = Math.sin(u * 6 + v * 4) * 1.4 + Math.cos(u * 5 - v * 5) * 1.1;
             bx += (bx / 16) * fold;
             by += (by / 19) * fold;
@@ -758,7 +1087,7 @@ export default function App(): React.JSX.Element {
             const nIdx = nodes.length;
             const nodeObj: BrainNode = {
               x: hemisphere * Math.abs(bx) + hOffset,
-              y: -by, // Balik koordinat agar kutub atas otak berada di atas
+              y: -by,
               z: bz,
               hemisphere,
               type: 'cortex',
@@ -770,14 +1099,13 @@ export default function App(): React.JSX.Element {
           }
         }
 
-        // 2. Serebelum (Cerebellum) di bagian bawah belakang oksipital
         for (let c = 0; c < 12; c++) {
           const cTheta = (c / 12) * Math.PI * 2;
           const cRadius = 6.5 + Math.sin(c * 3) * 1.2;
           const nIdx = nodes.length;
           nodes.push({
             x: hemisphere * (cRadius * Math.cos(cTheta) * 0.75 + 7),
-            y: 13 + Math.sin(cTheta * 2) * 2, // Berada di bawah posterior
+            y: 13 + Math.sin(cTheta * 2) * 2,
             z: -14 + Math.sin(cTheta) * 6,
             hemisphere,
             type: 'cerebellum',
@@ -787,7 +1115,6 @@ export default function App(): React.JSX.Element {
           hemiNodes.push(nIdx);
         }
 
-        // Sambungan akson neural internal dalam satu hemisfer
         for (let a = 0; a < hemiNodes.length; a++) {
           for (let b = a + 1; b < hemiNodes.length; b++) {
             const idxA = hemiNodes[a];
@@ -804,7 +1131,6 @@ export default function App(): React.JSX.Element {
         }
       });
 
-      // 3. Batang Otak (Brainstem) & Penghubung Corpus Callosum Antar-Hemisfer
       for (let s = 0; s < 7; s++) {
         const sY = 12 + s * 2.4;
         const stemIdx = nodes.length;
@@ -820,13 +1146,8 @@ export default function App(): React.JSX.Element {
         if (s > 0) connections.push([stemIdx - 1, stemIdx]);
       }
 
-      // Jembatan Corpus Callosum (garis koneksi yang menyeberangi celah tengah)
       for (let i = 0; i < nodes.length; i++) {
-        if (
-          nodes[i].type === 'cortex' &&
-          Math.abs(nodes[i].x) < 7 &&
-          nodes[i].y < 2
-        ) {
+        if (nodes[i].type === 'cortex' && Math.abs(nodes[i].x) < 7 && nodes[i].y < 2) {
           for (let j = i + 1; j < nodes.length; j++) {
             if (
               nodes[j].type === 'cortex' &&
@@ -851,7 +1172,6 @@ export default function App(): React.JSX.Element {
 
     const { nodes: brainNodes, connections: brainEdges } = generateRealisticBrain();
 
-    // Impuls sinaptik / potensial aksi yang meluncur antar neuron
     const actionPotentials: ActionPotential[] = [];
     for (let p = 0; p < 22; p++) {
       actionPotentials.push({
@@ -870,13 +1190,12 @@ export default function App(): React.JSX.Element {
       const h = (canvas.height = canvas.parentElement.clientHeight || 115);
 
       ctx.clearRect(0, 0, w, h);
-      angle += 0.012; // Rotasi horizontal perlahan
+      angle += 0.012;
 
       const cx = w * 0.5;
       const cy = h * 0.48;
-      const scale = Math.min(w, h) * 0.024; // Skala pas di dalam kartu
+      const scale = Math.min(w, h) * 0.024;
 
-      // Rotasi 3D (Pitch sedikit menunduk agar belahan atas dan serebelum terlihat)
       const pitch = 0.28;
       const cosPitch = Math.cos(pitch);
       const sinPitch = Math.sin(pitch);
@@ -884,15 +1203,12 @@ export default function App(): React.JSX.Element {
       const sinYaw = Math.sin(angle);
 
       const projected = brainNodes.map((n) => {
-        // Rotasi Yaw (Y)
         const x1 = n.x * cosYaw - n.z * sinYaw;
         const z1 = n.x * sinYaw + n.z * cosYaw;
 
-        // Rotasi Pitch (X)
         const y2 = n.y * cosPitch - z1 * sinPitch;
         const z2 = n.y * sinPitch + z1 * cosPitch;
 
-        // Proyeksi Perspektif
         const fov = 140;
         const pScale = fov / (fov + z2);
         return {
@@ -905,7 +1221,6 @@ export default function App(): React.JSX.Element {
         };
       });
 
-      // 1. Gambar Garis Akson Saraf (Neural Synaptic Pathways)
       ctx.lineWidth = 0.85;
       brainEdges.forEach(([iA, iB]) => {
         const pA = projected[iA];
@@ -920,7 +1235,6 @@ export default function App(): React.JSX.Element {
         ctx.stroke();
       });
 
-      // 2. Gambar Impuls Listrik Sinapsis (Action Potential Pulses)
       actionPotentials.forEach((pulse) => {
         pulse.progress += pulse.speed;
         if (pulse.progress > 1) {
@@ -947,7 +1261,6 @@ export default function App(): React.JSX.Element {
         }
       });
 
-      // 3. Gambar Badan Sel Neuron (Soma Nodes) dengan Depth Shading
       projected.forEach((p) => {
         const isFront = p.pz > 0;
         const alpha = Math.max(0.18, Math.min(1, (p.pz + 30) / 60));
@@ -982,7 +1295,12 @@ export default function App(): React.JSX.Element {
     return () => cancelAnimationFrame(animId);
   }, [accessed]);
 
-  // Jika bypass tersimpan, langsung tampilkan dashboard
+  // Filtered command logs
+  const filteredLogs = useMemo(() => {
+    if (logFilter === 'ALL') return logs;
+    return logs.filter((l) => l.category === logFilter);
+  }, [logs, logFilter]);
+
   if (isBypassed && accessed) {
     return (
       <DashboardPage
@@ -1007,13 +1325,12 @@ export default function App(): React.JSX.Element {
             transition: { duration: 0.4, ease: 'easeInOut' },
           }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
-          className="relative min-h-screen w-full bg-[#05070e] text-slate-100 flex flex-col justify-between overflow-hidden font-mono select-none"
+          className="relative min-h-screen w-full bg-[#04060A] text-slate-100 flex flex-col justify-between overflow-hidden font-mono select-none"
         >
           <style>{`
-            /* Beveled Cyber Tactical Corners untuk Tombol Utama */
             .cyber-button {
               position: relative;
-              background: rgba(0, 242, 254, 0.06);
+              background: rgba(0, 242, 254, 0.08);
               clip-path: polygon(
                 14px 0%, 
                 calc(100% - 14px) 0%, 
@@ -1045,11 +1362,10 @@ export default function App(): React.JSX.Element {
             }
 
             .cyber-border-wrap:hover {
-              box-shadow: 0 0 45px rgba(0, 242, 254, 0.8);
+              box-shadow: 0 0 45px rgba(0, 242, 254, 0.85);
               transform: translateY(-1px);
             }
 
-            /* 4 Sudut HUD Corner Brackets */
             .hud-corner-tl {
               position: absolute;
               top: 18px;
@@ -1110,15 +1426,31 @@ export default function App(): React.JSX.Element {
           {/* ========================================================================
               HEADER BAR
           ======================================================================== */}
-          <header className="relative z-20 w-full px-12 pt-6 flex items-center justify-between text-[11px] tracking-wider">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-[#080d1a]/80 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
+          <header className="relative z-20 w-full px-8 lg:px-12 pt-5 pb-1 flex items-center justify-between text-[11px] tracking-wider">
+            {/* Top-Left Pill */}
+            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-[#080d1a]/85 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
               <span className="text-cyan-400 text-xs">🛡</span>
               <span className="text-cyan-300 font-semibold tracking-widest text-[10.5px]">
                 COGNITIVE CRYPTO SHIELD ACTIVE
               </span>
+              <span className="text-slate-600">|</span>
+              <span className="text-[9px] text-slate-400 hidden sm:inline">
+                GATEWAY SEC: 256-BIT
+              </span>
             </div>
 
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-cyan-500/30 bg-[#080d1a]/80 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
+            {/* Top-Center Live UTC Clock */}
+            <div className="hidden md:flex items-center gap-3 text-[10px] text-slate-400 font-mono tracking-wider">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>INDODAX REST/WSS: CONNECTED</span>
+              </span>
+              <span className="text-slate-600">//</span>
+              <span className="text-cyan-300">TRADINGVIEW ENGINE: ACTIVE</span>
+            </div>
+
+            {/* Top-Right Pill */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-cyan-500/30 bg-[#080d1a]/85 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
               <span className="text-cyan-400 text-xs">((i))</span>
               <span className="text-slate-300 font-medium tracking-wider text-[10.5px]">
                 SYS_STATUS:
@@ -1130,181 +1462,262 @@ export default function App(): React.JSX.Element {
           </header>
 
           {/* ========================================================================
-              WORKSPACE 3-PANEL COMMAND DECK
+              WORKSPACE 3-PANEL COMMAND DECK (FULL-WIDTH 16:9 COCKPIT)
           ======================================================================== */}
-          <main className="relative z-10 w-full max-w-[1520px] mx-auto px-10 my-auto grid grid-cols-12 gap-8 items-center py-4">
+          <main className="relative z-10 w-full max-w-[1640px] mx-auto px-6 lg:px-10 my-auto grid grid-cols-12 gap-6 items-center py-3">
             {/* ======================================================================
-                PANEL KIRI: LOG DIAGNOSTIK VERTIKAL & TELEMETRI SAMPING
+                PANEL KIRI (WIDGET GANDA): 
+                1. PREVIEW TRADINGVIEW & INDODAX API PREVIEW
+                2. COMMAND LOG STREAM & TERMINAL KONTROL
             ====================================================================== */}
-            <div className="col-span-12 lg:col-span-3 flex items-start gap-4">
-              {/* Baris Meter Telemetri Samping */}
-              <div className="flex flex-col items-center gap-2 text-[9px] text-slate-400 pt-3">
-                <div className="text-[8px] font-bold text-slate-300">STATUS:</div>
-                <div className="font-mono text-cyan-300 text-[9px] leading-tight text-center">
-                  1010 0 1000
-                </div>
-                <div className="w-full text-[8px] font-bold text-slate-400 pt-2">
-                  GRID 6A2D:
-                </div>
-                <div className="font-mono text-slate-300 text-[8px]">[2, -3, 2, 8]</div>
-
-                {/* Meter Blok Vertikal */}
-                <div className="flex flex-col gap-[3px] py-2">
-                  {[...Array(14)].map((_, idx) => (
-                    <div
-                      key={idx}
-                      className={`w-2.5 h-1.5 rounded-[1px] ${
-                        idx > 8
-                          ? 'bg-cyan-400 shadow-[0_0_6px_#00f2fe]'
-                          : 'bg-slate-700/60'
+            <div className="col-span-12 xl:col-span-4 lg:col-span-4 flex flex-col gap-3.5">
+              {/* --------------------------------------------------------------------
+                  WIDGET 1 (ATAS): PREVIEW TRADINGVIEW & API INDODAX
+              -------------------------------------------------------------------- */}
+              <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/90 backdrop-blur-xl p-3.5 shadow-[0_10px_35px_rgba(0,242,254,0.1)] flex flex-col justify-between">
+                {/* Header Switcher: TradingView vs Indodax API */}
+                <div className="flex items-center justify-between pb-2.5 border-b border-cyan-500/20">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => {
+                        setLeftTab('tradingview');
+                        playCyberSound('hover');
+                      }}
+                      className={`px-2.5 py-1 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer ${
+                        leftTab === 'tradingview'
+                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 shadow-[0_0_10px_rgba(0,242,254,0.3)]'
+                          : 'text-slate-400 hover:text-slate-200'
                       }`}
-                    />
+                    >
+                      📊 TRADINGVIEW
+                    </button>
+                    <button
+                      onClick={() => {
+                        setLeftTab('indodax');
+                        playCyberSound('hover');
+                      }}
+                      className={`px-2.5 py-1 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer ${
+                        leftTab === 'indodax'
+                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 shadow-[0_0_10px_rgba(0,242,254,0.3)]'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      ⚡ INDODAX API
+                    </button>
+                  </div>
+
+                  {/* Indicator / Status Badge */}
+                  <div className="flex items-center gap-1.5 text-[8.5px] font-mono text-emerald-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>LIVE 14MS</span>
+                  </div>
+                </div>
+
+                {/* TAB 1: TRADINGVIEW ("TRATING VIEW") PREVIEW */}
+                {leftTab === 'tradingview' ? (
+                  <div className="pt-2">
+                    {/* Toolbar Mini TradingView */}
+                    <div className="flex items-center justify-between text-[9px] mb-2 font-mono">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-white text-[11px] tracking-wide">
+                          {selectedPair}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[8.5px] font-bold border border-emerald-500/30">
+                          +3.84%
+                        </span>
+                      </div>
+
+                      {/* Timeframe Switcher Buttons */}
+                      <div className="flex items-center gap-1 text-[8px] bg-slate-900/60 p-0.5 rounded border border-slate-700/60">
+                        {['1m', '5m', '15m', '1h', '1D'].map((tf) => (
+                          <button
+                            key={tf}
+                            onClick={() => {
+                              setTimeframe(tf);
+                              playCyberSound('hover');
+                            }}
+                            className={`px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+                              timeframe === tf
+                                ? 'bg-cyan-500 text-black font-bold'
+                                : 'text-slate-400 hover:text-white'
+                            }`}
+                          >
+                            {tf}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Kanvas Candlestick TradingView Realistis */}
+                    <div className="w-full h-[140px] relative rounded-lg bg-[#040813] border border-cyan-500/20 overflow-hidden">
+                      <canvas ref={tvCanvasRef} className="w-full h-full block" />
+                      
+                      {/* Watermark Indikator Wyckoff di Sudut */}
+                      <div className="absolute top-1.5 left-2 pointer-events-none text-[7.5px] font-mono text-cyan-400/70">
+                        EMA 8: <span className="text-[#00f2fe]">CYAN</span> | EMA 21: <span className="text-[#f59e0b]">AMBER</span> // WYCKOFF ACCUMULATION
+                      </div>
+                    </div>
+
+                    {/* Footer Info TradingView */}
+                    <div className="flex items-center justify-between text-[8px] text-slate-500 pt-1.5 font-mono">
+                      <span>RSI: 58.4 (BULLISH BIAS)</span>
+                      <span className="text-cyan-400">VOL: 148.2 BTC // 24H</span>
+                    </div>
+                  </div>
+                ) : (
+                  /* TAB 2: INDODAX API PREVIEW */
+                  <div className="pt-2 font-mono">
+                    <div className="flex items-center justify-between text-[8.5px] text-slate-400 mb-2 border-b border-cyan-500/15 pb-1">
+                      <span>ENDPOINT: <span className="text-cyan-300">api.indodax.com/api/summaries</span></span>
+                      <span className="text-emerald-400 font-bold">200 OK</span>
+                    </div>
+
+                    {/* Ticker List Indodax */}
+                    <div className="space-y-1.5 mb-2.5">
+                      {indodaxPairs.map((p) => (
+                        <div
+                          key={p.id}
+                          className="flex items-center justify-between px-2 py-1 rounded bg-[#091024]/60 border border-slate-800 text-[9px] hover:border-cyan-500/40 transition-colors"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-white">{p.symbol}/IDR</span>
+                            <span className="text-[7.5px] text-slate-500 hidden sm:inline">{p.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-slate-200">
+                              Rp {p.price >= 1000000 ? (p.price / 1000000).toFixed(2) + 'M' : p.price.toLocaleString('id-ID')}
+                            </span>
+                            <span
+                              className={`text-[8px] font-bold ${
+                                p.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'
+                              }`}
+                            >
+                              {p.change24h >= 0 ? `+${p.change24h.toFixed(2)}%` : `${p.change24h.toFixed(2)}%`}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Order Book Depth Bar Ratio (Bids vs Asks) */}
+                    <div className="pt-1">
+                      <div className="flex justify-between text-[8px] text-slate-400 mb-1">
+                        <span className="text-emerald-400">BUY DEPTH (53.4%)</span>
+                        <span className="text-rose-400">SELL DEPTH (46.6%)</span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-slate-800 flex overflow-hidden">
+                        <div className="h-full bg-emerald-400" style={{ width: '53.4%' }} />
+                        <div className="h-full bg-rose-500" style={{ width: '46.6%' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* --------------------------------------------------------------------
+                  WIDGET 2 (BAWAH): COMMAND LOG STREAM & TERMINAL DIAGNOSTIK
+              -------------------------------------------------------------------- */}
+              <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/90 backdrop-blur-xl p-3.5 shadow-[0_10px_35px_rgba(0,242,254,0.1)] flex flex-col justify-between">
+                {/* Header Command Log & Filter Tabs */}
+                <div className="flex items-center justify-between pb-2 border-b border-cyan-500/20 text-[9px]">
+                  <div className="flex items-center gap-1.5 font-bold text-white tracking-wider">
+                    <span className="text-cyan-400">⌨</span>
+                    <span>COMMAND LOG</span>
+                  </div>
+
+                  <div className="flex items-center gap-1 text-[7.5px]">
+                    {(['ALL', 'INDODAX', 'ORACLE', 'RISK'] as const).map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => {
+                          setLogFilter(cat);
+                          playCyberSound('hover');
+                        }}
+                        className={`px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+                          logFilter === cat
+                            ? 'bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-400/40'
+                            : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Log Stream Box dengan Auto-Scroll */}
+                <div
+                  ref={logContainerRef}
+                  className="space-y-1.5 py-2 font-mono text-[8.5px] max-h-[155px] overflow-y-auto pr-1 select-text scrollbar-thin scrollbar-thumb-cyan-500/30"
+                >
+                  {filteredLogs.map((item) => (
+                    <div key={item.id} className="leading-relaxed hover:bg-cyan-500/5 px-1 py-0.5 rounded transition-colors">
+                      <span className="text-slate-500">[{item.time}]</span>{' '}
+                      <span className="text-cyan-400 font-bold">{item.category}:</span>{' '}
+                      <span className="text-slate-200">{item.msg}</span>{' '}
+                      {item.status && (
+                        <span
+                          className="font-bold tracking-wider text-[8px] px-1 py-0.2 rounded bg-cyan-950/40"
+                          style={{ color: item.statusColor || '#00f2fe' }}
+                        >
+                          {item.status}
+                        </span>
+                      )}
+                    </div>
                   ))}
                 </div>
 
-                <div className="text-[8px] text-slate-500 pt-1">LATENCY:</div>
-                <div className="text-cyan-400 font-bold text-[9px]">~12MS</div>
-              </div>
-
-              {/* Kotak Konsol Log Diagnostik Kaca */}
-              <div className="flex-1 rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-4 shadow-[0_12px_40px_rgba(0,242,254,0.12)] min-h-[440px] flex flex-col justify-between text-[10px] leading-relaxed">
-                {/* Header Kode Heksadesimal */}
-                <div className="space-y-0.5 text-[8.5px] text-slate-500 font-mono pb-3 border-b border-cyan-500/20">
-                  <div className="flex justify-between">
-                    <span>GRID</span>
-                    <span>100 0 1060</span>
+                {/* Interactive CLI Prompt Line */}
+                <div className="pt-2 border-t border-cyan-500/20 flex items-center justify-between text-[8px] text-slate-400 font-mono">
+                  <div className="flex items-center gap-1 text-cyan-300">
+                    <span className="text-emerald-400">root@fantasma-v4:~$</span>
+                    <span>scan --wyckoff --indodax</span>
+                    <span className="w-1.5 h-3 bg-cyan-400 animate-pulse ml-0.5" />
                   </div>
-                  <div className="flex justify-between">
-                    <span>6R20</span>
-                    <span>123 0 2090</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>G020</span>
-                    <span>289 0 2060</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>6R20</span>
-                    <span>233 0 2060</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>6R20</span>
-                    <span>323 0 1650</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>6R20</span>
-                    <span>936 0 2000</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>6R20</span>
-                    <span>339 0 1060</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>GA20</span>
-                    <span>529 0 2660</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>GR20</span>
-                    <span>816 0 1000</span>
-                  </div>
-                </div>
-
-                {/* Log Terminal Aktif */}
-                <div className="space-y-3 pt-3 font-mono text-[9.5px]">
-                  <div>
-                    <span className="text-slate-400">[11:35:43 AM]</span>{' '}
-                    <span className="text-cyan-400 font-bold">SYSTEM:</span>{' '}
-                    <span className="text-slate-200">
-                      DE METHODOLOGY ANALYZERS INITIALIZED (SAC, WYCKOFF, HARMONIC...)
-                    </span>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-400">[11:35:43 AM]</span>{' '}
-                    <span className="text-cyan-400 font-bold">SYSTEM:</span>{' '}
-                    <span className="text-slate-200">
-                      MULTI-TIMEFRAME ANALYSIS COMPLETE //
-                    </span>{' '}
-                    <span className="text-cyan-400 font-bold tracking-wider">ACTIVE</span>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-400">[11:35:44 AM]</span>{' '}
-                    <span className="text-cyan-400 font-bold">SYSTEM:</span>{' '}
-                    <span className="text-slate-200">
-                      HALF-KELLY CAPITAL PRESERVATION STRATEGY:
-                    </span>{' '}
-                    <span className="text-emerald-400 font-bold tracking-wider">
-                      STABLE
-                    </span>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-400">[11:35:44 AM]</span>{' '}
-                    <span className="text-cyan-400 font-bold">SYSTEM:</span>{' '}
-                    <span className="text-slate-200">
-                      WARPING: TIME MACHINE VOLATILITY DETECTED:
-                    </span>{' '}
-                    <span className="text-cyan-400 font-bold tracking-wider">HIGH</span>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-400">[11:35:45 AM]</span>{' '}
-                    <span className="text-cyan-400 font-bold">SYSTEM:</span>{' '}
-                    <span className="text-slate-200">
-                      COGNITIVE ENCRYPTION COMPLETE //
-                    </span>{' '}
-                    <span className="text-emerald-400 font-bold tracking-wider">
-                      CONNECTED
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-cyan-500/20 text-[8.5px] text-slate-500 flex justify-between">
-                  <span>SECURITY PROTOCOL: v4.0</span>
-                  <span className="text-emerald-400">ENCRYPTED</span>
+                  <span className="text-slate-500 hidden sm:inline">BUF: 100%</span>
                 </div>
               </div>
             </div>
 
             {/* ======================================================================
-                PANEL TENGAH: BRANDING UTAMA, PEDESTAL & TOMBOL MASUK KE TERMINAL
+                PANEL TENGAH: 3D LUXURY CELESTIAL CORE & BRANDING UTAMA
             ====================================================================== */}
-            <div className="col-span-12 lg:col-span-6 flex flex-col items-center text-center justify-center pt-2 pb-6">
+            <div className="col-span-12 xl:col-span-5 lg:col-span-5 flex flex-col items-center text-center justify-center pt-1 pb-4">
               {/* VIEWPORT 3D CELESTIAL CORE INTERAKTIF (BISA DIGERAKKAN/DRAGGABLE) */}
-              <div className="relative w-full max-w-[460px] h-[240px] sm:h-[270px] flex items-center justify-center cursor-grab active:cursor-grabbing mb-2 group">
+              <div className="relative w-full max-w-[440px] h-[230px] sm:h-[260px] flex items-center justify-center cursor-grab active:cursor-grabbing mb-1 group">
                 <canvas ref={globeCanvasRef} className="w-full h-full block" />
 
                 {/* HUD Status Badge dengan Desain Horologi Mewah */}
-                <div className="absolute bottom-1 px-3.5 py-1 rounded-full border border-cyan-500/25 bg-[#070b16]/90 text-[9px] font-mono text-cyan-300/90 flex items-center gap-2.5 pointer-events-none backdrop-blur-xl shadow-[0_4px_20px_rgba(0,242,254,0.12)]">
+                <div className="absolute bottom-1 px-3 py-1 rounded-full border border-cyan-500/25 bg-[#070b16]/90 text-[8.5px] font-mono text-cyan-300/90 flex items-center gap-2 pointer-events-none backdrop-blur-xl shadow-[0_4px_20px_rgba(0,242,254,0.12)]">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f2fe] animate-pulse" />
                   <span ref={telemetryTagRef}>AZIMUTH: 0° | ELEVATION: 0°</span>
-                  <span className="text-slate-500 text-[8px] pl-1 border-l border-slate-700/60 hidden sm:inline">
-                    SMOOTH TOUCH & DRAG
+                  <span className="text-slate-500 text-[7.5px] pl-1 border-l border-slate-700/60 hidden sm:inline">
+                    TOUCH & DRAG
                   </span>
                 </div>
               </div>
 
               {/* JUDUL BESAR: FANTASMA SYNERGY */}
-              <div className="mb-2 relative">
-                <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-[0.24em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#f0f9ff] to-[#38bdf8] drop-shadow-[0_0_40px_rgba(0,242,254,0.7)] uppercase">
+              <div className="mb-1 relative">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-[0.24em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#f0f9ff] to-[#38bdf8] drop-shadow-[0_0_40px_rgba(0,242,254,0.7)] uppercase">
                   FANTASMA
                 </h1>
-                <h2 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-[0.24em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#f0f9ff] to-[#38bdf8] drop-shadow-[0_0_40px_rgba(0,242,254,0.7)] uppercase -mt-2 sm:-mt-3">
+                <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-[0.24em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#f0f9ff] to-[#38bdf8] drop-shadow-[0_0_40px_rgba(0,242,254,0.7)] uppercase -mt-2">
                   SYNERGY
                 </h2>
               </div>
 
               {/* SUBTITLE */}
-              <p className="text-[10px] sm:text-[11px] font-mono tracking-[0.22em] text-cyan-300/90 mb-8 max-w-xl">
+              <p className="text-[9.5px] sm:text-[10.5px] font-mono tracking-[0.22em] text-cyan-300/90 mb-6 max-w-xl">
                 QUANTITATIVE ORACLE INVESTMENT TERMINAL v4.0 &nbsp;|&nbsp; FOREX + CRYPTO
               </p>
 
               {/* TOMBOL UTAMA: [ MASUK KE TERMINAL → ] */}
-              <div className="cyber-border-wrap mb-4">
+              <div className="cyber-border-wrap mb-3.5">
                 <button
                   onClick={handleEnterTerminal}
                   onMouseEnter={() => playCyberSound('hover')}
-                  className="cyber-button px-10 py-3 text-xs sm:text-sm font-black tracking-[0.22em] text-cyan-300 hover:text-white flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                  className="cyber-button px-9 py-2.5 text-xs sm:text-sm font-black tracking-[0.22em] text-cyan-300 hover:text-white flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
                   <span>[ MASUK KE TERMINAL → ]</span>
                 </button>
@@ -1325,41 +1738,37 @@ export default function App(): React.JSX.Element {
             </div>
 
             {/* ======================================================================
-                PANEL KANAN: 3 KARTU METRIK BERSIFAT VERTIKAL & SLIDER FADER
+                PANEL KANAN: 3 KARTU METRIK & HARDWARE FADER SLIDERS
             ====================================================================== */}
-            <div className="col-span-12 lg:col-span-3 flex items-start gap-4">
+            <div className="col-span-12 xl:col-span-3 lg:col-span-3 flex items-start gap-3.5">
               {/* Kolom 3 Kartu Metrik */}
-              <div className="flex-1 space-y-3.5">
+              <div className="flex-1 space-y-3">
                 {/* KARTU 1: 1s Ticks */}
-                <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-3.5 shadow-[0_8px_30px_rgba(0,242,254,0.08)]">
-                  <div className="flex items-center justify-between mb-1.5">
+                <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,242,254,0.08)]">
+                  <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-white tracking-wide">
                       <span className="text-cyan-400">📈</span>
                       <span>1s Ticks</span>
                     </div>
-                    <span className="text-[9px] font-mono text-emerald-400">
-                      ACTIVE FEED
-                    </span>
+                    <span className="text-[8.5px] font-mono text-emerald-400">ACTIVE FEED</span>
                   </div>
-                  <div className="w-full h-20 relative">
+                  <div className="w-full h-18 relative">
                     <canvas ref={sparklineCanvasRef} className="w-full h-full block" />
                   </div>
                 </div>
 
                 {/* KARTU 2: Kelly Aware */}
-                <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-3.5 shadow-[0_8px_30px_rgba(0,242,254,0.08)]">
-                  <div className="flex items-center justify-between mb-2">
+                <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,242,254,0.08)]">
+                  <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-white tracking-wide">
                       <span className="text-cyan-400">📊</span>
                       <span>Kelly Aware</span>
                     </div>
-                    <span className="text-[9px] font-mono text-cyan-400">
-                      CAPITAL GUARD
-                    </span>
+                    <span className="text-[8.5px] font-mono text-cyan-400">CAPITAL GUARD</span>
                   </div>
 
                   {/* Diagram Tangga / Stepped Ascending Bars */}
-                  <div className="flex items-end justify-between gap-1.5 h-12 px-1 mb-3">
+                  <div className="flex items-end justify-between gap-1.5 h-10 px-1 mb-2">
                     {[14, 20, 26, 34, 42].map((height, i) => (
                       <div
                         key={i}
@@ -1370,8 +1779,8 @@ export default function App(): React.JSX.Element {
                   </div>
 
                   {/* Horizontal Progress Bar */}
-                  <div className="pt-1">
-                    <div className="flex justify-between text-[9px] font-mono text-slate-400 mb-1">
+                  <div className="pt-0.5">
+                    <div className="flex justify-between text-[8.5px] font-mono text-slate-400 mb-1">
                       <span>RISK PROGRESS:</span>
                       <span className="text-cyan-400 font-bold">76%</span>
                     </div>
@@ -1382,58 +1791,58 @@ export default function App(): React.JSX.Element {
                 </div>
 
                 {/* KARTU 3: Multi-Model */}
-                <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-3.5 shadow-[0_8px_30px_rgba(0,242,254,0.08)]">
+                <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,242,254,0.08)]">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-white tracking-wide">
                       <span className="text-cyan-400">🧠</span>
                       <span>Multi-Model</span>
                     </div>
-                    <div className="flex items-center gap-1 text-[9px] font-mono text-cyan-400">
+                    <div className="flex items-center gap-1 text-[8.5px] font-mono text-cyan-400">
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                       <span>NEURAL 3D</span>
                     </div>
                   </div>
-                  <div className="w-full h-28 relative">
+                  <div className="w-full h-24 relative">
                     <canvas ref={brainCanvasRef} className="w-full h-full block" />
                   </div>
-                  <div className="flex items-center justify-between text-[8px] font-mono text-slate-500 pt-1 border-t border-cyan-500/15">
+                  <div className="flex items-center justify-between text-[7.5px] font-mono text-slate-500 pt-1 border-t border-cyan-500/15">
                     <span>SYNAPSES: 4,120</span>
                     <span className="text-purple-400">HEMISPHERES: L / R</span>
                   </div>
                 </div>
               </div>
 
-              {/* Telemetri Tepi Kanan (Slider & Fader S6002 / USCO2 / OA80) */}
-              <div className="flex flex-col items-center gap-2 text-[9px] text-slate-400 pt-3">
+              {/* Telemetri Tepi Kanan (Slider & Fader Hardware Mixer) */}
+              <div className="flex flex-col items-center gap-2 text-[9px] text-slate-400 pt-2">
                 <div className="text-[8px] font-mono text-slate-400">LATENCY:</div>
                 <div className="text-cyan-400 font-bold text-[9px]">~12MS</div>
-                <div className="text-[8px] font-mono text-slate-500">68602800</div>
+                <div className="text-[7.5px] font-mono text-slate-500">68602800</div>
 
                 {/* Slider Fader Audio / Hardware Mixer */}
-                <div className="flex flex-col items-center gap-4 py-2">
+                <div className="flex flex-col items-center gap-3.5 py-1.5">
                   <div className="flex flex-col items-center">
-                    <span className="text-[7.5px] font-mono text-slate-500">S6002:</span>
-                    <div className="w-1.5 h-12 bg-slate-800 rounded-full relative my-1">
-                      <div className="absolute top-3 -left-1 w-3.5 h-1.5 bg-cyan-400 rounded-sm shadow-[0_0_6px_#00f2fe]" />
+                    <span className="text-[7px] font-mono text-slate-500">S6002:</span>
+                    <div className="w-1.5 h-11 bg-slate-800 rounded-full relative my-1">
+                      <div className="absolute top-2.5 -left-1 w-3.5 h-1.5 bg-cyan-400 rounded-sm shadow-[0_0_6px_#00f2fe]" />
                     </div>
                   </div>
 
                   <div className="flex flex-col items-center">
-                    <span className="text-[7.5px] font-mono text-slate-500">USCO2</span>
-                    <div className="w-1.5 h-12 bg-slate-800 rounded-full relative my-1">
-                      <div className="absolute top-6 -left-1 w-3.5 h-1.5 bg-cyan-400 rounded-sm shadow-[0_0_6px_#00f2fe]" />
+                    <span className="text-[7px] font-mono text-slate-500">USCO2</span>
+                    <div className="w-1.5 h-11 bg-slate-800 rounded-full relative my-1">
+                      <div className="absolute top-5 -left-1 w-3.5 h-1.5 bg-cyan-400 rounded-sm shadow-[0_0_6px_#00f2fe]" />
                     </div>
                   </div>
 
                   <div className="flex flex-col items-center">
-                    <span className="text-[7.5px] font-mono text-slate-500">OA80:</span>
-                    <div className="w-1.5 h-12 bg-slate-800 rounded-full relative my-1">
-                      <div className="absolute top-2 -left-1 w-3.5 h-1.5 bg-cyan-400 rounded-sm shadow-[0_0_6px_#00f2fe]" />
+                    <span className="text-[7px] font-mono text-slate-500">OA80:</span>
+                    <div className="w-1.5 h-11 bg-slate-800 rounded-full relative my-1">
+                      <div className="absolute top-1.5 -left-1 w-3.5 h-1.5 bg-cyan-400 rounded-sm shadow-[0_0_6px_#00f2fe]" />
                     </div>
                   </div>
                 </div>
 
-                <div className="text-[7px] text-slate-500 pt-1 tracking-tighter">
+                <div className="text-[7px] text-slate-500 pt-0.5 tracking-tighter">
                   LANTER SENSOR
                 </div>
               </div>
@@ -1443,8 +1852,13 @@ export default function App(): React.JSX.Element {
           {/* ========================================================================
               FOOTER TELEMETRY STATUS BAR
           ======================================================================== */}
-          <footer className="relative z-20 w-full px-12 py-5 flex items-center justify-between text-[10px] tracking-widest text-slate-500 font-mono">
+          <footer className="relative z-20 w-full px-8 lg:px-12 py-4 flex items-center justify-between text-[10px] tracking-widest text-slate-500 font-mono">
             <div>FANTASMA SYNERGY SYSTEMS INC.</div>
+            <div className="hidden md:flex items-center gap-4 text-[9px] text-slate-400">
+              <span>TRADINGVIEW CHART ENGINE: V2.4</span>
+              <span>•</span>
+              <span>INDODAX GATEWAY: ACTIVE (IDR_MARKET)</span>
+            </div>
             <div>ALL PROTOCOLS ENCRYPTED // [v4.0]</div>
           </footer>
         </motion.div>
