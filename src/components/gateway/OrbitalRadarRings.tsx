@@ -16,7 +16,7 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
   const { degreeTicks, degreeLabels } = useMemo(() => {
     const ticks: { x1: number; y1: number; x2: number; y2: number; isMajor: boolean }[] = [];
     const labels: { x: number; y: number; text: string; deg: number; rot: number }[] = [];
-    const rRing = 195;
+    const rRing = 205;
 
     // Specific displayed labels around the arc matching reference
     const arcLabels = [
@@ -44,7 +44,7 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
     for (let a = -140; a <= 140; a += 2.5) {
       const rad = ((a - 90) * Math.PI) / 180;
       const isMajor = a % 10 === 0 || a === 0;
-      const len = isMajor ? 10 : 5;
+      const len = isMajor ? 11 : 5.5;
 
       ticks.push({
         x1: Math.cos(rad) * rRing,
@@ -57,8 +57,8 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
 
     arcLabels.forEach(item => {
       const rad = ((item.angle - 90) * Math.PI) / 180;
-      const lx = Math.cos(rad) * (rRing + 20);
-      const ly = Math.sin(rad) * (rRing + 20);
+      const lx = Math.cos(rad) * (rRing + 21);
+      const ly = Math.sin(rad) * (rRing + 21);
       labels.push({
         x: lx,
         y: ly,
@@ -73,7 +73,7 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
 
   // Dashed Ring Nodes
   const dashedNodes = useMemo(() => {
-    const r = 155;
+    const r = 165;
     const angles = [-120, -50, 20, 85, 160, 230];
     return angles.map(deg => {
       const rad = ((deg - 90) * Math.PI) / 180;
@@ -88,62 +88,37 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
   // Armillary sphere intersection nodes
   const sphereNodes = useMemo(() => {
     return [
-      { cx: -105, cy: -32, r: 2.2 },
-      { cx: 105, cy: -32, r: 2.2 },
-      { cx: -135, cy: 0, r: 2.5 },
-      { cx: 135, cy: 0, r: 2.5 },
-      { cx: -105, cy: 32, r: 2.2 },
-      { cx: 105, cy: 32, r: 2.2 },
-      { cx: 0, cy: -55, r: 2.8 },
-      { cx: 0, cy: 55, r: 2.8 },
-      { cx: -50, cy: -20, r: 2 },
-      { cx: 50, cy: -20, r: 2 },
-      { cx: -50, cy: 20, r: 2 },
-      { cx: 50, cy: 20, r: 2 },
-      { cx: 0, cy: 0, r: 3.2 },
-      { cx: -60, cy: -75, r: 2 },
-      { cx: 60, cy: -75, r: 2 },
-      { cx: -80, cy: 65, r: 2 },
-      { cx: 80, cy: 65, r: 2 },
+      { cx: -115, cy: -34, r: 2.4 },
+      { cx: 115, cy: -34, r: 2.4 },
+      { cx: -145, cy: 0, r: 2.6 },
+      { cx: 145, cy: 0, r: 2.6 },
+      { cx: -115, cy: 34, r: 2.4 },
+      { cx: 115, cy: 34, r: 2.4 },
+      { cx: 0, cy: -60, r: 3 },
+      { cx: 0, cy: 60, r: 3 },
+      { cx: -60, cy: -80, r: 2 },
+      { cx: 60, cy: -80, r: 2 },
+      { cx: -85, cy: 70, r: 2 },
+      { cx: 85, cy: 70, r: 2 },
     ];
   }, []);
 
   // Dynamic parallax tilt
-  const tiltX = 58 + mouseY * 6;
+  const tiltX = 56 + mouseY * 6;
   const tiltY = mouseX * 8;
 
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-visible">
-      {/* Background Isometric Wireframe Planes (matching screenshot sides) */}
-      <div className="absolute inset-0 flex items-center justify-between px-8 md:px-16 pointer-events-none opacity-20">
-        {/* Left Wireframe Grid Box */}
-        <svg width="180" height="120" viewBox="0 0 180 120" className="hidden lg:block overflow-visible">
-          <path d="M10 80 L90 30 L170 50 L90 100 Z" fill="none" stroke="#00F0FF" strokeWidth="0.8" />
-          <path d="M10 80 L10 110 L90 130 L90 100" fill="none" stroke="#00F0FF" strokeWidth="0.8" />
-          <path d="M170 50 L170 80 L90 130" fill="none" stroke="#00F0FF" strokeWidth="0.8" />
-          <line x1="30" y1="67" x2="110" y2="17" stroke="#00F0FF" strokeWidth="0.5" strokeDasharray="3 3" />
-          <line x1="50" y1="55" x2="130" y2="5" stroke="#00F0FF" strokeWidth="0.5" strokeDasharray="3 3" />
-        </svg>
-
-        {/* Right Wireframe Grid Box */}
-        <svg width="180" height="120" viewBox="0 0 180 120" className="hidden lg:block overflow-visible">
-          <path d="M10 50 L90 20 L170 70 L90 100 Z" fill="none" stroke="#00F0FF" strokeWidth="0.8" />
-          <path d="M10 50 L10 80 L90 130 L90 100" fill="none" stroke="#00F0FF" strokeWidth="0.8" />
-          <path d="M170 70 L170 100 L90 130" fill="none" stroke="#00F0FF" strokeWidth="0.8" />
-          <line x1="50" y1="35" x2="130" y2="85" stroke="#00F0FF" strokeWidth="0.5" strokeDasharray="3 3" />
-        </svg>
-      </div>
-
       {/* Center 3D Radar System */}
       <div
-        className="relative w-[340px] h-[340px] md:w-[480px] md:h-[480px] preserve-3d transition-transform duration-300 ease-out"
+        className="relative w-[380px] h-[380px] sm:w-[480px] sm:h-[480px] lg:w-[580px] lg:h-[580px] preserve-3d transition-transform duration-300 ease-out"
         style={{
           perspective: '1000px',
           transform: `rotateX(${tiltX}deg) rotateZ(${tiltY}deg)`,
         }}
       >
         <svg
-          viewBox="-250 -250 500 500"
+          viewBox="-260 -260 520 520"
           className="w-full h-full overflow-visible"
         >
           <defs>
@@ -166,23 +141,23 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
             </filter>
 
             <radialGradient id="centerAtmosphere" cx="0%" cy="0%" r="50%">
-              <stop offset="0%" stopColor="#00F0FF" stopOpacity="0.22" />
+              <stop offset="0%" stopColor="#00F0FF" stopOpacity="0.25" />
               <stop offset="65%" stopColor="#00F0FF" stopOpacity="0.04" />
               <stop offset="100%" stopColor="#00F0FF" stopOpacity="0" />
             </radialGradient>
           </defs>
 
           {/* Central Radial Atmosphere */}
-          <circle cx="0" cy="0" r="170" fill="url(#centerAtmosphere)" />
+          <circle cx="0" cy="0" r="180" fill="url(#centerAtmosphere)" />
 
           {/* Outer Boundary Reticle Ring */}
           <circle
             cx="0"
             cy="0"
-            r="238"
+            r="250"
             fill="none"
             stroke="#00F0FF"
-            strokeWidth="0.75"
+            strokeWidth="0.8"
             strokeOpacity="0.25"
             strokeDasharray="6 8"
           />
@@ -194,10 +169,10 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
           <circle
             cx="0"
             cy="0"
-            r="195"
+            r="205"
             fill="none"
             stroke="#00F0FF"
-            strokeWidth="1.4"
+            strokeWidth="1.5"
             filter="url(#cyanGlow)"
           />
 
@@ -210,8 +185,8 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
               x2={t.x2}
               y2={t.y2}
               stroke="#00F0FF"
-              strokeWidth={t.isMajor ? 1.4 : 0.7}
-              strokeOpacity={t.isMajor ? 0.9 : 0.45}
+              strokeWidth={t.isMajor ? 1.5 : 0.75}
+              strokeOpacity={t.isMajor ? 0.95 : 0.45}
             />
           ))}
 
@@ -222,7 +197,7 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
               x={l.x}
               y={l.y}
               fill="#00F0FF"
-              fontSize="7"
+              fontSize="7.5"
               fontFamily="JetBrains Mono, monospace"
               fontWeight="600"
               textAnchor="middle"
@@ -236,8 +211,8 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
           {/* Prominent Glowing Beacon Node at Top (near -90deg / 355-0deg) */}
           <circle
             cx="-12"
-            cy="-195"
-            r="3.8"
+            cy="-205"
+            r="4"
             fill="#00F0FF"
             filter="url(#flareGlow)"
             className="animate-glow-pulse"
@@ -250,7 +225,7 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
             <circle
               cx="0"
               cy="0"
-              r="155"
+              r="165"
               fill="none"
               stroke="#00F0FF"
               strokeWidth="1.2"
@@ -264,7 +239,7 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
                 <circle
                   cx={n.cx}
                   cy={n.cy}
-                  r="3.2"
+                  r="3.5"
                   fill="#00F0FF"
                   filter="url(#cyanGlow)"
                   className="animate-glow-pulse"
@@ -272,7 +247,7 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
                 <circle
                   cx={n.cx}
                   cy={n.cy}
-                  r="5.5"
+                  r="6"
                   fill="none"
                   stroke="#00FF9D"
                   strokeWidth="0.6"
@@ -285,18 +260,18 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
           {/* ========================================================
               ARMILLARY CELESTIAL SPHERE WIREFRAME (The Eye)
              ======================================================== */}
-          <g className="opacity-60">
+          <g className="opacity-55">
             {/* Latitude Ellipses */}
-            <ellipse cx="0" cy="0" rx="168" ry="46" fill="none" stroke="#00F0FF" strokeWidth="0.8" strokeOpacity="0.45" />
-            <ellipse cx="0" cy="-35" rx="146" ry="38" fill="none" stroke="#00F0FF" strokeWidth="0.6" strokeOpacity="0.35" />
-            <ellipse cx="0" cy="35" rx="146" ry="38" fill="none" stroke="#00F0FF" strokeWidth="0.6" strokeOpacity="0.35" />
-            <ellipse cx="0" cy="-70" rx="105" ry="24" fill="none" stroke="#00F0FF" strokeWidth="0.5" strokeOpacity="0.25" />
-            <ellipse cx="0" cy="70" rx="105" ry="24" fill="none" stroke="#00F0FF" strokeWidth="0.5" strokeOpacity="0.25" />
+            <ellipse cx="0" cy="0" rx="180" ry="48" fill="none" stroke="#00F0FF" strokeWidth="0.8" strokeOpacity="0.45" />
+            <ellipse cx="0" cy="-38" rx="155" ry="40" fill="none" stroke="#00F0FF" strokeWidth="0.6" strokeOpacity="0.35" />
+            <ellipse cx="0" cy="38" rx="155" ry="40" fill="none" stroke="#00F0FF" strokeWidth="0.6" strokeOpacity="0.35" />
+            <ellipse cx="0" cy="-75" rx="112" ry="25" fill="none" stroke="#00F0FF" strokeWidth="0.5" strokeOpacity="0.25" />
+            <ellipse cx="0" cy="75" rx="112" ry="25" fill="none" stroke="#00F0FF" strokeWidth="0.5" strokeOpacity="0.25" />
 
             {/* Longitude Arcs */}
-            <ellipse cx="0" cy="0" rx="46" ry="168" fill="none" stroke="#00F0FF" strokeWidth="0.6" strokeOpacity="0.35" />
-            <ellipse cx="0" cy="0" rx="105" ry="168" fill="none" stroke="#00F0FF" strokeWidth="0.6" strokeOpacity="0.3" />
-            <ellipse cx="0" cy="0" rx="146" ry="168" fill="none" stroke="#00F0FF" strokeWidth="0.5" strokeOpacity="0.2" />
+            <ellipse cx="0" cy="0" rx="48" ry="180" fill="none" stroke="#00F0FF" strokeWidth="0.6" strokeOpacity="0.35" />
+            <ellipse cx="0" cy="0" rx="112" ry="180" fill="none" stroke="#00F0FF" strokeWidth="0.6" strokeOpacity="0.3" />
+            <ellipse cx="0" cy="0" rx="155" ry="180" fill="none" stroke="#00F0FF" strokeWidth="0.5" strokeOpacity="0.2" />
 
             {/* Intersection Nodes */}
             {sphereNodes.map((pt, idx) => (
@@ -316,11 +291,11 @@ export const OrbitalRadarRings: React.FC<OrbitalRadarRingsProps> = ({
       </div>
 
       {/* Horizontal Anamorphic Lens Flare Beam behind center typography */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[2px] pointer-events-none z-0">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[2.5px] pointer-events-none z-0">
         <div className="w-full h-full bg-gradient-to-r from-transparent via-[#00F0FF]/35 to-transparent blur-[1px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-[2.5px] bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_16px_#00F0FF]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-[3px] bg-gradient-to-r from-transparent via-white to-transparent shadow-[0_0_18px_#00F0FF]" />
         {/* Optical cyan flare spot on left */}
-        <div className="absolute top-1/2 left-[24%] -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#00F0FF] blur-[3px] opacity-90 animate-glow-pulse" />
+        <div className="absolute top-1/2 left-[20%] -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#00F0FF] blur-[3px] opacity-90 animate-glow-pulse" />
       </div>
     </div>
   );

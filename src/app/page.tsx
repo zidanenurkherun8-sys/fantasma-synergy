@@ -8,16 +8,11 @@ import {
   Radio,
   Volume2,
   VolumeX,
-  Activity,
-  BarChart2,
-  Settings,
 } from 'lucide-react';
 import { audio } from '@/lib/audio';
 import { OrbitalRadarRings } from '@/components/gateway/OrbitalRadarRings';
-import { TerminalDiagnosticConsole } from '@/components/gateway/TerminalDiagnosticConsole';
-import { LiveSparkline } from '@/components/gateway/LiveSparkline';
-import { SegmentedKellyBar } from '@/components/gateway/SegmentedKellyBar';
-import { NeuralClusterIcon } from '@/components/gateway/NeuralClusterIcon';
+import { LeftTerminalLog } from '@/components/gateway/LeftTerminalLog';
+import { RightTelemetryCards } from '@/components/gateway/RightTelemetryCards';
 
 export default function Home() {
   const [accessed, setAccessed] = useState(false);
@@ -131,7 +126,7 @@ export default function Home() {
     resize();
     window.addEventListener('resize', resize);
 
-    // 70 fine quantum particles (cyan and lavender)
+    // 70 quantum data particles (cyan and lavender)
     const particles = Array.from({ length: 65 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -207,21 +202,21 @@ export default function Home() {
           className="h-screen w-full relative bg-[#05070A] text-slate-100 font-sans flex flex-col justify-between overflow-hidden select-none"
           style={{
             backgroundImage: `
-              radial-gradient(circle at 50% 36%, rgba(0, 240, 255, 0.08) 0%, rgba(10, 15, 22, 0.75) 45%, #05070A 85%),
-              conic-gradient(from 180deg at 50% 50%, rgba(0, 240, 255, 0.012) 0deg, rgba(157, 78, 221, 0.012) 180deg, rgba(0, 240, 255, 0.012) 360deg)
+              radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.08) 0%, rgba(10, 15, 22, 0.75) 45%, #05070A 85%),
+              conic-gradient(from 180deg at 50% 50%, rgba(0, 240, 255, 0.015) 0deg, rgba(157, 78, 221, 0.015) 180deg, rgba(0, 240, 255, 0.015) 360deg)
             `,
           }}
         >
-          {/* Subtle Fine Gridline Overlay (Opacity 0.03) */}
+          {/* Subtle Fine Gridline Overlay (Opacity 10% across entire widescreen) */}
           <div
             className="fixed inset-0 pointer-events-none z-0"
             style={{
               backgroundImage: `
-                linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px)
+                linear-gradient(rgba(0, 240, 255, 0.10) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.10) 1px, transparent 1px)
               `,
               backgroundSize: '48px 48px',
-              maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 30%, rgba(0,0,0,0.2) 90%)',
+              maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 40%, rgba(0,0,0,0.3) 95%)',
             }}
           />
 
@@ -232,11 +227,11 @@ export default function Home() {
           />
 
           {/* ========================================================
-              TOP TELEMETRY HEADER
+              5. FULL-WIDTH TELEMETRY BAR: TOP HEADER
              ======================================================== */}
-          <header className="w-full h-12 px-6 md:px-12 flex items-center justify-between z-30 shrink-0">
+          <header className="w-full h-11 px-6 md:px-8 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-b border-[rgba(0,240,255,0.18)] flex items-center justify-between z-30 shrink-0">
             {/* Top-Left: Cognitive Crypto Shield Active */}
-            <div className="flex items-center gap-2 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3.5 py-1.5 rounded-[6px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
+            <div className="flex items-center gap-2 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3 py-1 rounded-[4px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
               <ShieldCheck className="w-3.5 h-3.5 text-[#00F0FF] animate-pulse" />
               <span className="text-[10px] font-mono tracking-[0.14em] text-slate-200 font-semibold uppercase">
                 COGNITIVE CRYPTO SHIELD ACTIVE
@@ -258,7 +253,7 @@ export default function Home() {
                 )}
               </button>
 
-              <div className="flex items-center gap-2.5 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3.5 py-1.5 rounded-[6px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
+              <div className="flex items-center gap-2.5 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3.5 py-1 rounded-[4px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
                 <Radio className="w-3.5 h-3.5 text-[#00FF9D] animate-pulse" />
                 <span className="text-[10px] font-mono tracking-[0.14em] font-semibold text-slate-300 uppercase">
                   SYS_STATUS:{' '}
@@ -267,7 +262,7 @@ export default function Home() {
                   </span>{' '}
                   //{' '}
                   <span className="text-[#00FF9D] drop-shadow-[0_0_6px_rgba(0,255,157,0.7)]">
-                    ONLINE
+                    ONLINE (12MS)
                   </span>
                 </span>
               </div>
@@ -275,123 +270,106 @@ export default function Home() {
           </header>
 
           {/* ========================================================
-              CENTRAL QUANTITATIVE ORACLE CORE
+              1. FULL-WIDTH COCKPIT GRID (OPSI A): 12-COLUMN LAYOUT
              ======================================================== */}
-          <main className="flex-1 flex flex-col items-center justify-center relative w-full px-4 z-20">
-            {/* Center Eye: 3D Orbital Radar Rings & Branding */}
-            <div className="relative w-full max-w-[580px] h-[210px] md:h-[240px] flex items-center justify-center">
-              <OrbitalRadarRings mouseX={mousePos.x} mouseY={mousePos.y} />
+          <main className="flex-1 w-full px-4 md:px-6 py-2.5 overflow-y-auto lg:overflow-hidden z-20 flex flex-col justify-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 xl:gap-6 h-full items-stretch max-w-[1780px] mx-auto w-full">
+              
+              {/* ----------------------------------------------------
+                  KOLOM KIRI (col-span-3): Vertical Streaming Log Panel
+                 ---------------------------------------------------- */}
+              <div className="lg:col-span-3 h-[320px] lg:h-full order-2 lg:order-1">
+                <LeftTerminalLog />
+              </div>
 
-              {/* Central Branding Typography: FANTASMA SYNERGY */}
-              <div className="relative z-10 flex flex-col items-center justify-center text-center px-4">
-                <h1
-                  className="font-extrabold uppercase leading-[0.94] tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#E0F7FA] to-[#93C5FD] drop-shadow-[0_0_20px_rgba(0,240,255,0.85)] drop-shadow-[0_0_45px_rgba(0,240,255,0.35)]"
+              {/* ----------------------------------------------------
+                  KOLOM TENGAH (col-span-6): The Core Branding & Radar
+                 ---------------------------------------------------- */}
+              <div className="lg:col-span-6 h-[460px] lg:h-full flex flex-col items-center justify-center relative order-1 lg:order-2">
+                {/* Dynamic 3D Orbital Radar Rings */}
+                <OrbitalRadarRings mouseX={mousePos.x} mouseY={mousePos.y} />
+
+                {/* ANTI-OVERLAP ISOLATION LAYER:
+                    Radial backdrop mask that isolates typography completely
+                    from radar wireframe lines crossing through the text */}
+                <div
+                  className="absolute w-[440px] md:w-[600px] h-[220px] md:h-[300px] rounded-full pointer-events-none z-10"
                   style={{
-                    fontSize: 'clamp(2.2rem, 5.2vw, 3.4rem)',
+                    background: 'radial-gradient(ellipse at center, rgba(5,7,10,0.96) 50%, rgba(5,7,10,0.75) 75%, transparent 100%)',
+                    backdropFilter: 'blur(4px)',
                   }}
-                >
-                  <span className="block">FANTASMA</span>
-                  <span className="block mt-1">SYNERGY</span>
-                </h1>
-
-                {/* Sub-badge Monospace Title */}
-                <p className="mt-2.5 text-[9.5px] md:text-[10.5px] font-mono tracking-[0.24em] md:tracking-[0.28em] text-cyan-300/90 font-semibold uppercase">
-                  QUANTITATIVE ORACLE INVESTMENT TERMINAL v4.0 | FOREX + CRYPTO
-                </p>
-              </div>
-            </div>
-
-            {/* Terminal Diagnostic Panel (Frosted Glassmorphism Console) */}
-            <div className="w-full max-w-[640px] mt-4">
-              <TerminalDiagnosticConsole />
-            </div>
-
-            {/* Modular Tactical KPI Telemetry Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full max-w-[640px] mt-3">
-              {/* Card 1: 1s Ticks */}
-              <div className="rounded-[8px] p-3 px-3.5 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
-                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-0.5">
-                  <Activity className="w-3.5 h-3.5 text-[#00F0FF]" />
-                  <span>LIVE MARKET TICKER</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm md:text-base font-mono font-bold text-white tracking-tight">
-                    1s Ticks
-                  </div>
-                  <LiveSparkline />
-                </div>
-              </div>
-
-              {/* Card 2: Kelly Aware */}
-              <div className="rounded-[8px] p-3 px-3.5 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
-                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-0.5">
-                  <BarChart2 className="w-3.5 h-3.5 text-[#00F0FF]" />
-                  <span>R25K LAYER:</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm md:text-base font-mono font-bold text-white tracking-tight">
-                    Kelly Aware
-                  </div>
-                  <SegmentedKellyBar />
-                </div>
-              </div>
-
-              {/* Card 3: Multi Model */}
-              <div className="rounded-[8px] p-3 px-3.5 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
-                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-0.5">
-                  <Settings className="w-3.5 h-3.5 text-[#00F0FF]" />
-                  <span>AI CONSENSUS:</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm md:text-base font-mono font-bold text-white tracking-tight">
-                    Multi Model
-                  </div>
-                  <NeuralClusterIcon />
-                </div>
-              </div>
-            </div>
-
-            {/* Gateway Action Button & Bypass intro */}
-            <div className="mt-4 md:mt-5 flex flex-col items-center gap-2 w-full max-w-[640px]">
-              <button
-                onClick={handleAccessTerminal}
-                onMouseEnter={() => audio?.playHover()}
-                disabled={glitching}
-                className="w-[280px] sm:w-[320px] py-2.5 px-6 rounded-[12px] bg-[rgba(0,240,255,0.08)] hover:bg-[rgba(0,240,255,0.18)] border-2 border-[#00F0FF] text-white font-mono font-extrabold text-xs md:text-sm tracking-[0.18em] uppercase transition-all duration-300 transform active:scale-95 shadow-[0_0_22px_rgba(0,240,255,0.4),inset_0_0_12px_rgba(0,240,255,0.18)] hover:shadow-[0_0_36px_rgba(0,240,255,0.65),inset_0_0_20px_rgba(0,240,255,0.3)] cursor-pointer flex items-center justify-center gap-2 group"
-                style={{
-                  textShadow: '0 0 10px rgba(0, 240, 255, 0.85)',
-                }}
-              >
-                {glitching ? (
-                  <span>{glitchText}</span>
-                ) : (
-                  <>
-                    <span className="text-[#00F0FF] text-base font-bold">[</span>
-                    <span>MASUK KE TERMINAL →</span>
-                    <span className="text-[#00F0FF] text-base font-bold">]</span>
-                  </>
-                )}
-              </button>
-
-              {/* Bypass intro checkbox */}
-              <label className="flex items-center gap-2 cursor-pointer select-none py-0.5 group">
-                <input
-                  type="checkbox"
-                  checked={bypassCheck}
-                  onChange={e => handleToggleBypass(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded-[2px] border border-[#1E293B] bg-[#0A0F16] accent-[#00F0FF] cursor-pointer focus:ring-0"
                 />
-                <span className="text-[10px] md:text-[10.5px] font-mono text-slate-400 group-hover:text-cyan-300 transition-colors">
-                  bypass intro pada kunjungan berikutnya
-                </span>
-              </label>
+
+                {/* Central Typography & Action */}
+                <div className="relative z-20 flex flex-col items-center justify-center text-center px-4">
+                  {/* Huge Branding Text */}
+                  <h1
+                    className="font-black uppercase leading-[0.92] tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#E0F7FA] to-[#93C5FD] drop-shadow-[0_0_24px_rgba(0,240,255,0.9)] drop-shadow-[0_0_60px_rgba(0,240,255,0.4)]"
+                    style={{
+                      fontSize: 'clamp(2.6rem, 5.5vw, 4.8rem)',
+                    }}
+                  >
+                    <span className="block">FANTASMA</span>
+                    <span className="block mt-1">SYNERGY</span>
+                  </h1>
+
+                  {/* Monospace Sub-Badge Title */}
+                  <p className="mt-3 text-[10px] md:text-[11.5px] font-mono tracking-[0.24em] md:tracking-[0.28em] text-cyan-300 font-semibold uppercase">
+                    QUANTITATIVE ORACLE INVESTMENT TERMINAL v4.0 | FOREX + CRYPTO
+                  </p>
+
+                  {/* Action Gateway Button */}
+                  <div className="mt-6 md:mt-8 flex flex-col items-center gap-2.5">
+                    <button
+                      onClick={handleAccessTerminal}
+                      onMouseEnter={() => audio?.playHover()}
+                      disabled={glitching}
+                      className="w-[280px] sm:w-[320px] py-3.5 px-6 rounded-[12px] clip-cyber-beveled neon-sweep-btn bg-[rgba(0,240,255,0.1)] hover:bg-[rgba(0,240,255,0.22)] border-2 border-[#00F0FF] text-white font-mono font-extrabold text-xs md:text-sm tracking-[0.18em] uppercase transition-all duration-300 transform active:scale-95 shadow-[0_0_24px_rgba(0,240,255,0.45),inset_0_0_14px_rgba(0,240,255,0.2)] hover:shadow-[0_0_42px_rgba(0,240,255,0.7),inset_0_0_22px_rgba(0,240,255,0.35)] cursor-pointer flex items-center justify-center gap-2"
+                      style={{
+                        textShadow: '0 0 10px rgba(0, 240, 255, 0.85)',
+                      }}
+                    >
+                      {glitching ? (
+                        <span>{glitchText}</span>
+                      ) : (
+                        <>
+                          <span className="text-[#00F0FF] text-base font-bold">[</span>
+                          <span>MASUK KE TERMINAL →</span>
+                          <span className="text-[#00F0FF] text-base font-bold">]</span>
+                        </>
+                      )}
+                    </button>
+
+                    {/* Bypass Intro Checkbox */}
+                    <label className="flex items-center gap-2 cursor-pointer select-none py-1 group">
+                      <input
+                        type="checkbox"
+                        checked={bypassCheck}
+                        onChange={e => handleToggleBypass(e.target.checked)}
+                        className="w-3.5 h-3.5 rounded-[2px] border border-[#1E293B] bg-[#0A0F16] accent-[#00F0FF] cursor-pointer focus:ring-0"
+                      />
+                      <span className="text-[10px] md:text-[10.5px] font-mono text-slate-400 group-hover:text-cyan-300 transition-colors">
+                        bypass intro pada kunjungan berikutnya
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* ----------------------------------------------------
+                  KOLOM KANAN (col-span-3): Tactical KPI Cards - Expanded
+                 ---------------------------------------------------- */}
+              <div className="lg:col-span-3 h-[420px] lg:h-full order-3">
+                <RightTelemetryCards />
+              </div>
+
             </div>
           </main>
 
           {/* ========================================================
-              BOTTOM TELEMETRY FOOTER
+              5. FULL-WIDTH TELEMETRY BAR: BOTTOM FOOTER
              ======================================================== */}
-          <footer className="w-full h-11 px-6 md:px-12 flex items-center justify-between text-[9px] md:text-[9.5px] font-mono tracking-[0.2em] text-slate-500 uppercase z-30 shrink-0">
+          <footer className="w-full h-10 px-6 md:px-8 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-t border-[rgba(0,240,255,0.12)] flex items-center justify-between text-[9px] md:text-[9.5px] font-mono tracking-[0.2em] text-slate-500 uppercase z-30 shrink-0">
             <div>FANTASMA SYNERGY SYSTEMS INC.</div>
             <div>ALL PROTOCOLS ENCRYPTED // [V4.0]</div>
           </footer>
