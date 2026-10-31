@@ -46,6 +46,11 @@ interface BrainNode {
   z: number;
 }
 
+interface BrainEdge {
+  from: number;
+  to: number;
+}
+
 type AudioFeedbackType = 'hover' | 'click';
 
 export default function App(): React.JSX.Element {
@@ -53,13 +58,12 @@ export default function App(): React.JSX.Element {
   const [isBypassed, setIsBypassed] = useState<boolean>(false);
   const [bypassIntro, setBypassIntro] = useState<boolean>(false);
 
+  // Diagnostic Logs sesuai persis dengan screenshot referensi
   const [logs] = useState<LogEntry[]>([
     {
       time: '11:35:43 AM',
       tag: 'SYSTEM:',
-      msg: 'DE METHODOLOGY ANALYZERS',
-      status: 'INITIALIZED (SAC, WYCKOFF, HARMONIC...)',
-      statusColor: '#10b981',
+      msg: 'DE METHODOLOGY ANALYZERS INITIALIZED (SAC, WYCKOFF, HARMONIC...)',
     },
     {
       time: '11:35:43 AM',
@@ -80,7 +84,7 @@ export default function App(): React.JSX.Element {
       tag: 'SYSTEM:',
       msg: 'WARPING: TIME MACHINE VOLATILITY DETECTED:',
       status: 'HIGH',
-      statusColor: '#10b981',
+      statusColor: '#00f2fe',
     },
     {
       time: '11:35:45 AM',
@@ -92,10 +96,11 @@ export default function App(): React.JSX.Element {
   ]);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
   const brainCanvasRef = useRef<HTMLCanvasElement>(null);
   const sparklineCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Check saved bypass portal preference on mount
+  // Cek preferensi bypass intro tersimpan di localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedBypass = localStorage.getItem('fantasma_bypass_portal') === 'true';
@@ -131,21 +136,21 @@ export default function App(): React.JSX.Element {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(880, ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.03, ctx.currentTime);
+        gain.gain.setValueAtTime(0.025, ctx.currentTime);
         gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.05);
         osc.start();
         osc.stop(ctx.currentTime + 0.05);
       } else {
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(440, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15);
+        osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.16);
         gain.gain.setValueAtTime(0.08, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.16);
         osc.start();
-        osc.stop(ctx.currentTime + 0.15);
+        osc.stop(ctx.currentTime + 0.16);
       }
     } catch {
-      // Abaikan jika browser membatasi audio tanpa interaksi awal
+      // Abaikan jika browser membatasi audio sebelum interaksi
     }
   };
 
@@ -157,7 +162,7 @@ export default function App(): React.JSX.Element {
   };
 
   // -------------------------------------------------------------
-  // 1. CANVAS UTAMA: Celestial Holographic Radar, Degrees & Sphere
+  // 1. CANVAS UTAMA: Celestial Holographic Radar, Degrees & 3D Sphere
   // -------------------------------------------------------------
   useEffect(() => {
     if (accessed) return;
@@ -180,12 +185,13 @@ export default function App(): React.JSX.Element {
 
     // Kumpulan partikel bintang kosmik di latar belakang
     const stars: StarParticle[] = [];
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 95; i++) {
       stars.push({
         x: Math.random() * w,
         y: Math.random() * h,
         size: Math.random() * 1.8 + 0.5,
-        color: Math.random() > 0.4 ? '#00f2fe' : Math.random() > 0.5 ? '#c084fc' : '#38bdf8',
+        color:
+          Math.random() > 0.4 ? '#00f2fe' : Math.random() > 0.5 ? '#c084fc' : '#38bdf8',
         alpha: Math.random() * 0.7 + 0.2,
         speed: Math.random() * 0.02 + 0.005,
       });
@@ -200,21 +206,49 @@ export default function App(): React.JSX.Element {
       sphereNodes.push({ phi, theta, size: Math.random() * 2 + 1.5 });
     }
 
+    // Label derajat pada busur radar atas sesuai referensi gambar
+    const degreeLabels: DegreeLabel[] = [
+      { deg: 290, text: '290°' },
+      { deg: 300, text: '300°' },
+      { deg: 310, text: '310°' },
+      { deg: 320, text: '320°' },
+      { deg: 330, text: '330°' },
+      { deg: 370, text: '370°' },
+      { deg: 0, text: '0°' },
+      { deg: 10, text: '10°' },
+      { deg: 20, text: '20°' },
+      { deg: 30, text: '30°' },
+      { deg: 40, text: '40°' },
+      { deg: 50, text: '50°' },
+      { deg: 60, text: '60°' },
+      { deg: 70, text: '70°' },
+      { deg: 80, text: '80°' },
+      { deg: 90, text: '90°' },
+      { deg: 130, text: '130°' },
+      { deg: 160, text: '160°' },
+      { deg: 180, text: '180°' },
+    ];
+
     let angle = 0;
 
     const render = (): void => {
       ctx.clearRect(0, 0, w, h);
       angle += 0.008;
 
-      // Pusat Radar (Tepat di atas title "FANTASMA SYNERGY")
-      const cx = w * 0.5;
-      const cy = h * 0.36;
-      const baseR = Math.min(w * 0.24, 210);
+      // Presisi Posisi: Hitung pusat radar tepat di tengah elemen judul FANTASMA SYNERGY
+      let cx = w * 0.5;
+      let cy = h * 0.35;
+      if (titleRef.current) {
+        const rect = titleRef.current.getBoundingClientRect();
+        cx = rect.left + rect.width / 2;
+        cy = rect.top + rect.height / 2;
+      }
+      const baseR = Math.max(190, Math.min(w * 0.22, 230));
 
-      // (A) Gambar Grid Latar Belakang Siber & Crosshairs
-      ctx.strokeStyle = 'rgba(0, 242, 254, 0.035)';
+      // (A) Grid Latar Belakang Siber Halus
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.03)';
       ctx.lineWidth = 1;
-      const gridSize = 48;
+      const gridSize = 50;
       for (let x = 0; x < w; x += gridSize) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
@@ -239,8 +273,8 @@ export default function App(): React.JSX.Element {
         ctx.globalAlpha = 1;
       });
 
-      // (C) Wireframe Proyeksi Ruang Isometrik di Sisi Kiri & Kanan Belakang
-      ctx.strokeStyle = 'rgba(0, 242, 254, 0.08)';
+      // (C) Wireframe Proyeksi Isometrik di Kiri & Kanan Bawah
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.07)';
       ctx.lineWidth = 1;
       // Grid kiri
       ctx.beginPath();
@@ -260,24 +294,55 @@ export default function App(): React.JSX.Element {
       ctx.closePath();
       ctx.stroke();
 
-      // (D) Anamorphic Horizontal Lens Flare Streak (Menyilang di pusat)
-      const flareGrad = ctx.createLinearGradient(cx - baseR * 2.2, cy, cx + baseR * 2.2, cy);
+      // (D) Cahaya Radial Ambient di Belakang Core Radar
+      const radGlow = ctx.createRadialGradient(cx, cy, 10, cx, cy, baseR * 1.5);
+      radGlow.addColorStop(0, 'rgba(0, 240, 255, 0.18)');
+      radGlow.addColorStop(0.35, 'rgba(0, 150, 255, 0.08)');
+      radGlow.addColorStop(0.7, 'rgba(0, 60, 120, 0.025)');
+      radGlow.addColorStop(1, 'rgba(4, 7, 13, 0)');
+      ctx.fillStyle = radGlow;
+      ctx.beginPath();
+      ctx.arc(cx, cy, baseR * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // (E) Anamorphic Horizontal Lens Flare Streak (Menyilang di pusat)
+      ctx.save();
+      // Efek cahaya horizontal menyebar
+      const flareBloom = ctx.createRadialGradient(cx, cy, 0, cx, cy, baseR * 2.2);
+      flareBloom.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
+      flareBloom.addColorStop(0.15, 'rgba(0, 240, 255, 0.2)');
+      flareBloom.addColorStop(0.5, 'rgba(0, 240, 255, 0.03)');
+      flareBloom.addColorStop(1, 'rgba(0, 240, 255, 0)');
+      ctx.scale(1, 0.08);
+      ctx.beginPath();
+      ctx.arc(cx, cy / 0.08, baseR * 2.2, 0, Math.PI * 2);
+      ctx.fillStyle = flareBloom;
+      ctx.fill();
+      ctx.restore();
+
+      // Garis cahaya horizontal tajam
+      const flareGrad = ctx.createLinearGradient(
+        cx - baseR * 2.4,
+        cy,
+        cx + baseR * 2.4,
+        cy
+      );
       flareGrad.addColorStop(0, 'rgba(0, 242, 254, 0)');
-      flareGrad.addColorStop(0.35, 'rgba(0, 242, 254, 0.15)');
-      flareGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.75)');
-      flareGrad.addColorStop(0.65, 'rgba(0, 242, 254, 0.15)');
+      flareGrad.addColorStop(0.35, 'rgba(0, 242, 254, 0.2)');
+      flareGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.85)');
+      flareGrad.addColorStop(0.65, 'rgba(0, 242, 254, 0.2)');
       flareGrad.addColorStop(1, 'rgba(0, 242, 254, 0)');
 
       ctx.save();
       ctx.beginPath();
-      ctx.moveTo(cx - baseR * 2.2, cy);
-      ctx.lineTo(cx + baseR * 2.2, cy);
+      ctx.moveTo(cx - baseR * 2.4, cy);
+      ctx.lineTo(cx + baseR * 2.4, cy);
       ctx.strokeStyle = flareGrad;
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.6;
       ctx.stroke();
       ctx.restore();
 
-      // (E) Cincin Lingkaran Radar Holografis Luar dengan Skala Derajat
+      // (F) Cincin Radar Orbital Konsentris
       ctx.save();
       ctx.translate(cx, cy);
 
@@ -291,14 +356,7 @@ export default function App(): React.JSX.Element {
       ctx.stroke();
       ctx.shadowBlur = 0;
 
-      // Cincin Busur Konsentris Sekunder
-      ctx.beginPath();
-      ctx.arc(0, 0, baseR * 0.88, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(0, 242, 254, 0.28)';
-      ctx.lineWidth = 1.2;
-      ctx.stroke();
-
-      // Lingkaran Putus-putus
+      // Cincin Putus-putus
       ctx.beginPath();
       ctx.arc(0, 0, baseR * 0.94, 0, Math.PI * 2);
       ctx.setLineDash([3, 5]);
@@ -307,27 +365,14 @@ export default function App(): React.JSX.Element {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Garis Skala Derajat & Label Teks Derajat (0°, 10°, 20°, ... 370°)
-      const degreeLabels: DegreeLabel[] = [
-        { deg: 0, text: '0°' },
-        { deg: 10, text: '10°' },
-        { deg: 20, text: '20°' },
-        { deg: 30, text: '30°' },
-        { deg: 40, text: '40°' },
-        { deg: 60, text: '60°' },
-        { deg: 70, text: '70°' },
-        { deg: 80, text: '80°' },
-        { deg: 90, text: '90°' },
-        { deg: 130, text: '130°' },
-        { deg: 160, text: '160°' },
-        { deg: 180, text: '180°' },
-        { deg: 290, text: '290°' },
-        { deg: 320, text: '320°' },
-        { deg: 330, text: '330°' },
-        { deg: 370, text: '370°' },
-      ];
+      // Cincin Konsentris Sekunder
+      ctx.beginPath();
+      ctx.arc(0, 0, baseR * 0.88, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.28)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
 
-      // Gambar semua garis tick kecil di sepanjang keliling lingkaran
+      // Garis Skala Derajat & Tick Marks
       for (let d = 0; d < 360; d += 3) {
         const rad = (d - 90) * (Math.PI / 180);
         const isMajor = d % 15 === 0;
@@ -343,12 +388,14 @@ export default function App(): React.JSX.Element {
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
-        ctx.strokeStyle = isMajor ? 'rgba(0, 242, 254, 0.7)' : 'rgba(0, 242, 254, 0.3)';
+        ctx.strokeStyle = isMajor
+          ? 'rgba(0, 242, 254, 0.7)'
+          : 'rgba(0, 242, 254, 0.3)';
         ctx.lineWidth = isMajor ? 1.4 : 0.8;
         ctx.stroke();
       }
 
-      // Cetak Teks Derajat
+      // Cetak Teks Label Derajat
       ctx.fillStyle = 'rgba(0, 242, 254, 0.85)';
       ctx.font = '8px monospace';
       ctx.textAlign = 'center';
@@ -365,8 +412,8 @@ export default function App(): React.JSX.Element {
         ctx.restore();
       });
 
-      // (F) Satelit / Mutiara Sian Mengorbit di Busur Lingkaran Atas
-      const orbitAngle = -Math.PI * 0.45 + Math.sin(angle * 0.7) * 0.4;
+      // Satelit / Mutiara Sian Mengorbit di Busur Atas
+      const orbitAngle = -Math.PI * 0.52 + Math.sin(angle * 0.6) * 0.2;
       const orbX = Math.cos(orbitAngle) * baseR;
       const orbY = Math.sin(orbitAngle) * baseR;
 
@@ -393,8 +440,17 @@ export default function App(): React.JSX.Element {
         ctx.save();
         ctx.rotate(angle * (idx % 2 === 0 ? 0.3 : -0.2) + idx);
         ctx.beginPath();
-        ctx.ellipse(0, 0, sphereRadius, sphereRadius * Math.abs(Math.sin(tilt + 1)), 0, 0, Math.PI * 2);
-        ctx.strokeStyle = idx % 2 === 0 ? 'rgba(0, 242, 254, 0.22)' : 'rgba(56, 189, 248, 0.15)';
+        ctx.ellipse(
+          0,
+          0,
+          sphereRadius,
+          sphereRadius * Math.abs(Math.sin(tilt + 1)),
+          0,
+          0,
+          Math.PI * 2
+        );
+        ctx.strokeStyle =
+          idx % 2 === 0 ? 'rgba(0, 242, 254, 0.22)' : 'rgba(56, 189, 248, 0.15)';
         ctx.lineWidth = 1;
         ctx.stroke();
         ctx.restore();
@@ -467,7 +523,9 @@ export default function App(): React.JSX.Element {
 
     let animId: number;
 
-    const data: number[] = [22, 26, 19, 32, 28, 42, 35, 50, 38, 45, 55, 48, 62, 58, 68, 60, 75, 70, 82];
+    const data: number[] = [
+      22, 26, 19, 32, 28, 42, 35, 50, 38, 45, 55, 48, 62, 58, 68, 60, 75, 70, 82,
+    ];
     let offset = 0;
 
     const drawSparkline = (): void => {
@@ -479,10 +537,10 @@ export default function App(): React.JSX.Element {
       offset += 0.05;
 
       const dynamicPoints = data.map((v, i) => {
-        const wave = Math.sin(offset + i * 0.6) * 6;
+        const wave = Math.sin(offset + i * 0.6) * 5;
         return {
           x: (i / (data.length - 1)) * w,
-          y: h - ((v + wave) / 100) * (h * 0.8) - 4,
+          y: h - ((v + wave) / 100) * (h * 0.78) - 4,
         };
       });
 
@@ -504,7 +562,7 @@ export default function App(): React.JSX.Element {
       ctx.lineTo(0, h);
       ctx.closePath();
       const grad = ctx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, 'rgba(0, 242, 254, 0.25)');
+      grad.addColorStop(0, 'rgba(0, 242, 254, 0.28)');
       grad.addColorStop(1, 'rgba(0, 242, 254, 0)');
       ctx.fillStyle = grad;
       ctx.fill();
@@ -546,6 +604,8 @@ export default function App(): React.JSX.Element {
       { x: 0, y: 0, z: 6 },
       { x: -6, y: 2, z: -6 },
       { x: 6, y: 2, z: 6 },
+      { x: -12, y: -1, z: 3 },
+      { x: 12, y: -1, z: -3 },
     ];
 
     let t = 0;
@@ -566,10 +626,10 @@ export default function App(): React.JSX.Element {
         const sin = Math.sin(t);
         const rx = n.x * cos - n.z * sin;
         const rz = n.x * sin + n.z * cos;
-        return { x: cx + rx * 1.1, y: cy + n.y * 1.1, z: rz };
+        return { x: cx + rx * 1.05, y: cy + n.y * 1.05, z: rz };
       });
 
-      ctx.strokeStyle = 'rgba(0, 242, 254, 0.35)';
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
       ctx.lineWidth = 0.9;
       for (let i = 0; i < rot.length; i++) {
         for (let j = i + 1; j < rot.length; j++) {
@@ -600,6 +660,7 @@ export default function App(): React.JSX.Element {
     return () => cancelAnimationFrame(animId);
   }, [accessed]);
 
+  // Jika bypass aktif, langsung tampilkan Dashboard
   if (isBypassed && accessed) {
     return (
       <DashboardPage
@@ -624,7 +685,7 @@ export default function App(): React.JSX.Element {
             transition: { duration: 0.4, ease: 'easeInOut' },
           }}
           transition={{ duration: 0.4, ease: 'easeInOut' }}
-          className="relative min-h-screen w-full bg-[#050811] text-slate-100 flex flex-col justify-between overflow-hidden font-mono select-none"
+          className="relative min-h-screen w-full bg-[#04070D] text-slate-100 flex flex-col justify-between overflow-hidden font-mono select-none"
         >
           <style>{`
             /* Beveled Cyber Tactical Corners untuk Tombol Utama */
@@ -679,20 +740,47 @@ export default function App(): React.JSX.Element {
           ======================================================================== */}
           <header className="relative z-20 w-full px-6 pt-5 pb-2 flex items-center justify-between text-[11px] tracking-wider">
             {/* Top-Left Pill: COGNITIVE CRYPTO SHIELD ACTIVE */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-[#090e1a]/80 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
-              <span className="text-cyan-400 text-xs">🛡</span>
-              <span className="text-cyan-300 font-semibold tracking-widest">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-[#080d19]/80 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
+              <svg
+                className="w-3.5 h-3.5 text-cyan-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <polyline points="9 12 11 14 15 10" />
+              </svg>
+              <span className="text-cyan-300 font-semibold tracking-widest text-[10.5px]">
                 COGNITIVE CRYPTO SHIELD ACTIVE
               </span>
             </div>
 
             {/* Top-Right Pill: SYS_STATUS: CRYPTED // ONLINE */}
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-cyan-500/30 bg-[#090e1a]/80 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
-              <span className="text-cyan-400 text-xs">((i))</span>
-              <span className="text-slate-300 font-medium tracking-wider">SYS_STATUS:</span>
-              <span className="text-cyan-400 font-bold">CRYPTED</span>
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-cyan-500/30 bg-[#080d19]/80 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
+              <svg
+                className="w-3.5 h-3.5 text-cyan-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
+                <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4" />
+                <circle cx="12" cy="12" r="2" fill="currentColor" />
+                <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4" />
+                <path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1" />
+              </svg>
+              <span className="text-slate-300 font-medium tracking-wider text-[10.5px]">
+                SYS_STATUS:
+              </span>
+              <span className="text-cyan-400 font-bold text-[10.5px]">CRYPTED</span>
               <span className="text-slate-500">//</span>
-              <span className="text-emerald-400 font-bold">ONLINE</span>
+              <span className="text-emerald-400 font-bold text-[10.5px]">ONLINE</span>
             </div>
           </header>
 
@@ -701,17 +789,17 @@ export default function App(): React.JSX.Element {
           ======================================================================== */}
           <main className="relative z-10 w-full max-w-4xl mx-auto px-4 my-auto flex flex-col items-center text-center pt-2 pb-6">
             {/* BRANDING TITLE: FANTASMA SYNERGY */}
-            <div className="mb-2 relative">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#e0f7fe] to-[#38bdf8] drop-shadow-[0_0_35px_rgba(0,242,254,0.65)] uppercase">
+            <div ref={titleRef} className="mb-2 relative">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-[0.24em] indent-[0.24em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#dff4fd] to-[#38bdf8] drop-shadow-[0_0_35px_rgba(0,242,254,0.65)] uppercase select-none">
                 FANTASMA
               </h1>
-              <h2 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#e0f7fe] to-[#38bdf8] drop-shadow-[0_0_35px_rgba(0,242,254,0.65)] uppercase -mt-2 sm:-mt-3">
+              <h2 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-[0.24em] indent-[0.24em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#dff4fd] to-[#38bdf8] drop-shadow-[0_0_35px_rgba(0,242,254,0.65)] uppercase -mt-2 sm:-mt-3 select-none">
                 SYNERGY
               </h2>
             </div>
 
             {/* SUBTITLE */}
-            <p className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-cyan-300/90 mb-5">
+            <p className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] text-cyan-300/90 mb-5 drop-shadow-[0_0_10px_rgba(0,242,254,0.5)]">
               QUANTITATIVE ORACLE INVESTMENT TERMINAL v4.0 &nbsp;|&nbsp; FOREX + CRYPTO
             </p>
 
@@ -720,7 +808,10 @@ export default function App(): React.JSX.Element {
             ======================================================================== */}
             <div className="w-full max-w-[620px] rounded-xl border border-cyan-500/40 bg-[#080d19]/85 backdrop-blur-xl p-3.5 mb-4 shadow-[0_10px_35px_rgba(0,242,254,0.12)] text-left text-[10px] sm:text-[10.5px] leading-relaxed">
               {logs.map((item, idx) => (
-                <div key={idx} className="flex flex-wrap items-baseline gap-1.5 font-mono py-0.5">
+                <div
+                  key={idx}
+                  className="flex flex-wrap items-baseline gap-1.5 font-mono py-0.5"
+                >
                   <span className="text-slate-400 tracking-tight">[{item.time}]</span>
                   <span className="text-cyan-400 font-bold">{item.tag}</span>
                   <span className="text-slate-200">{item.msg}</span>
@@ -743,8 +834,17 @@ export default function App(): React.JSX.Element {
               {/* KARTU 1: 1s Ticks */}
               <div className="rounded-xl border border-cyan-500/30 bg-[#080d19]/80 backdrop-blur-md p-2.5 flex items-center justify-between text-left shadow-[0_4px_20px_rgba(0,242,254,0.06)] hover:border-cyan-400/60 transition-colors">
                 <div>
-                  <div className="flex items-center gap-1 text-[8px] text-slate-400 tracking-wider mb-0.5">
-                    <span className="text-cyan-400">📈</span>
+                  <div className="flex items-center gap-1.5 text-[8.5px] text-slate-400 tracking-wider mb-0.5">
+                    <svg
+                      className="w-3 h-3 text-cyan-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                      <polyline points="16 7 22 7 22 13" />
+                    </svg>
                     <span>LIVE MARKET TICKER</span>
                   </div>
                   <div className="text-xs sm:text-sm font-bold text-white tracking-wide">
@@ -760,9 +860,19 @@ export default function App(): React.JSX.Element {
               {/* KARTU 2: Kelly Aware */}
               <div className="rounded-xl border border-cyan-500/30 bg-[#080d19]/80 backdrop-blur-md p-2.5 flex items-center justify-between text-left shadow-[0_4px_20px_rgba(0,242,254,0.06)] hover:border-cyan-400/60 transition-colors">
                 <div>
-                  <div className="flex items-center gap-1 text-[8px] text-slate-400 tracking-wider mb-0.5">
-                    <span className="text-cyan-400">📊</span>
-                    <span>R25K LAYER:</span>
+                  <div className="flex items-center gap-1.5 text-[8.5px] text-slate-400 tracking-wider mb-0.5">
+                    <svg
+                      className="w-3 h-3 text-cyan-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <line x1="18" y1="20" x2="18" y2="10" />
+                      <line x1="12" y1="20" x2="12" y2="4" />
+                      <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
+                    <span>RISK LAYER:</span>
                   </div>
                   <div className="text-xs sm:text-sm font-bold text-white tracking-wide">
                     Kelly Aware
@@ -770,7 +880,7 @@ export default function App(): React.JSX.Element {
                 </div>
                 {/* Stepped Battery / Bar Risk Gauge with Angled Profile */}
                 <div
-                  className="flex items-end gap-[2px] h-7 px-1.5 py-1 rounded bg-[#050811]/60 border border-cyan-500/30 shadow-[0_0_8px_rgba(0,242,254,0.15)]"
+                  className="flex items-end gap-[2.5px] h-7 px-2 py-1 rounded bg-[#050811]/60 border border-cyan-500/30 shadow-[0_0_8px_rgba(0,242,254,0.15)]"
                   style={{
                     clipPath: 'polygon(0 15%, 100% 0%, 100% 100%, 0 100%)',
                   }}
@@ -788,8 +898,17 @@ export default function App(): React.JSX.Element {
               {/* KARTU 3: Multi Model */}
               <div className="rounded-xl border border-cyan-500/30 bg-[#080d19]/80 backdrop-blur-md p-2.5 flex items-center justify-between text-left shadow-[0_4px_20px_rgba(0,242,254,0.06)] hover:border-cyan-400/60 transition-colors">
                 <div>
-                  <div className="flex items-center gap-1 text-[8px] text-slate-400 tracking-wider mb-0.5">
-                    <span className="text-cyan-400">⚙</span>
+                  <div className="flex items-center gap-1.5 text-[8.5px] text-slate-400 tracking-wider mb-0.5">
+                    <svg
+                      className="w-3 h-3 text-cyan-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
                     <span>AI CONSENSUS:</span>
                   </div>
                   <div className="text-xs sm:text-sm font-bold text-white tracking-wide">
