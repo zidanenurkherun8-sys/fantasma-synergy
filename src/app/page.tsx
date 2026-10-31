@@ -1429,7 +1429,18 @@ export default function App(): React.JSX.Element {
           <header className="relative z-20 w-full px-8 lg:px-12 pt-5 pb-1 flex items-center justify-between text-[11px] tracking-wider">
             {/* Top-Left Pill */}
             <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg border border-cyan-500/30 bg-[#080d1a]/85 backdrop-blur-md shadow-[0_0_15px_rgba(0,242,254,0.15)]">
-              <span className="text-cyan-400 text-xs">🛡</span>
+              <svg
+                className="w-3.5 h-3.5 text-cyan-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <polyline points="9 12 11 14 15 10" />
+              </svg>
               <span className="text-cyan-300 font-semibold tracking-widest text-[10.5px]">
                 COGNITIVE CRYPTO SHIELD ACTIVE
               </span>
@@ -1483,26 +1494,51 @@ export default function App(): React.JSX.Element {
                         setLeftTab('tradingview');
                         playCyberSound('hover');
                       }}
-                      className={`px-2.5 py-1 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer ${
+                      className={`px-2.5 py-1 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
                         leftTab === 'tradingview'
                           ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 shadow-[0_0_10px_rgba(0,242,254,0.3)]'
                           : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
-                      📊 TRADINGVIEW
+                      <svg
+                        className="w-3 h-3 text-cyan-400"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M8 17V12" />
+                        <path d="M12 17V7" />
+                        <path d="M16 17V10" />
+                      </svg>
+                      <span>TRADINGVIEW</span>
                     </button>
                     <button
                       onClick={() => {
                         setLeftTab('indodax');
                         playCyberSound('hover');
                       }}
-                      className={`px-2.5 py-1 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer ${
+                      className={`px-2.5 py-1 rounded text-[9.5px] font-bold tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${
                         leftTab === 'indodax'
                           ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 shadow-[0_0_10px_rgba(0,242,254,0.3)]'
                           : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
-                      ⚡ INDODAX API
+                      <svg
+                        className="w-3 h-3 text-cyan-400"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                      </svg>
+                      <span>INDODAX API</span>
                     </button>
                   </div>
 
@@ -1621,7 +1657,18 @@ export default function App(): React.JSX.Element {
                 {/* Header Command Log & Filter Tabs */}
                 <div className="flex items-center justify-between pb-2 border-b border-cyan-500/20 text-[9px]">
                   <div className="flex items-center gap-1.5 font-bold text-white tracking-wider">
-                    <span className="text-cyan-400">⌨</span>
+                    <svg
+                      className="w-3 h-3 text-cyan-400"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="4 17 10 11 4 5" />
+                      <line x1="12" y1="19" x2="20" y2="19" />
+                    </svg>
                     <span>COMMAND LOG</span>
                   </div>
 
@@ -1747,7 +1794,18 @@ export default function App(): React.JSX.Element {
                 <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,242,254,0.08)]">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-white tracking-wide">
-                      <span className="text-cyan-400">📈</span>
+                      <svg
+                        className="w-3.5 h-3.5 text-cyan-400"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                        <polyline points="16 7 22 7 22 13" />
+                      </svg>
                       <span>1s Ticks</span>
                     </div>
                     <span className="text-[8.5px] font-mono text-emerald-400">ACTIVE FEED</span>
@@ -1761,7 +1819,19 @@ export default function App(): React.JSX.Element {
                 <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,242,254,0.08)]">
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-white tracking-wide">
-                      <span className="text-cyan-400">📊</span>
+                      <svg
+                        className="w-3.5 h-3.5 text-cyan-400"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="18" y1="20" x2="18" y2="10" />
+                        <line x1="12" y1="20" x2="12" y2="4" />
+                        <line x1="6" y1="20" x2="6" y2="14" />
+                      </svg>
                       <span>Kelly Aware</span>
                     </div>
                     <span className="text-[8.5px] font-mono text-cyan-400">CAPITAL GUARD</span>
@@ -1794,7 +1864,18 @@ export default function App(): React.JSX.Element {
                 <div className="rounded-2xl border border-cyan-500/40 bg-[#070b16]/85 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,242,254,0.08)]">
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-white tracking-wide">
-                      <span className="text-cyan-400">🧠</span>
+                      <svg
+                        className="w-3.5 h-3.5 text-cyan-400"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                      </svg>
                       <span>Multi-Model</span>
                     </div>
                     <div className="flex items-center gap-1 text-[8.5px] font-mono text-cyan-400">
