@@ -277,6 +277,157 @@ body {
   animation: glitch 0.3s linear infinite;
 }
 
+/* ============================================================
+   FANTASMA SYNERGY SCI-FI HUD & QUANTITATIVE TERMINAL STYLES
+   ============================================================ */
+
+/* 3D Radar Perspective Container */
+.radar-perspective-container {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.radar-tilt-core {
+  transform: rotateX(60deg) rotateZ(0deg);
+  transform-style: preserve-3d;
+}
+
+/* Radar Ring Rotations */
+@keyframes radarSpinCW {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes radarSpinCCW {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.animate-radar-spin-cw {
+  animation: radarSpinCW 80s linear infinite;
+  transform-origin: center;
+}
+
+.animate-radar-spin-ccw {
+  animation: radarSpinCCW 50s linear infinite;
+  transform-origin: center;
+}
+
+.animate-radar-spin-fast {
+  animation: radarSpinCW 24s linear infinite;
+  transform-origin: center;
+}
+
+/* Glowing Pulse for Status Lights */
+@keyframes glowPulse {
+  0%, 100% {
+    opacity: 0.45;
+    filter: drop-shadow(0 0 2px rgba(0, 240, 255, 0.4));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.95));
+  }
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2.4s ease-in-out infinite;
+}
+
+/* Beveled Cyber Button */
+.clip-cyber-beveled {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+
+/* Neon Sweep Animation on Button Hover */
+@keyframes neonSweep {
+  0% {
+    transform: translateX(-150%) skewX(-30deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(180%) skewX(-30deg);
+    opacity: 0;
+  }
+}
+
+.neon-sweep-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.neon-sweep-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 240, 255, 0.15) 30%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(0, 240, 255, 0.3) 70%,
+    transparent 100%
+  );
+  transform: translateX(-150%) skewX(-30deg);
+  pointer-events: none;
+}
+
+.neon-sweep-btn:hover::after {
+  animation: neonSweep 1.2s ease-in-out infinite;
+}
+
+/* Thin Cyan Terminal Scrollbar */
+.terminal-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.terminal-scroll::-webkit-scrollbar-track {
+  background: rgba(5, 7, 10, 0.6);
+  border-radius: 2px;
+}
+
+.terminal-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.45);
+  border-radius: 2px;
+}
+
+.terminal-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.9);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
+}
+
+/* Neural Network Pulse for Card 3 */
+@keyframes neuralNodePulse {
+  0%, 100% {
+    r: 2.2;
+    opacity: 0.7;
+  }
+  50% {
+    r: 3.4;
+    opacity: 1;
+  }
+}
+
+.animate-neural-node {
+  animation: neuralNodePulse 2s ease-in-out infinite;
+}
+
+/* Sparkline Draw Animation */
+@keyframes sparklineDash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

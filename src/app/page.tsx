@@ -3,104 +3,122 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardPage from './dashboard/page';
-import { Activity, BarChart3, Cpu, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
+import {
+  ShieldCheck,
+  Radio,
+  Volume2,
+  VolumeX,
+  Activity,
+  BarChart2,
+  Cpu,
+} from 'lucide-react';
 import { audio } from '@/lib/audio';
+import { OrbitalRadarRings } from '@/components/gateway/OrbitalRadarRings';
+import { TerminalDiagnosticConsole } from '@/components/gateway/TerminalDiagnosticConsole';
+import { LiveSparkline } from '@/components/gateway/LiveSparkline';
+import { SegmentedKellyBar } from '@/components/gateway/SegmentedKellyBar';
+import { NeuralClusterIcon } from '@/components/gateway/NeuralClusterIcon';
 
 export default function Home() {
   const [accessed, setAccessed] = useState(false);
   const [isBypassed, setIsBypassed] = useState(false);
   const [glitching, setGlitching] = useState(false);
+  const [glitchText, setGlitchText] = useState('');
   const [bypassCheck, setBypassCheck] = useState(false);
-  const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const [mutedState, setMutedState] = useState(false);
 
+  // Mouse coordinates normalized (-1 to 1) for 3D gyro parallax
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | null>(null);
+
+  // Check saved audio preference
   useEffect(() => {
     if (audio) {
       setMutedState(audio.isMuted());
     }
   }, []);
 
-
-  
-  const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | null>(null);
-  const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
-  const rotationRef = useRef({ x: 0, y: 0 });
-  const zoomRef = useRef(1.0);
-  const dragRef = useRef({ isDragging: false, lastX: 0, lastY: 0, velX: 0, velY: 0 });
-  const impactRef = useRef({ velocityY: 0, velocityX: 0 });
-
+  // Check saved bypass portal preference
   useEffect(() => {
-    const elements = Array.from(document.querySelectorAll<HTMLElement>('.scroll-reveal'));
-    if (elements.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-          }
-        });
-      },
-      { threshold: 0.18, rootMargin: '0px 0px -8% 0px' }
-    );
-
-    elements.forEach(element => observer.observe(element));
-    return () => observer.disconnect();
-  }, [accessed]);
-
-  // Load configuration and simulate console logging
-  useEffect(() => {
-    if (accessed) return;
-
-    // Reset console logs when entering portal to show animation
-    setConsoleLogs([]);
-
-    const bypass = localStorage.getItem('fantasma_bypass_portal') === 'true';
-    setBypassCheck(bypass);
-    if (bypass) {
-      setIsBypassed(true);
-      setAccessed(true);
-      return;
+    if (typeof window !== 'undefined') {
+      const bypass = localStorage.getItem('fantasma_bypass_portal') === 'true';
+      setBypassCheck(bypass);
+      if (bypass) {
+        setIsBypassed(true);
+        setAccessed(true);
+      }
     }
+  }, []);
 
-    const logs = [
-      'SYSTEM: [SECURE COGNITIVE DECRYPTION ACTIVE]',
-      'SYSTEM: INITIALIZING QUANTUM ORACLE ENGINE PROTOCOLS...',
-      'SYSTEM: PULLING INDODAX TICKER INDEX & ORDERBOOK PRESSURES...',
-      'SYSTEM: CONNECTED TO INDODAX REST COGNITIVE TUNNEL (OK)',
-      'SYSTEM: LOADING FOREX INTELLIGENCE ENGINE — 28 PAIRS UNIVERSE...',
-      'SYSTEM: 10 METHODOLOGY ANALYZERS INITIALIZED (SMC, WYCKOFF, HARMONIC...)',
-      'SYSTEM: MULTI-TIMEFRAME CONFLUENCE ENGINE ARMED (M1→MN)',
-      'SYSTEM: HALF-KELLY CAPITAL PRESERVATION STRATEGY: STAGED',
-      'SYSTEM: WARNING: TIME REGIME VOLATILITY DETECTED: HIGH',
-      'SYSTEM: COGNITIVE DECRYPTION COMPLETED.',
-      'FANTASMA SYNERGY QUANTUM GATEWAY v4.0 IS ONLINE.'
+  // Mouse movement tracking for 3D orbital rings & particles
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, clientY } = e;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const normX = (clientX / w) * 2 - 1;
+    const normY = (clientY / h) * 2 - 1;
+    setMousePos({ x: normX, y: normY });
+  };
+
+  // Toggle Bypass Preference
+  const handleToggleBypass = (checked: boolean) => {
+    setBypassCheck(checked);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fantasma_bypass_portal', checked ? 'true' : 'false');
+    }
+    audio?.playClick();
+  };
+
+  // Toggle Sound FX
+  const handleToggleSound = () => {
+    if (audio) {
+      const newMuted = audio.toggleMute();
+      setMutedState(newMuted);
+      if (!newMuted) {
+        audio.playClick();
+      }
+    }
+  };
+
+  // Decryption & Gateway Access Transition
+  const handleAccessTerminal = () => {
+    if (glitching) return;
+    setGlitching(true);
+    setGlitchText('DECRYPTING QUANTUM CORE...');
+    audio?.playLaserCharge();
+
+    const glitchPhases = [
+      'DECRYPTING QUANTUM CORE...',
+      'ARMING SAC & WYCKOFF FILTERS...',
+      'ESTABLISHING COGNITIVE TUNNEL...',
+      'ACCESS GRANTED // WELCOME',
     ];
 
-    const timers: NodeJS.Timeout[] = [];
-    logs.forEach((logText, idx) => {
-      const timer = setTimeout(() => {
-        setConsoleLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${logText}`].slice(-6));
-      }, idx * 600);
-      timers.push(timer);
+    glitchPhases.forEach((phrase, idx) => {
+      setTimeout(() => {
+        setGlitchText(phrase);
+      }, (idx + 1) * 260);
     });
 
-    return () => {
-      timers.forEach(clearTimeout);
-    };
-  }, [accessed]);
+    setTimeout(() => {
+      audio?.playSuccess();
+      setAccessed(true);
+      setGlitching(false);
+    }, 1200);
+  };
 
-  // 3D Parallax Canvas Particle & Hologram Loop
+  // 60 FPS Ambient Digital Dust & Particle Canvas
   useEffect(() => {
     if (accessed || !canvasElement) return;
     const canvas = canvasElement;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animFrameId: number;
+    let animId: number;
     let width = window.innerWidth;
     let height = window.innerHeight;
-    const setCanvasSize = () => {
+
+    const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       width = window.innerWidth;
       height = window.innerHeight;
@@ -110,675 +128,66 @@ export default function Home() {
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    setCanvasSize();
+    resize();
+    window.addEventListener('resize', resize);
 
-    // Resize listener
-    const handleResize = () => {
-      if (!canvas) return;
-      setCanvasSize();
-    };
-    window.addEventListener('resize', handleResize);
+    // Spawn 65 cyber particles
+    const particles = Array.from({ length: 65 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * 1.6 + 0.6,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      alpha: Math.random() * 0.6 + 0.2,
+      baseAlpha: Math.random() * 0.6 + 0.2,
+      pulseSpeed: Math.random() * 0.02 + 0.01,
+      color: Math.random() > 0.25 ? '#00F0FF' : '#9D4EDD',
+      parallaxFactor: Math.random() * 0.04 + 0.01,
+    }));
 
-    // Drag and Zoom interaction handlers
-    const handleMouseDown = (e: MouseEvent) => {
-      // Don't drag if clicking buttons, inputs, links, or labels
-      if ((e.target as HTMLElement).closest('button, input, label, a, checkbox')) return;
-      dragRef.current.isDragging = true;
-      dragRef.current.lastX = e.clientX;
-      dragRef.current.lastY = e.clientY;
-      dragRef.current.velX = 0;
-      dragRef.current.velY = 0;
-    };
-
-    const handleMouseMoveDrag = (e: MouseEvent) => {
-      // Passive mouse tracking for parallax particles
-      mouseRef.current.targetX = e.clientX;
-      mouseRef.current.targetY = e.clientY;
-
-      if (!dragRef.current.isDragging) return;
-
-      const dx = e.clientX - dragRef.current.lastX;
-      const dy = e.clientY - dragRef.current.lastY;
-
-      rotationRef.current.y += dx * 0.005;
-      rotationRef.current.x += dy * 0.005;
-
-      dragRef.current.velX = dx * 0.005;
-      dragRef.current.velY = dy * 0.005;
-
-      dragRef.current.lastX = e.clientX;
-      dragRef.current.lastY = e.clientY;
-    };
-
-    const handleMouseUp = () => {
-      dragRef.current.isDragging = false;
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      if (!e.ctrlKey && !e.metaKey) return;
-      e.preventDefault();
-      const zoomDelta = -e.deltaY * 0.0015;
-      zoomRef.current = Math.max(0.65, Math.min(2.25, zoomRef.current + zoomDelta));
-    };
-
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mousemove', handleMouseMoveDrag);
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('wheel', handleWheel, { passive: false });
-
-    // Define 80 floating parallax dust particles
-    const particles: Array<{
-      x: number;
-      y: number;
-      size: number;
-      speedX: number;
-      speedY: number;
-      opacity: number;
-      parallaxFactor: number;
-      hue: number;
-    }> = [];
-
-    for (let i = 0; i < 80; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: Math.random() * 2.5 + 0.5,
-        speedX: (Math.random() - 0.5) * 0.3,
-        speedY: (Math.random() - 0.5) * 0.3,
-        opacity: Math.random() * 0.5 + 0.1,
-        parallaxFactor: Math.random() * 0.04 + 0.005, // controls depth look
-        hue: Math.random() > 0.6 ? 180 : 280 // Cyan or Purple
-      });
-    }
-
-    // 3D Wireframe Globe coordinates grid (stored as unit sphere points)
-    const globeGrid: Array<Array<{ x: number; y: number; z: number }>> = [];
-    const latDiv = 8;
-    const lonDiv = 14;
-
-    for (let i = 0; i <= latDiv; i++) {
-      const latAngle = (i * Math.PI) / latDiv;
-      const row = [];
-      for (let j = 0; j < lonDiv; j++) {
-        const lonAngle = (j * 2 * Math.PI) / lonDiv;
-        row.push({
-          x: Math.sin(latAngle) * Math.cos(lonAngle),
-          y: Math.cos(latAngle),
-          z: Math.sin(latAngle) * Math.sin(lonAngle)
-        });
-      }
-      globeGrid.push(row);
-    }
-
-    // Swarm of orbiting satellite nodes (12 nodes)
-    const satellites: Array<{
-      radiusFactor: number;
-      inclination: number; // orbital tilt in radians
-      yaw: number;         // orbital yaw in radians
-      speed: number;       // angular speed
-      phase: number;       // current orbital angle
-      size: number;
-      hue: number;
-    }> = [];
-
-    for (let i = 0; i < 12; i++) {
-      satellites.push({
-        radiusFactor: 1.25 + Math.random() * 0.4, // orbits between 1.25x and 1.65x globe radius
-        inclination: (Math.random() - 0.5) * (Math.PI / 2.5), // tilt up to +-36 degrees
-        yaw: Math.random() * Math.PI * 2,
-        speed: (0.006 + Math.random() * 0.012) * (Math.random() > 0.5 ? 1 : -1), // clockwise or counter
-        phase: Math.random() * Math.PI * 2,
-        size: Math.random() * 1.5 + 1.2,
-        hue: Math.random() > 0.4 ? 180 : 280
-      });
-    }
-
-    // Orbiting ring points (Saturn style wireframe ring)
-    const ringPoints: Array<{ x: number; y: number; z: number }> = [];
-    const ringPointCount = 48;
-    const ringRadiusFactor = 1.45;
-    const ringTiltAngle = Math.PI / 6; // 30 degrees tilt
-
-    for (let i = 0; i < ringPointCount; i++) {
-      const theta = (i * 2 * Math.PI) / ringPointCount;
-      const rx = Math.cos(theta) * ringRadiusFactor;
-      const rz = Math.sin(theta) * ringRadiusFactor;
-      // Tilt around Z axis:
-      ringPoints.push({
-        x: rx * Math.cos(ringTiltAngle),
-        y: rx * Math.sin(ringTiltAngle),
-        z: rz
-      });
-    }
-
-    // 3D Wireframe background cubes (3 cubes)
-    const cubes = [
-      { x: -width * 0.22, y: -height * 0.15, z: -50, size: 22, rotX: 0.01, rotY: 0.015, angleX: 0, angleY: 0 },
-      { x: width * 0.25, y: height * 0.18, z: -120, size: 28, rotX: -0.008, rotY: 0.012, angleX: 0, angleY: 0 },
-      { x: -width * 0.28, y: height * 0.22, z: -80, size: 18, rotX: 0.012, rotY: -0.008, angleX: 0, angleY: 0 }
-    ];
-
-    const cubeVertices = [
-      { x: -1, y: -1, z: -1 }, { x: 1, y: -1, z: -1 }, { x: 1, y: 1, z: -1 }, { x: -1, y: 1, z: -1 },
-      { x: -1, y: -1, z: 1 }, { x: 1, y: -1, z: 1 }, { x: 1, y: 1, z: 1 }, { x: -1, y: 1, z: 1 }
-    ];
-
-    const cubeEdges = [
-      [0, 1], [1, 2], [2, 3], [3, 0], // back face
-      [4, 5], [5, 6], [6, 7], [7, 4], // front face
-      [0, 4], [1, 5], [2, 6], [3, 7]  // links
-    ];
-
-    // Define comets/meteors & explosions
-    interface Comet {
-      x: number;
-      y: number;
-      dx: number;
-      dy: number;
-      size: number;
-      trail: Array<{ x: number; y: number }>;
-      color: string;
-      glowColor: string;
-      targetY: number;
-    }
-
-    interface ExplosionParticle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      size: number;
-      life: number;
-      maxLife: number;
-      color: string;
-    }
-
-    const comets: Comet[] = [];
-    const explosions: ExplosionParticle[] = [];
-
-    const spawnComet = () => {
-      // Spawn from top/top-right edge traveling top-right -> bottom-left
-      const startX = Math.random() * (width * 1.3);
-      const startY = -40;
-      const speedMultiplier = 1.0 + Math.random() * 1.5;
-      const dx = (-5 - Math.random() * 8) * speedMultiplier;
-      const dy = (5 + Math.random() * 8) * speedMultiplier;
-      const size = Math.random() * 2.5 + 1.2;
-      const isCyan = Math.random() > 0.5;
-
-      comets.push({
-        x: startX,
-        y: startY,
-        dx,
-        dy,
-        size,
-        trail: [],
-        color: isCyan ? 'rgba(0, 229, 255, 0.9)' : 'rgba(157, 78, 221, 0.9)',
-        glowColor: isCyan ? '#00E5FF' : '#9D4EDD',
-        targetY: height * 0.45 + Math.random() * (height * 0.5)
-      });
-    };
-
-    const spawnExplosion = (x: number, y: number, color: string) => {
-      audio?.playExplosion();
-      // Physical reaction on the globe
-      impactRef.current.velocityY = (Math.random() - 0.5) * 0.018;
-      impactRef.current.velocityX = (Math.random() - 0.5) * 0.018;
-
-      const particleCount = 18 + Math.floor(Math.random() * 12);
-      for (let i = 0; i < particleCount; i++) {
-        const angle = Math.random() * 2 * Math.PI;
-        const speed = 1.5 + Math.random() * 4.5;
-        explosions.push({
-          x,
-          y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          size: Math.random() * 1.8 + 0.6,
-          life: 25 + Math.floor(Math.random() * 20),
-          maxLife: 45,
-          color
-        });
-      }
-    };
-
-    // Animation Loop
-    const draw = () => {
+    const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Spawn comets randomly
-      if (Math.random() < 0.02) {
-        spawnComet();
-      }
+      particles.forEach(p => {
+        // Shift particle position based on mouse parallax
+        const px = p.x - mousePos.x * width * p.parallaxFactor;
+        const py = p.y - mousePos.y * height * p.parallaxFactor;
 
-      // Update and draw comets
-      for (let i = comets.length - 1; i >= 0; i--) {
-        const c = comets[i];
-        c.trail.push({ x: c.x, y: c.y });
-        if (c.trail.length > 18) {
-          c.trail.shift();
-        }
-
-        c.x += c.dx;
-        c.y += c.dy;
-
-        const hitTarget = c.y >= c.targetY;
-        const outOfBounds = c.x < -100 || c.x > width + 100 || c.y > height + 100;
-
-        if (hitTarget || outOfBounds) {
-          if (hitTarget) {
-            spawnExplosion(c.x, c.y, c.glowColor);
-          }
-          comets.splice(i, 1);
-          continue;
-        }
-
-        if (c.trail.length > 1) {
-          ctx.beginPath();
-          ctx.moveTo(c.trail[0].x, c.trail[0].y);
-          for (let j = 1; j < c.trail.length; j++) {
-            ctx.lineTo(c.trail[j].x, c.trail[j].y);
-          }
-          ctx.strokeStyle = c.color;
-          ctx.lineWidth = c.size * 0.75;
-          ctx.lineCap = 'round';
-          ctx.shadowBlur = c.size * 2.5;
-          ctx.shadowColor = c.glowColor;
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-        }
+        p.alpha += p.pulseSpeed;
+        const currentAlpha = Math.abs(Math.sin(p.alpha)) * p.baseAlpha;
 
         ctx.beginPath();
-        ctx.arc(c.x, c.y, c.size, 0, 2 * Math.PI);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.shadowBlur = c.size * 5;
-        ctx.shadowColor = c.glowColor;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-
-      // Update and draw explosions
-      for (let i = explosions.length - 1; i >= 0; i--) {
-        const p = explosions[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.06;
-        p.vx *= 0.97;
-        p.vy *= 0.97;
-        p.life--;
-
-        if (p.life <= 0) {
-          explosions.splice(i, 1);
-          continue;
-        }
-
-        const opacity = p.life / p.maxLife;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * opacity, 0, 2 * Math.PI);
+        ctx.arc(px, py, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.shadowBlur = p.size * 3 * opacity;
+        ctx.globalAlpha = currentAlpha;
+        ctx.shadowBlur = p.size * 3;
         ctx.shadowColor = p.color;
         ctx.fill();
-        ctx.shadowBlur = 0;
-      }
 
-      // Smoothly interpolate mouse positioning (disabled cursor offset parallax)
-      const mouse = mouseRef.current;
-      mouse.x = width / 2;
-      mouse.y = height / 2;
+        p.x += p.vx;
+        p.y += p.vy;
 
-      // Draw refined ambient background
-      const glowGrad = ctx.createRadialGradient(
-        width / 2 + (mouse.x - width / 2) * 0.15,
-        height / 2 + (mouse.y - height / 2) * 0.15,
-        10,
-        width / 2,
-        height / 2,
-        Math.max(width, height) * 0.6
-      );
-      glowGrad.addColorStop(0, 'rgba(12, 34, 54, 0.72)');
-      glowGrad.addColorStop(0.45, 'rgba(6, 8, 16, 0.96)');
-      glowGrad.addColorStop(1, '#030407');
-      ctx.fillStyle = glowGrad;
-      ctx.fillRect(0, 0, width, height);
-
-      const gridGap = 44;
-      ctx.save();
-      ctx.globalAlpha = 0.18;
-      ctx.strokeStyle = 'rgba(88, 166, 255, 0.12)';
-      ctx.lineWidth = 0.6;
-      for (let x = (rotationRef.current.y * 24) % gridGap; x < width; x += gridGap) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x - width * 0.08, height);
-        ctx.stroke();
-      }
-      for (let y = (rotationRef.current.x * 24) % gridGap; y < height; y += gridGap) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y + height * 0.06);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // Draw floating space particles with cursor parallax shifting
-      particles.forEach(p => {
-        // Shift particle coordinate by parallax factor
-        const shiftedX = p.x - (mouse.x - width / 2) * p.parallaxFactor;
-        const shiftedY = p.y - (mouse.y - height / 2) * p.parallaxFactor;
-
-        // Draw particle
-        ctx.beginPath();
-        ctx.arc(shiftedX, shiftedY, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue}, 90%, 65%, ${p.opacity})`;
-        ctx.shadowBlur = p.size * 3;
-        ctx.shadowColor = p.hue === 180 ? '#00E5FF' : '#9D4EDD';
-        ctx.fill();
-        ctx.shadowBlur = 0; // reset glow
-
-        // Update particle natural position
-        p.x += p.speedX;
-        p.y += p.speedY;
-
-        // Screen boundary loops
+        // Wrap around boundaries
         if (p.x < 0) p.x = width;
         if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
       });
 
-      // Draw background cubes
-      cubes.forEach(cube => {
-        cube.angleX += cube.rotX;
-        cube.angleY += cube.rotY;
-
-        const cCosY = Math.cos(cube.angleY);
-        const cSinY = Math.sin(cube.angleY);
-        const cCosX = Math.cos(cube.angleX);
-        const cSinX = Math.sin(cube.angleX);
-
-        const projectedVertices = cubeVertices.map(v => {
-          let lx = v.x * cube.size;
-          let ly = v.y * cube.size;
-          let lz = v.z * cube.size;
-
-          let rx = lx * cCosY - lz * cSinY;
-          let rz = lx * cSinY + lz * cCosY;
-
-          let ry = ly * cCosX - rz * cSinX;
-          rz = ly * cSinX + rz * cCosX;
-
-          const worldX = rx + cube.x - (mouse.x - width / 2) * 0.02;
-          const worldY = ry + cube.y - (mouse.y - height / 2) * 0.02;
-          const worldZ = rz + cube.z;
-
-          const scale = 400 / (400 + worldZ);
-          return {
-            x: worldX * scale + width / 2,
-            y: worldY * scale + height / 2 - 40
-          };
-        });
-
-        ctx.beginPath();
-        cubeEdges.forEach(edge => {
-          const p1 = projectedVertices[edge[0]];
-          const p2 = projectedVertices[edge[1]];
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-        });
-        ctx.strokeStyle = 'rgba(157, 78, 221, 0.09)';
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
-      });
-
-      // Update rotating angles with dragging state check
-      if (dragRef.current.isDragging) {
-        // Rotation updated directly by mouse drags
-      } else {
-        const d = dragRef.current;
-        if (Math.abs(d.velX) > 0.0001 || Math.abs(d.velY) > 0.0001) {
-          rotationRef.current.y += d.velX;
-          rotationRef.current.x += d.velY;
-          d.velX *= 0.95;
-          d.velY *= 0.95;
-        } else {
-          // Default slow auto-spin
-          rotationRef.current.y += 0.002 + (mouse.x - width / 2) * 0.00001;
-          rotationRef.current.x += 0.0008 + (mouse.y - height / 2) * 0.000005;
-        }
-      }
-
-      // Apply gentle impact rotations
-      rotationRef.current.y += impactRef.current.velocityY;
-      rotationRef.current.x += impactRef.current.velocityX;
-      impactRef.current.velocityY *= 0.9;
-      impactRef.current.velocityX *= 0.9;
-
-      const angleY = rotationRef.current.y;
-      const angleX = rotationRef.current.x;
-
-      const cosY = Math.cos(angleY);
-      const sinY = Math.sin(angleY);
-      const cosX = Math.cos(angleX);
-      const sinX = Math.sin(angleX);
-
-      // Project 3D Grid points to 2D Screen
-      const centerX = width / 2;
-      const centerY = height / 2 - 40;
-      const dist = 400; // perspective camera depth
-      const baseGlobeRadius = Math.min(width, height) * 0.16; // adaptive sizing
-      const currentRadius = baseGlobeRadius * zoomRef.current;
-
-      const projectedGlobe = globeGrid.map(row =>
-        row.map(p => {
-          const px = p.x * currentRadius;
-          const py = p.y * currentRadius;
-          const pz = p.z * currentRadius;
-
-          // Y-axis rotation
-          let x1 = px * cosY - pz * sinY;
-          let z1 = px * sinY + pz * cosY;
-
-          // X-axis rotation
-          let y2 = py * cosX - z1 * sinX;
-          let z2 = py * sinX + z1 * cosX;
-
-          // Perspective scaling factor
-          const scale = dist / (dist + z2);
-          return {
-            x: x1 * scale + centerX,
-            y: y2 * scale + centerY,
-            z: z2
-          };
-        })
-      );
-
-      // Draw projected Globe lines
-      // 1. Latitude circles
-      for (let i = 0; i < projectedGlobe.length; i++) {
-        ctx.beginPath();
-        for (let j = 0; j < projectedGlobe[i].length; j++) {
-          const p = projectedGlobe[i][j];
-          if (j === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        }
-        ctx.lineTo(projectedGlobe[i][0].x, projectedGlobe[i][0].y); // loop close
-        
-        // Ghostly fade color based on latitude
-        const latRatio = i / latDiv;
-        ctx.strokeStyle = `rgba(0, 229, 255, ${0.08 + Math.sin(latRatio * Math.PI) * 0.15})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-
-      // 2. Longitude vertical links
-      for (let j = 0; j < lonDiv; j++) {
-        ctx.beginPath();
-        for (let i = 0; i < projectedGlobe.length; i++) {
-          const p = projectedGlobe[i][j];
-          if (i === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        }
-        ctx.strokeStyle = `rgba(157, 78, 221, 0.12)`;
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
-      }
-
-      // Project the Saturn ring
-      const projectedRing = ringPoints.map(p => {
-        const px = p.x * currentRadius;
-        const py = p.y * currentRadius;
-        const pz = p.z * currentRadius;
-
-        let x1 = px * cosY - pz * sinY;
-        let z1 = px * sinY + pz * cosY;
-
-        let y2 = py * cosX - z1 * sinX;
-        let z2 = py * sinX + z1 * cosX;
-
-        const scale = dist / (dist + z2);
-        return {
-          x: x1 * scale + centerX,
-          y: y2 * scale + centerY,
-          z: z2
-        };
-      });
-
-      // Draw projected Saturn ring
-      ctx.beginPath();
-      for (let i = 0; i < projectedRing.length; i++) {
-        const p = projectedRing[i];
-        if (i === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
-      }
-      ctx.closePath();
-      ctx.strokeStyle = 'rgba(0, 229, 255, 0.22)';
-      ctx.lineWidth = 0.85;
-      ctx.stroke();
-
-      // Project and draw satellites
-      satellites.forEach(sat => {
-        sat.phase += sat.speed;
-
-        const r = currentRadius * sat.radiusFactor;
-        const sx = r * Math.cos(sat.phase);
-        const sz = r * Math.sin(sat.phase);
-        const sy = 0;
-
-        const y_inc = -sz * Math.sin(sat.inclination);
-        const z_inc = sz * Math.cos(sat.inclination);
-
-        const x_yaw = sx * Math.cos(sat.yaw) - z_inc * Math.sin(sat.yaw);
-        const z_yaw = sx * Math.sin(sat.yaw) + z_inc * Math.cos(sat.yaw);
-        const y_yaw = y_inc;
-
-        let x1 = x_yaw * cosY - z_yaw * sinY;
-        let z1 = x_yaw * sinY + z_yaw * cosY;
-
-        let y2 = y_yaw * cosX - z1 * sinX;
-        let z2 = y_yaw * sinX + z1 * cosX;
-
-        const scale = dist / (dist + z2);
-        const screenX = x1 * scale + centerX;
-        const screenY = y2 * scale + centerY;
-
-        // Draw full orbit trailing path (tilted 3D circle)
-        ctx.beginPath();
-        const orbitSteps = 32;
-        for (let step = 0; step <= orbitSteps; step++) {
-          const stepPhase = (step * 2 * Math.PI) / orbitSteps;
-          const ox = r * Math.cos(stepPhase);
-          const oz = r * Math.sin(stepPhase);
-          
-          const oy_inc = -oz * Math.sin(sat.inclination);
-          const oz_inc = oz * Math.cos(sat.inclination);
-
-          const ox_yaw = ox * Math.cos(sat.yaw) - oz_inc * Math.sin(sat.yaw);
-          const oz_yaw = ox * Math.sin(sat.yaw) + oz_inc * Math.cos(sat.yaw);
-          const oy_yaw = oy_inc;
-
-          let ox1 = ox_yaw * cosY - oz_yaw * sinY;
-          let oz1 = ox_yaw * sinY + oz_yaw * cosY;
-
-          let oy2 = oy_yaw * cosX - oz1 * sinX;
-          let oz2 = oy_yaw * sinX + oz1 * cosX;
-
-          const oscale = dist / (dist + oz2);
-          const osx = ox1 * oscale + centerX;
-          const osy = oy2 * oscale + centerY;
-
-          if (step === 0) ctx.moveTo(osx, osy);
-          else ctx.lineTo(osx, osy);
-        }
-        ctx.strokeStyle = sat.hue === 180 ? 'rgba(0, 229, 255, 0.04)' : 'rgba(157, 78, 221, 0.04)';
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-
-        // Draw active satellite node
-        if (z2 < 100) {
-          ctx.beginPath();
-          ctx.arc(screenX, screenY, sat.size, 0, Math.PI * 2);
-          ctx.fillStyle = sat.hue === 180 ? '#00E5FF' : '#9D4EDD';
-          ctx.shadowBlur = 6;
-          ctx.shadowColor = sat.hue === 180 ? '#00E5FF' : '#9D4EDD';
-          ctx.fill();
-          ctx.shadowBlur = 0;
-
-          // Draw small coordinate label (Bloomberg analytical style)
-          ctx.fillStyle = 'rgba(139, 152, 166, 0.35)';
-          ctx.font = '7px monospace';
-          ctx.fillText(`S-${sat.hue === 180 ? 'A' : 'B'}:${Math.round(z2)}`, screenX + 6, screenY + 2);
-        }
-      });
-
-      // 3. Draw glow nodes at intersections
-      projectedGlobe.forEach(row => {
-        row.forEach(p => {
-          // Draw only front-facing nodes for organic looks
-          if (p.z < 10) {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
-            ctx.fillStyle = '#00E5FF';
-            ctx.shadowBlur = 4;
-            ctx.shadowColor = '#00E5FF';
-            ctx.fill();
-            ctx.shadowBlur = 0;
-          }
-        });
-      });
-
-      animFrameId = requestAnimationFrame(draw);
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+      animId = requestAnimationFrame(render);
     };
 
-    draw();
+    render();
 
     return () => {
-      cancelAnimationFrame(animFrameId);
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMoveDrag);
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('wheel', handleWheel);
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', resize);
     };
-  }, [accessed, canvasElement]);
+  }, [accessed, canvasElement, mousePos]);
 
-  // Decryption transition trigger
-  const handleAccessCore = () => {
-    setGlitching(true);
-    audio?.playLaserCharge();
-    // Matrix glitch delay
-    setTimeout(() => {
-      audio?.playSuccess();
-      setAccessed(true);
-      setGlitching(false);
-    }, 1100);
-  };
-
-  const toggleBypassOption = (checked: boolean) => {
-    setBypassCheck(checked);
-    localStorage.setItem('fantasma_bypass_portal', checked ? 'true' : 'false');
-  };
-
+  // If user bypassed, directly render Dashboard
   if (isBypassed && accessed) {
     return <DashboardPage onExit={() => { setAccessed(false); setIsBypassed(false); }} />;
   }
@@ -787,146 +196,216 @@ export default function Home() {
     <AnimatePresence mode="wait">
       {!accessed ? (
         <motion.div
-          key="portal"
-          initial={{ opacity: 1 }}
-          exit={{ 
-            opacity: 0, 
-            scale: 1.05,
-            filter: 'blur(8px)',
-            transition: { duration: 0.8, ease: 'easeInOut' } 
+          key="gateway-portal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{
+            opacity: 0,
+            scale: 1.04,
+            filter: 'blur(10px) brightness(1.5)',
+            transition: { duration: 0.75, ease: 'easeInOut' },
           }}
-          className="min-h-screen relative overflow-x-hidden bg-[#030407] text-[#F0F3F8] font-sans flex flex-col items-center justify-between select-none"
+          onMouseMove={handleMouseMove}
+          className="min-h-screen w-full relative bg-[#05070A] text-slate-100 font-sans flex flex-col justify-between overflow-x-hidden select-none"
+          style={{
+            backgroundImage: `
+              radial-gradient(circle at 50% 38%, rgba(0, 240, 255, 0.08) 0%, rgba(10, 15, 22, 0.75) 45%, #05070A 85%),
+              conic-gradient(from 180deg at 50% 50%, rgba(0, 240, 255, 0.015) 0deg, rgba(157, 78, 221, 0.015) 180deg, rgba(0, 240, 255, 0.015) 360deg)
+            `,
+          }}
         >
-          {/* Dynamic Parallax Background Canvas */}
-          <canvas ref={setCanvasElement} className="fixed inset-0 z-0 pointer-events-none" />
+          {/* Subtle Fine Gridline Overlay (Opacity 0.035) */}
+          <div
+            className="fixed inset-0 pointer-events-none z-0"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px)
+              `,
+              backgroundSize: '48px 48px',
+              maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 30%, rgba(0,0,0,0.2) 90%)',
+            }}
+          />
 
-          <div className="fixed inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.18)_50%),linear-gradient(90deg,rgba(88,166,255,0.018),rgba(157,78,221,0.012),rgba(0,229,255,0.018))] bg-[length:100%_4px,8px_100%] pointer-events-none z-10 opacity-55" />
-          <div className="fixed inset-0 z-10 pointer-events-none parallax-layer parallax-slow">
-            <div className="absolute inset-0 premium-grid-overlay" />
-          </div>
+          {/* Interactive Digital Dust Particle Canvas */}
+          <canvas
+            ref={setCanvasElement}
+            className="fixed inset-0 z-0 pointer-events-none"
+          />
 
-          {/* Top Banner Alert */}
-          <header className="w-full max-w-6xl px-6 py-4 flex items-center justify-between z-20">
-            <div className="flex items-center gap-2 border border-[#8B2BE2]/40 bg-[#9D4EDD]/5 px-3 py-1.5 rounded-[3px]">
-              <ShieldAlert className="h-4 w-4 text-[#9D4EDD] animate-pulse" />
-              <span className="text-[10px] font-bold tracking-widest text-[#9D4EDD] font-mono">
+          {/* ========================================================
+              6. FULL-WIDTH TELEMETRY BAR: TOP HEADER
+             ======================================================== */}
+          <header className="w-full h-11 px-4 md:px-8 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-b border-[rgba(0,240,255,0.18)] flex items-center justify-between z-30">
+            {/* Top-Left: Cognitive Crypto Shield Active */}
+            <div className="flex items-center gap-2 border border-[rgba(0,240,255,0.25)] bg-[rgba(0,240,255,0.05)] px-3 py-1 rounded-[4px] shadow-[0_0_12px_rgba(0,240,255,0.12)]">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#00F0FF] animate-pulse" />
+              <span className="text-[10px] font-mono tracking-[0.15em] text-[#00F0FF] font-semibold uppercase">
                 COGNITIVE CRYPTO SHIELD ACTIVE
               </span>
             </div>
-            <div className="flex items-center gap-4">
+
+            {/* Top-Right: Sound Control & System Status */}
+            <div className="flex items-center gap-3">
               <button
-                onClick={() => {
-                  if (audio) {
-                    const isMuted = audio.toggleMute();
-                    setMutedState(isMuted);
-                    if (!isMuted) {
-                      audio.playClick();
-                    }
-                  }
-                }}
-                className="text-[#8B98A6] hover:text-white transition p-1.5 border border-[#1E2333] bg-[#07090F]/60 rounded-[3px] cursor-pointer flex items-center justify-center"
-                title={mutedState ? "Unmute Audio" : "Mute Audio"}
+                onClick={handleToggleSound}
+                onMouseEnter={() => audio?.playHover()}
+                className="text-slate-400 hover:text-cyan-400 p-1 rounded border border-[#1E293B] bg-[rgba(10,15,22,0.6)] transition-colors cursor-pointer"
+                title={mutedState ? 'Unmute Audio' : 'Mute Audio'}
               >
-                {mutedState ? <VolumeX className="h-4 w-4 text-rose-500" /> : <Volume2 className="h-4 w-4 text-cyan-400" />}
+                {mutedState ? (
+                  <VolumeX className="w-3.5 h-3.5 text-rose-400" />
+                ) : (
+                  <Volume2 className="w-3.5 h-3.5 text-[#00F0FF]" />
+                )}
               </button>
-              <div className="text-[10px] font-mono text-cyan-400 font-bold tracking-widest">
-                SYS_STATUS: CRYPTED
+
+              <div className="flex items-center gap-2 border border-[rgba(0,240,255,0.25)] bg-[rgba(10,15,22,0.7)] px-3 py-1 rounded-[4px] shadow-[0_0_12px_rgba(0,240,255,0.1)]">
+                <Radio className="w-3.5 h-3.5 text-[#00FF9D] animate-pulse" />
+                <span className="text-[10px] font-mono tracking-[0.15em] font-semibold text-slate-300 uppercase">
+                  SYS_STATUS:{' '}
+                  <span className="text-[#00FF9D] drop-shadow-[0_0_6px_rgba(0,255,157,0.7)]">
+                    CRYPTED
+                  </span>{' '}
+                  //{' '}
+                  <span className="text-[#00F0FF] drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]">
+                    ONLINE
+                  </span>
+                </span>
               </div>
             </div>
           </header>
 
-          {/* Main Core Elements */}
-          <div className="flex flex-col items-center justify-center text-center z-20 flex-1 px-4 max-w-2xl mt-[-20px] min-h-[calc(100vh-148px)] scroll-reveal">
-            {/* Wireframe Area Placeholder for spacing (canvas draws over this) */}
-            <div className="h-[260px] w-full pointer-events-none" />
+          {/* ========================================================
+              CENTRAL QUANTITATIVE ORACLE CORE
+             ======================================================== */}
+          <main className="flex-1 flex flex-col items-center justify-center relative w-full px-4 py-4 md:py-6 z-20">
+            {/* Center Eye: 3D Orbital Radar Rings */}
+            <div className="relative w-full max-w-[560px] h-[220px] md:h-[260px] flex items-center justify-center">
+              <OrbitalRadarRings mouseX={mousePos.x} mouseY={mousePos.y} />
 
-            {/* Brand Names & Subtitle */}
-            <h1 
-              className="text-4xl md:text-5xl font-extrabold tracking-[0.18em] text-transparent bg-clip-text bg-gradient-to-r from-[#58A6FF] via-[#00E5FF] to-[#9D4EDD] drop-shadow-[0_0_20px_rgba(88,166,255,0.16)] font-sans uppercase cursor-crosshair"
-              title="FANTASMA SYNERGY"
-            >
-              FANTASMA SYNERGY
-            </h1>
-            <p className="text-[10px] font-bold font-mono tracking-[0.4em] text-cyan-400/80 uppercase mt-2 select-none">
-              Quantitative Oracle Investment Terminal v4.0 | FOREX + CRYPTO
-            </p>
+              {/* Central Branding Typography: FANTASMA SYNERGY */}
+              <div className="relative z-10 flex flex-col items-center justify-center text-center px-4">
+                <h1
+                  className="font-extrabold uppercase leading-[0.95] tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-b from-white via-[#E0F7FA] to-[#00F0FF] drop-shadow-[0_0_20px_rgba(0,240,255,0.85)] drop-shadow-[0_0_45px_rgba(0,240,255,0.4)]"
+                  style={{
+                    fontSize: 'clamp(2rem, 5.5vw, 3.4rem)',
+                  }}
+                >
+                  <span className="block">FANTASMA</span>
+                  <span className="block mt-1">SYNERGY</span>
+                </h1>
 
-            {/* Cyber Logs Feed Console */}
-            <div className="w-full bg-[#07090F]/80 border border-[#1E2333] rounded-[3px] p-4 mt-8 font-mono text-[9px] text-left leading-normal text-[#8B98A6] flex flex-col gap-1.5 h-[120px] overflow-hidden shadow-2xl backdrop-blur-sm">
-              {consoleLogs.map((log, index) => (
-                <div key={`log-${index}`} className="flex items-start gap-1">
-                  <span className="text-[#9D4EDD] font-bold">{'>'}</span>
-                  <span className={index === consoleLogs.length - 1 ? 'text-white font-extrabold' : ''}>
-                    {log}
-                  </span>
-                </div>
-              ))}
-              {consoleLogs.length === 0 && (
-                <span className="text-gray-600 animate-pulse">Establishing encrypted socket tunnel...</span>
-              )}
+                {/* Quantitative Terminal Subtitle */}
+                <p className="mt-3 text-[9px] md:text-[10.5px] font-mono tracking-[0.22em] md:tracking-[0.28em] text-cyan-300/90 font-semibold uppercase">
+                  QUANTITATIVE ORACLE INVESTMENT TERMINAL v4.0 | FOREX + CRYPTO
+                </p>
+              </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-3 gap-3 w-full text-left">
-              {[
-                { icon: Activity, label: 'Live Market Engine', value: '1s Ticks' },
-                { icon: BarChart3, label: 'Risk Layer', value: 'Kelly Aware' },
-                { icon: Cpu, label: 'AI Consensus', value: 'Multi Model' }
-              ].map(item => (
-                <div key={item.label} className="bg-[#07090F]/70 border border-[#1E2333] rounded-[6px] p-3 backdrop-blur-sm">
-                  <item.icon className="h-4 w-4 text-[#58A6FF] mb-2" />
-                  <div className="text-[9px] text-[#8B98A6] uppercase font-mono font-bold">{item.label}</div>
-                  <div className="text-xs text-[#F0F3F8] font-extrabold mt-0.5">{item.value}</div>
-                </div>
-              ))}
+            {/* 3. Terminal Diagnostic Console (Frosted Glassmorphism Log) */}
+            <div className="w-full max-w-[620px] mt-4 md:mt-5">
+              <TerminalDiagnosticConsole />
             </div>
 
-            {/* Action Button & Bypass controls */}
-            <div className="mt-8 flex flex-col items-center gap-3 w-full">
+            {/* 4. Tactical KPI Telemetry Cards (3 Horizontal Cards) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full max-w-[620px] mt-3 md:mt-4">
+              {/* Card 1: Live Market Ticker */}
+              <div className="rounded-[4px] p-3 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
+                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-1">
+                  <Activity className="w-3.5 h-3.5 text-[#00F0FF]" />
+                  <span>LIVE MARKET TICKER</span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <div className="text-sm md:text-base font-mono font-bold text-white tracking-tight">
+                    1s Ticks
+                  </div>
+                  <LiveSparkline />
+                </div>
+              </div>
+
+              {/* Card 2: R2K Layer / Kelly Aware */}
+              <div className="rounded-[4px] p-3 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
+                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-1">
+                  <BarChart2 className="w-3.5 h-3.5 text-[#00FF9D]" />
+                  <span>R2K LAYER:</span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <div className="text-sm md:text-base font-mono font-bold text-white tracking-tight">
+                    Kelly Aware
+                  </div>
+                  <SegmentedKellyBar percentage={68} />
+                </div>
+              </div>
+
+              {/* Card 3: AI Conscious / Multi Model */}
+              <div className="rounded-[4px] p-3 bg-[rgba(10,15,22,0.65)] backdrop-blur-md border border-[rgba(0,240,255,0.22)] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:border-[#00F0FF]/50 transition-all duration-200">
+                <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[9px] font-semibold tracking-wider uppercase mb-1">
+                  <Cpu className="w-3.5 h-3.5 text-[#00F0FF]" />
+                  <span>AI CONSENSUS:</span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <div className="text-sm md:text-base font-mono font-bold text-white tracking-tight">
+                    Multi Model
+                  </div>
+                  <NeuralClusterIcon />
+                </div>
+              </div>
+            </div>
+
+            {/* 5. Gateway Action Button (Beveled Cybernetic Button) */}
+            <div className="mt-5 md:mt-6 flex flex-col items-center gap-2.5 w-full max-w-[620px]">
               <button
-                onClick={handleAccessCore}
+                onClick={handleAccessTerminal}
+                onMouseEnter={() => audio?.playHover()}
                 disabled={glitching}
-                className="w-full md:w-72 bg-[#58A6FF] hover:bg-[#79B8FF] border border-[#58A6FF] text-[#030407] font-extrabold text-xs tracking-widest py-3.5 px-6 rounded-[6px] transition-all duration-300 transform active:scale-95 hover:shadow-[0_0_25px_rgba(88,166,255,0.35)] cursor-pointer"
+                className="w-full sm:w-[320px] py-3.5 px-6 clip-cyber-beveled neon-sweep-btn bg-[rgba(0,240,255,0.1)] hover:bg-[rgba(0,240,255,0.2)] border border-[#00F0FF] text-white font-mono font-extrabold text-xs md:text-sm tracking-[0.2em] uppercase transition-all duration-300 transform active:scale-95 shadow-[0_0_20px_rgba(0,240,255,0.35),inset_0_0_12px_rgba(0,240,255,0.15)] hover:shadow-[0_0_32px_rgba(0,240,255,0.6),inset_0_0_20px_rgba(0,240,255,0.3)] cursor-pointer"
+                style={{
+                  textShadow: '0 0 10px rgba(0, 240, 255, 0.85)',
+                }}
               >
-                {glitching ? 'MENYIAPKAN CORE...' : 'MASUK KE TERMINAL'}
+                {glitching ? glitchText : '[ MASUK KE TERMINAL → ]'}
               </button>
-              
-              <label className="flex items-center gap-2 cursor-pointer select-none py-1.5">
+
+              {/* Bypass Intro Checkbox */}
+              <label className="flex items-center gap-2 cursor-pointer select-none py-1 group">
                 <input
                   type="checkbox"
                   checked={bypassCheck}
-                  onChange={(e) => toggleBypassOption(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded border-[#1E2333] bg-[#07090F] checked:bg-cyan-400 focus:ring-0 cursor-pointer"
+                  onChange={e => handleToggleBypass(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded-[2px] border border-[#1E293B] bg-[#0A0F16] accent-[#00F0FF] cursor-pointer focus:ring-0"
                 />
-                <span className="text-[10px] text-[#8B98A6] font-mono hover:text-white transition">
-                  Bypass intro pada kunjungan berikutnya
+                <span className="text-[10px] md:text-[10.5px] font-mono text-slate-400 group-hover:text-cyan-300 transition-colors">
+                  bypass intro pada kunjungan berikutnya
                 </span>
               </label>
             </div>
-          </div>
+          </main>
 
-          {/* Footer */}
-          <footer className="w-full max-w-6xl px-6 py-6 border-t border-[#1E2333]/30 flex flex-col sm:flex-row items-center justify-between text-[8px] text-[#8B98A6]/60 font-mono tracking-widest gap-2 z-20">
-            <div>COGNITIVE AUDIT BLOCK #0409A8F</div>
-            <div className="text-center sm:text-right">
-              (C) 2026 FANTASMA SYNERGY INC. ALL PROTOCOLS ENCRYPTED.
-            </div>
+          {/* ========================================================
+              6. FULL-WIDTH TELEMETRY BAR: BOTTOM FOOTER
+             ======================================================== */}
+          <footer className="w-full h-10 px-4 md:px-8 bg-[rgba(5,7,10,0.85)] backdrop-blur-md border-t border-[rgba(0,240,255,0.12)] flex items-center justify-between text-[9px] md:text-[9.5px] font-mono tracking-[0.2em] text-slate-500 uppercase z-30">
+            <div>FANTASMA SYNERGY SYSTEMS INC.</div>
+            <div>ALL PROTOCOLS ENCRYPTED // [V4.0]</div>
           </footer>
         </motion.div>
       ) : (
+        /* Transition to the Full Institutional Dashboard */
         <motion.div
-          key="dashboard"
-          initial={{ opacity: 0, scale: 0.96, filter: 'blur(6px)' }}
+          key="terminal-dashboard"
+          initial={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }}
           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-          exit={{ 
-            opacity: 0, 
-            scale: 0.96, 
-            filter: 'blur(6px)',
-            transition: { duration: 0.8, ease: 'easeIn' } 
-          }}
-          transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
-          className="min-h-screen w-full bg-[#030407]"
+          exit={{ opacity: 0, scale: 0.96, filter: 'blur(8px)' }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+          className="min-h-screen w-full bg-[#05070A]"
         >
-          <DashboardPage onExit={() => { setAccessed(false); setIsBypassed(false); }} />
+          <DashboardPage
+            onExit={() => {
+              setAccessed(false);
+              setIsBypassed(false);
+            }}
+          />
         </motion.div>
       )}
     </AnimatePresence>
